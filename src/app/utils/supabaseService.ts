@@ -523,3 +523,91 @@ export async function updateSupabaseEmployeeDetails(
     
   if (error) throw error;
 }
+
+export interface SchemaDiagnosis {
+  table: string;
+  status: 'ok' | 'missing_table' | 'missing_columns' | 'unreachable';
+  errorDetails?: string;
+}
+
+/**
+ * Diagnostica si las tablas o columnas requeridas por el código existen en Supabase.
+ */
+export async function diagnoseSupabaseSchema(): Promise<SchemaDiagnosis[]> {
+  const diagnosis: SchemaDiagnosis[] = [];
+
+  const checks = [
+    {
+      table: 'employees',
+      query: () => supabase.from('employees').select('employee_number, name, department, puesto, manager, employee_type, role, certification_status').limit(1)
+    },
+    {
+      table: 'roles',
+      query: () => supabase.from('roles').select('name, description').limit(1)
+    },
+    {
+      table: 'courses',
+      query: () => supabase.from('courses').select('id, name, description, duration, order_num, is_active').limit(1)
+    },
+    {
+      table: 'course_content',
+      query: () => supabase.from('course_content').select('id, course_id, name, type, url, size').limit(1)
+    },
+    {
+      table: 'exams',
+      query: () => supabase.from('exams').select('course_id, min_score').limit(1)
+    },
+    {
+      table: 'questions',
+      query: () => supabase.from('questions').select('id, exam_id, text, options, correct_option_index, points').limit(1)
+    },
+    {
+      table: 'course_progress',
+      query: () => supabase.from('course_progress').select('employee_number, course_id, status, progress, content_viewed, exam_attempts, exam_score, exam_passed, completion_date, certificate_folio').limit(1)
+    },
+    {
+      table: 'certificates',
+      query: () => supabase.from('certificates').select('id, employee_number, course_id, course_name, date_issued, grade, folio').limit(1)
+    }
+  ];
+
+  for (const check of checks) {
+    try {
+      const { error } = await check.query();
+      if (!error) {
+        diagnosis.push({ table: check.table, status: 'ok' });
+      } else {
+        const code = error.code;
+        // Postgres error code 42P01: undefined_table
+        // Postgres error code 42703: undefined_column
+        if (code === '42P01') {
+          diagnosis.push({
+            table: check.table,
+            status: 'missing_table',
+            errorDetails: `Falta tabla: La tabla '${check.table}' no existe.`
+          });
+        } else if (code === '42703') {
+          diagnosis.push({
+            table: check.table,
+            status: 'missing_columns',
+            errorDetails: `Falta columna: ${error.message}`
+          });
+        } else {
+          diagnosis.push({
+            table: check.table,
+            status: 'unreachable',
+            errorDetails: `Error de consulta (${code}): ${error.message}`
+          });
+        }
+      }
+    } catch (err: any) {
+      diagnosis.push({
+        table: check.table,
+        status: 'unreachable',
+        errorDetails: err.message || 'Excepción al consultar'
+      });
+    }
+  }
+
+  return diagnosis;
+}

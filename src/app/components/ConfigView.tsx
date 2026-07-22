@@ -8,6 +8,8 @@ import ConfigCourses from './ConfigCourses';
 import ConfigExams from './ConfigExams';
 import ConfigCertificates from './ConfigCertificates';
 
+import { SchemaDiagnosis } from '../utils/supabaseService';
+
 interface ConfigViewProps {
   employees: MergedEmployee[];
   overrides: Record<string, EmployeeOverride>;
@@ -30,6 +32,7 @@ interface ConfigViewProps {
   isImportingHC: boolean;
   isImportingReport: boolean;
   onUpdateEmployeeRole: (employeeNumber: string, role: 'Admin' | 'User') => Promise<void>;
+  schemaDiagnosis: SchemaDiagnosis[];
 }
 
 export default function ConfigView({
@@ -54,6 +57,7 @@ export default function ConfigView({
   isImportingHC,
   isImportingReport,
   onUpdateEmployeeRole,
+  schemaDiagnosis,
 }: ConfigViewProps) {
   const [activeTab, setActiveTab] = useState<'files' | 'employees' | 'courses' | 'exams' | 'certificates'>('files');
   
@@ -492,6 +496,48 @@ export default function ConfigView({
                   <p className="text-xs text-slate-500 dark:text-[#cbd5e1] mt-1 font-semibold">
                     La base de datos en la nube no está disponible (verifica las variables de entorno o la conexión de red). Se está utilizando localStorage como fallback para almacenamiento.
                   </p>
+                </div>
+              </div>
+            )}
+
+            {/* Sección de Diagnóstico Supabase */}
+            {supabaseStatus === 'online' && schemaDiagnosis && schemaDiagnosis.length > 0 && (
+              <div className="glass-panel p-5 rounded-2xl bg-white dark:bg-[#1e293b] border border-slate-200 dark:border-[#334155] flex flex-col gap-4 mt-4 animate-fade-in">
+                <div>
+                  <h4 className="text-sm font-extrabold text-slate-800 dark:text-[#f8fafc] flex items-center gap-1.5 font-sans">
+                    🔍 Diagnóstico Supabase
+                  </h4>
+                  <p className="text-xs text-slate-400 dark:text-[#cbd5e1] mt-0.5 font-medium">
+                    Estado de sincronización estructural de las tablas necesarias para la aplicación.
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {schemaDiagnosis.map((item) => {
+                    const isOk = item.status === 'ok';
+                    return (
+                      <div
+                        key={item.table}
+                        className={`flex items-start gap-2.5 p-3 rounded-xl border text-xs font-semibold ${
+                          isOk
+                            ? 'bg-emerald-500/5 border-emerald-500/10 text-emerald-700 dark:text-emerald-400'
+                            : 'bg-red-500/5 border-red-500/10 text-red-700 dark:text-red-400'
+                        }`}
+                      >
+                        <span className="mt-0.5">
+                          {isOk ? '✅' : '❌'}
+                        </span>
+                        <div className="flex-1">
+                          <span className="font-extrabold font-mono uppercase tracking-wider">{item.table}</span>
+                          {!isOk && item.errorDetails && (
+                            <span className="block mt-1 font-medium text-[10px] opacity-80 leading-normal">
+                              {item.errorDetails}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             )}

@@ -80,6 +80,9 @@ CREATE TABLE IF NOT EXISTS public.courses (
     created_at timestamptz DEFAULT now()
 );
 
+ALTER TABLE public.courses ADD COLUMN IF NOT EXISTS name text;
+ALTER TABLE public.courses ADD COLUMN IF NOT EXISTS description text;
+ALTER TABLE public.courses ADD COLUMN IF NOT EXISTS duration text;
 ALTER TABLE public.courses ADD COLUMN IF NOT EXISTS order_num integer NOT NULL DEFAULT 0;
 ALTER TABLE public.courses ADD COLUMN IF NOT EXISTS is_active boolean NOT NULL DEFAULT true;
 
