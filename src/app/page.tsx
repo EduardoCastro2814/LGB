@@ -27,6 +27,8 @@ import {
 } from './types';
 import { processLgbData, computeKPIs, computeDepartmentSummaries } from './utils/dataProcessor';
 import { Loader2, AlertCircle } from 'lucide-react';
+import * as XLSX from 'xlsx';
+import { getAssetPath } from './utils/paths';
 
 // Cursos predeterminados exigidos por las reglas del negocio
 const defaultCourses: Course[] = [
@@ -408,39 +410,69 @@ export default function DashboardPage() {
     }
   }, []);
 
-  // Carga inicial automática de archivos Excel desde la API del servidor
+  // Carga inicial automática de archivos Excel desde la carpeta public/data de forma estática
   const loadPreloadedData = async () => {
     setIsLoading(true);
     setApiError(null);
     try {
-      const response = await fetch('/api/load-data');
-      const result = await response.json();
-      
-      if (result.success) {
-        setHcData(result.hcData);
-        setReportData(result.reportData);
-        setIsPreloaded(true);
-        
-        // Registrar metadatos del servidor
-        const nowStr = new Date().toLocaleString('es-MX');
-        setHcFileMetadata({
-          name: 'HC B29 2026 Junio.xlsx',
-          size: '388.9 KB',
-          lastUpdated: nowStr,
-          state: 'Cargado de Servidor',
-        });
-        setReportFileMetadata({
-          name: 'ReportLGB.xlsx',
-          size: '25.7 KB',
-          lastUpdated: nowStr,
-          state: 'Cargado de Servidor',
-        });
-      } else {
-        setApiError(result.error);
-        setIsPreloaded(false);
+      const hcUrl = getAssetPath('/data/HC B29 2026 Junio.xlsx');
+      const reportUrl = getAssetPath('/data/ReportLGB.xlsx');
+
+      console.log('[LGB App debug] Iniciando carga de Excels...');
+      console.log('[LGB App debug] URL de Headcount:', hcUrl);
+      console.log('[LGB App debug] URL de ReportLGB:', reportUrl);
+
+      // 1. Cargar Headcount Excel
+      const resHC = await fetch(hcUrl);
+      console.log('[LGB App debug] Res Headcount fetch status:', resHC.status);
+      if (!resHC.ok) {
+        throw new Error('No se encontró el archivo de datos requerido.');
       }
+      const bufferHC = await resHC.arrayBuffer();
+      const hcWorkbook = XLSX.read(bufferHC, { type: 'array' });
+      const sheetNameHC = hcWorkbook.SheetNames[1] || hcWorkbook.SheetNames[0];
+      const sheetHC = hcWorkbook.Sheets[sheetNameHC];
+      const hcRawData = XLSX.utils.sheet_to_json(sheetHC, { range: 1 });
+      console.log('[LGB App debug] Headcount parsed rows count:', hcRawData.length);
+
+      // 2. Cargar ReportLGB Excel
+      const resReport = await fetch(reportUrl);
+      console.log('[LGB App debug] Res ReportLGB fetch status:', resReport.status);
+      if (!resReport.ok) {
+        throw new Error('No se encontró el archivo de datos requerido.');
+      }
+      const bufferReport = await resReport.arrayBuffer();
+      const reportWorkbook = XLSX.read(bufferReport, { type: 'array' });
+      const sheetNameReport = reportWorkbook.SheetNames[0];
+      const sheetReport = reportWorkbook.Sheets[sheetNameReport];
+      const reportRawData = XLSX.utils.sheet_to_json(sheetReport);
+      console.log('[LGB App debug] ReportLGB parsed rows count:', reportRawData.length);
+
+      // Cargar datos en los estados
+      setHcData(hcRawData);
+      setReportData(reportRawData);
+      setIsPreloaded(true);
+
+      // Registrar metadatos del servidor
+      const nowStr = new Date().toLocaleString('es-MX');
+      setHcFileMetadata({
+        name: 'HC B29 2026 Junio.xlsx',
+        size: '388.9 KB',
+        lastUpdated: nowStr,
+        state: 'Cargado de Servidor',
+      });
+      setReportFileMetadata({
+        name: 'ReportLGB.xlsx',
+        size: '25.7 KB',
+        lastUpdated: nowStr,
+        state: 'Cargado de Servidor',
+      });
     } catch (err: any) {
-      setApiError(`No se pudieron precargar los archivos del servidor: ${err.message}`);
+      // Mensaje de fallback amigable
+      const userMessage = err.message === 'No se encontró el archivo de datos requerido.'
+        ? err.message
+        : `No se pudieron cargar los archivos iniciales: ${err.message}`;
+      setApiError(userMessage);
       setIsPreloaded(false);
     } finally {
       setIsLoading(false);
