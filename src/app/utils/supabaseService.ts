@@ -87,7 +87,8 @@
  * );
  */
 
-import { supabase } from './supabaseClient';
+import { supabase } from '../../lib/supabase';
+import { normalizeId, normalizeText } from './dataProcessor';
 import { 
   MergedEmployee, 
   Course, 
@@ -144,26 +145,86 @@ export async function getSupabaseEmployees(): Promise<MergedEmployee[]> {
 }
 
 /**
- * Guarda colaboradores en lote a Supabase (Importador Excel).
+ * Importa empleados desde los datos crudos del Excel de Headcount (HC B29 2026 Junio.xlsx).
+ * Asigna 'Por Certificar' como estatus inicial de certificación.
  */
-export async function importEmployeesToSupabase(employees: MergedEmployee[]): Promise<void> {
-  const payload = employees.map(emp => ({
-    employee_number: emp.ID,
-    name: emp.Nombre,
-    department: emp.Departamento,
-    employee_type: emp.TipoPersonal || 'DL',
-    role: emp.Departamento === 'BE' ? 'Admin' : 'User',
-    certification_status: emp.Estatus || 'Por Certificar',
-    puesto: emp.Puesto || 'Operador DL',
-    manager: emp.Manager || 'N/A',
-    updated_at: new Date().toISOString()
-  }));
+export async function importHcEmployees(hcRawData: any[]): Promise<void> {
+  const nameKeys = ['Employee Name', 'Full Name', 'Nombre Completo', 'Nombre', 'Name', 'Empleado'];
+  const payload: any[] = [];
+
+  hcRawData.forEach(row => {
+    const idVal = row['ID'] || row['Empleado#'] || row['Numero'];
+    const empNo = normalizeId(idVal);
+    if (!empNo) return;
+
+    let nombreVal = '';
+    for (const key of nameKeys) {
+      if (row[key] !== undefined && row[key] !== null) {
+        nombreVal = normalizeText(row[key]);
+        if (nombreVal !== '') break;
+      }
+    }
+    const name = nombreVal || 'Sin Nombre';
+    const department = normalizeText(row['Departamento'] || row['Dept'] || row['Area'] || 'SIN DEPARTAMENTO');
+    const puesto = normalizeText(row['Puesto'] || row['Puesto/Posición'] || row['Job Title'] || 'Puesto General');
+    const manager = normalizeText(row['Manager N1'] || row['Manager'] || row['Supervisor'] || 'Sin Supervisor');
+
+    const clasif = normalizeText(row['Clasificación'] || row['Clasificacion'] || row['Tipo Personal'] || 'Direct');
+    const employee_type = (clasif.toLowerCase().includes('indirect') || clasif.toLowerCase() === 'idl') ? 'IDL' : 'DL';
+
+    payload.push({
+      employee_number: empNo,
+      name,
+      department,
+      employee_type,
+      role: department.toUpperCase() === 'BE' ? 'Admin' : 'User',
+      puesto,
+      manager,
+      certification_status: 'Por Certificar',
+      updated_at: new Date().toISOString()
+    });
+  });
+
+  if (payload.length === 0) return;
 
   const { error } = await supabase
     .from('employees')
     .upsert(payload, { onConflict: 'employee_number' });
-    
+
   if (error) throw error;
+}
+
+/**
+ * Lee el archivo de certificaciones (ReportLGB.xlsx) y actualiza el estatus de certificación
+ * de los empleados existentes en Supabase.
+ */
+export async function importReportLgbStatuses(reportRawData: any[]): Promise<void> {
+  for (const row of reportRawData) {
+    const empNo = normalizeId(row['Employee#'] || row['Employee'] || row['ID'] || row['NumEmp']);
+    if (!empNo) continue;
+
+    const action = normalizeText(row['Action']).toLowerCase();
+    let status: LGBStatus = 'Por Certificar';
+
+    if (action === 'complete' || action === 'complete/resigned') {
+      status = 'Certificado';
+    } else if (action === 'create form') {
+      status = 'Potencial';
+    }
+
+    // Actualizar solo para empleados existentes en Supabase
+    const { error } = await supabase
+      .from('employees')
+      .update({
+        certification_status: status,
+        updated_at: new Date().toISOString()
+      })
+      .eq('employee_number', empNo);
+
+    if (error) {
+      console.warn(`[Supabase Import Warning] Error actualizando estatus para ${empNo}:`, error.message);
+    }
+  }
 }
 
 /**

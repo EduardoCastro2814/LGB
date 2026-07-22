@@ -32,7 +32,8 @@ import { getAssetPath } from './utils/paths';
 import {
   testSupabaseConnection,
   getSupabaseEmployees,
-  importEmployeesToSupabase,
+  importHcEmployees,
+  importReportLgbStatuses,
   updateSupabaseEmployeeRole,
   updateSupabaseEmployeeDetails,
   getSupabaseCourses,
@@ -319,7 +320,8 @@ const defaultCertConfig: CertificateConfig = {
 export default function DashboardPage() {
   // ESTADOS DE INTEGRACIÓN CON SUPABASE
   const [supabaseStatus, setSupabaseStatus] = useState<'online' | 'offline'>('offline');
-  const [isImporting, setIsImporting] = useState<boolean>(false);
+  const [isImportingHC, setIsImportingHC] = useState<boolean>(false);
+  const [isImportingReport, setIsImportingReport] = useState<boolean>(false);
 
   const [hcData, setHcData] = useState<any[]>([]);
   const [reportData, setReportData] = useState<any[]>([]);
@@ -663,16 +665,16 @@ export default function DashboardPage() {
     }
   };
 
-  // Importar headcount unificado a Supabase en lote
-  const handleImportToSupabase = async () => {
-    if (mergedEmployees.length === 0) {
+  // Importar headcount a la tabla employees en Supabase
+  const handleImportHcToSupabase = async () => {
+    if (hcData.length === 0) {
       alert('No hay datos de headcount cargados para importar.');
       return;
     }
-    setIsImporting(true);
+    setIsImportingHC(true);
     try {
-      await importEmployeesToSupabase(mergedEmployees);
-      alert('¡Sincronización Exitosa! Los registros de headcount han sido importados a Supabase.');
+      await importHcEmployees(hcData);
+      alert('¡Importación Exitosa! Los registros de headcount han sido importados a la tabla employees en Supabase.');
       
       // Recargar base de datos desde Supabase
       const dbEmployees = await getSupabaseEmployees();
@@ -684,7 +686,7 @@ export default function DashboardPage() {
           Puesto: emp.Puesto || 'Operador DL',
           Manager: emp.Manager || 'N/A',
           TipoPersonal: emp.TipoPersonal || 'DL',
-          role: (emp as any).role || 'User'
+          role: emp.role || 'User'
         }));
         const reconstructedReport = dbEmployees.map(emp => ({
           'Employee#': emp.ID,
@@ -694,9 +696,46 @@ export default function DashboardPage() {
         setReportData(reconstructedReport);
       }
     } catch (err: any) {
-      alert(`Error al importar datos a Supabase: ${err.message}`);
+      alert(`Error al importar headcount a Supabase: ${err.message}`);
     } finally {
-      setIsImporting(false);
+      setIsImportingHC(false);
+    }
+  };
+
+  // Importar ReportLGB para actualizar estatus en Supabase
+  const handleImportReportLgbToSupabase = async () => {
+    if (reportData.length === 0) {
+      alert('No hay datos del reporte cargados para actualizar.');
+      return;
+    }
+    setIsImportingReport(true);
+    try {
+      await importReportLgbStatuses(reportData);
+      alert('¡Actualización Exitosa! Los estatus de certificación de los empleados existentes han sido actualizados en Supabase.');
+      
+      // Recargar base de datos desde Supabase
+      const dbEmployees = await getSupabaseEmployees();
+      if (dbEmployees.length > 0) {
+        const reconstructedHc = dbEmployees.map(emp => ({
+          ID: emp.ID,
+          Nombre: emp.Nombre,
+          Departamento: emp.Departamento,
+          Puesto: emp.Puesto || 'Operador DL',
+          Manager: emp.Manager || 'N/A',
+          TipoPersonal: emp.TipoPersonal || 'DL',
+          role: emp.role || 'User'
+        }));
+        const reconstructedReport = dbEmployees.map(emp => ({
+          'Employee#': emp.ID,
+          Action: emp.Action || ''
+        }));
+        setHcData(reconstructedHc);
+        setReportData(reconstructedReport);
+      }
+    } catch (err: any) {
+      alert(`Error al actualizar estatus en Supabase: ${err.message}`);
+    } finally {
+      setIsImportingReport(false);
     }
   };
 
@@ -1086,8 +1125,10 @@ export default function DashboardPage() {
                 onSaveExams={handleSaveExams}
                 onSaveCertConfig={handleSaveCertConfig}
                 supabaseStatus={supabaseStatus}
-                onImportToSupabase={handleImportToSupabase}
-                isImporting={isImporting}
+                onImportHcToSupabase={handleImportHcToSupabase}
+                onImportReportLgbToSupabase={handleImportReportLgbToSupabase}
+                isImportingHC={isImportingHC}
+                isImportingReport={isImportingReport}
                 onUpdateEmployeeRole={handleUpdateEmployeeRole}
               />
             )}

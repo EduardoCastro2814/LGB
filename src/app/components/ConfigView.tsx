@@ -25,8 +25,10 @@ interface ConfigViewProps {
   onSaveExams: (updatedExams: Exam[]) => void;
   onSaveCertConfig: (updatedConfig: CertificateConfig) => void;
   supabaseStatus: 'online' | 'offline';
-  onImportToSupabase: () => Promise<void>;
-  isImporting: boolean;
+  onImportHcToSupabase: () => Promise<void>;
+  onImportReportLgbToSupabase: () => Promise<void>;
+  isImportingHC: boolean;
+  isImportingReport: boolean;
   onUpdateEmployeeRole: (employeeNumber: string, role: 'Admin' | 'User') => Promise<void>;
 }
 
@@ -47,8 +49,10 @@ export default function ConfigView({
   onSaveExams,
   onSaveCertConfig,
   supabaseStatus,
-  onImportToSupabase,
-  isImporting,
+  onImportHcToSupabase,
+  onImportReportLgbToSupabase,
+  isImportingHC,
+  isImportingReport,
   onUpdateEmployeeRole,
 }: ConfigViewProps) {
   const [activeTab, setActiveTab] = useState<'files' | 'employees' | 'courses' | 'exams' | 'certificates'>('files');
@@ -222,7 +226,16 @@ export default function ConfigView({
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
+          {/* Conexión Supabase Status */}
+          <div className={`px-3 py-2 rounded-xl text-xs font-bold border ${
+            supabaseStatus === 'online'
+              ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'
+              : 'bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20'
+          }`}>
+            {supabaseStatus === 'online' ? '✅ Supabase conectado' : '❌ Error de conexión'}
+          </div>
+
           {totalOverrides > 0 && (
             <button
               onClick={onResetOverrides}
@@ -421,32 +434,53 @@ export default function ConfigView({
 
             {/* Supabase Import Zone */}
             {supabaseStatus === 'online' ? (
-              <div className="glass-panel p-5 rounded-2xl bg-emerald-500/5 dark:bg-emerald-950/10 border border-emerald-500/20 flex flex-col sm:flex-row sm:items-center justify-between gap-4 mt-2">
+              <div className="glass-panel p-5 rounded-2xl bg-emerald-500/5 dark:bg-emerald-950/10 border border-emerald-500/20 flex flex-col gap-4 mt-2">
                 <div>
                   <h4 className="text-sm font-extrabold text-slate-800 dark:text-emerald-400 flex items-center gap-1.5 font-sans">
                     <Database className="w-4 h-4 text-emerald-500" /> Sincronización con Supabase Activa
                   </h4>
                   <p className="text-xs text-slate-500 dark:text-[#cbd5e1] mt-1 font-semibold">
-                    Puedes importar la base de datos de headcount cargada localmente directamente hacia las tablas oficiales de Supabase en la nube.
+                    Importa los registros de tus archivos locales Excel directamente a la base de datos en la nube.
                   </p>
                 </div>
-                <button
-                  onClick={onImportToSupabase}
-                  disabled={isImporting || (!hcLoaded && !reportLoaded)}
-                  className="flex items-center justify-center gap-2 py-2.5 px-5 rounded-xl text-xs font-bold bg-emerald-500 hover:bg-emerald-600 text-white disabled:opacity-50 transition-all cursor-pointer shadow-md font-sans"
-                >
-                  {isImporting ? (
-                    <>
-                      <span className="animate-spin border-2 border-white border-t-transparent rounded-full w-3.5 h-3.5"></span>
-                      <span>Sincronizando...</span>
-                    </>
-                  ) : (
-                    <>
-                      <Database className="w-3.5 h-3.5" />
-                      <span>Importar a Supabase</span>
-                    </>
-                  )}
-                </button>
+
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <button
+                    onClick={onImportHcToSupabase}
+                    disabled={isImportingHC || !hcLoaded}
+                    className="flex-1 flex items-center justify-center gap-2 py-2.5 px-5 rounded-xl text-xs font-bold bg-emerald-500 hover:bg-emerald-600 text-white disabled:opacity-50 transition-all cursor-pointer shadow-md font-sans"
+                  >
+                    {isImportingHC ? (
+                      <>
+                        <span className="animate-spin border-2 border-white border-t-transparent rounded-full w-3.5 h-3.5"></span>
+                        <span>Importando Headcount...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Database className="w-3.5 h-3.5" />
+                        <span>Importar HC a Supabase</span>
+                      </>
+                    )}
+                  </button>
+
+                  <button
+                    onClick={onImportReportLgbToSupabase}
+                    disabled={isImportingReport || !reportLoaded}
+                    className="flex-1 flex items-center justify-center gap-2 py-2.5 px-5 rounded-xl text-xs font-bold bg-blue-500 hover:bg-blue-600 text-white disabled:opacity-50 transition-all cursor-pointer shadow-md font-sans"
+                  >
+                    {isImportingReport ? (
+                      <>
+                        <span className="animate-spin border-2 border-white border-t-transparent rounded-full w-3.5 h-3.5"></span>
+                        <span>Actualizando Estatus...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Award className="w-3.5 h-3.5" />
+                        <span>Importar ReportLGB a Supabase</span>
+                      </>
+                    )}
+                  </button>
+                </div>
               </div>
             ) : (
               <div className="glass-panel p-5 rounded-2xl bg-amber-500/5 dark:bg-amber-950/10 border border-amber-500/20 flex items-start gap-3 mt-2">
