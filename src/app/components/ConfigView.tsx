@@ -24,6 +24,10 @@ interface ConfigViewProps {
   onSaveCourses: (updatedCourses: Course[]) => void;
   onSaveExams: (updatedExams: Exam[]) => void;
   onSaveCertConfig: (updatedConfig: CertificateConfig) => void;
+  supabaseStatus: 'online' | 'offline';
+  onImportToSupabase: () => Promise<void>;
+  isImporting: boolean;
+  onUpdateEmployeeRole: (employeeNumber: string, role: 'Admin' | 'User') => Promise<void>;
 }
 
 export default function ConfigView({
@@ -42,6 +46,10 @@ export default function ConfigView({
   onSaveCourses,
   onSaveExams,
   onSaveCertConfig,
+  supabaseStatus,
+  onImportToSupabase,
+  isImporting,
+  onUpdateEmployeeRole,
 }: ConfigViewProps) {
   const [activeTab, setActiveTab] = useState<'files' | 'employees' | 'courses' | 'exams' | 'certificates'>('files');
   
@@ -62,6 +70,7 @@ export default function ConfigView({
   const [editStatus, setEditStatus] = useState<LGBStatus>('Por Certificar');
   const [editAction, setEditAction] = useState('');
   const [editTipo, setEditTipo] = useState<TipoPersonal>('DL');
+  const [editRole, setEditRole] = useState<'Admin' | 'User'>('User');
 
   // Drag-and-drop state
   const [dragActiveHC, setDragActiveHC] = useState(false);
@@ -173,10 +182,11 @@ export default function ConfigView({
     setEditStatus(emp.Estatus);
     setEditAction(emp.Action);
     setEditTipo(emp.TipoPersonal);
+    setEditRole((emp as any).role || 'User');
   };
 
   // Guardar edición
-  const saveEdit = () => {
+  const saveEdit = async () => {
     if (editingEmp) {
       onSaveOverride(editingEmp.ID, {
         Departamento: editDept,
@@ -184,6 +194,15 @@ export default function ConfigView({
         Action: editAction,
         TipoPersonal: editTipo,
       });
+
+      // Guardar el rol en Supabase si está disponible
+      if (supabaseStatus === 'online') {
+        try {
+          await onUpdateEmployeeRole(editingEmp.ID, editRole);
+        } catch (e) {
+          console.error('Error al guardar el rol en Supabase:', e);
+        }
+      }
       setEditingEmp(null);
     }
   };
@@ -399,6 +418,49 @@ export default function ConfigView({
                 </p>
               </div>
             </div>
+
+            {/* Supabase Import Zone */}
+            {supabaseStatus === 'online' ? (
+              <div className="glass-panel p-5 rounded-2xl bg-emerald-500/5 dark:bg-emerald-950/10 border border-emerald-500/20 flex flex-col sm:flex-row sm:items-center justify-between gap-4 mt-2">
+                <div>
+                  <h4 className="text-sm font-extrabold text-slate-800 dark:text-emerald-400 flex items-center gap-1.5 font-sans">
+                    <Database className="w-4 h-4 text-emerald-500" /> Sincronización con Supabase Activa
+                  </h4>
+                  <p className="text-xs text-slate-500 dark:text-[#cbd5e1] mt-1 font-semibold">
+                    Puedes importar la base de datos de headcount cargada localmente directamente hacia las tablas oficiales de Supabase en la nube.
+                  </p>
+                </div>
+                <button
+                  onClick={onImportToSupabase}
+                  disabled={isImporting || (!hcLoaded && !reportLoaded)}
+                  className="flex items-center justify-center gap-2 py-2.5 px-5 rounded-xl text-xs font-bold bg-emerald-500 hover:bg-emerald-600 text-white disabled:opacity-50 transition-all cursor-pointer shadow-md font-sans"
+                >
+                  {isImporting ? (
+                    <>
+                      <span className="animate-spin border-2 border-white border-t-transparent rounded-full w-3.5 h-3.5"></span>
+                      <span>Sincronizando...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Database className="w-3.5 h-3.5" />
+                      <span>Importar a Supabase</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            ) : (
+              <div className="glass-panel p-5 rounded-2xl bg-amber-500/5 dark:bg-amber-950/10 border border-amber-500/20 flex items-start gap-3 mt-2">
+                <AlertCircle className="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" />
+                <div>
+                  <h4 className="text-sm font-extrabold text-amber-600 dark:text-amber-400 font-sans">
+                    Supabase en Modo Offline
+                  </h4>
+                  <p className="text-xs text-slate-500 dark:text-[#cbd5e1] mt-1 font-semibold">
+                    La base de datos en la nube no está disponible (verifica las variables de entorno o la conexión de red). Se está utilizando localStorage como fallback para almacenamiento.
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
         )}
 
@@ -481,6 +543,7 @@ export default function ConfigView({
                       <th className="py-3 px-4">Tipo</th>
                       <th className="py-3 px-4">Departamento</th>
                       <th className="py-3 px-4">Estatus Certificación</th>
+                      <th className="py-3 px-4">Rol</th>
                       <th className="py-3 px-4">Action ReportLGB</th>
                       <th className="py-3 px-4 text-right">Acciones</th>
                     </tr>
@@ -534,6 +597,15 @@ export default function ConfigView({
                                 </span>
                               )}
                             </td>
+                            <td className="py-3 px-4">
+                              <span className={`px-2 py-0.5 rounded-lg text-[10px] font-bold ${
+                                (emp as any).role === 'Admin' 
+                                  ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20' 
+                                  : 'bg-slate-500/10 text-slate-600 dark:text-slate-400 border border-slate-500/20'
+                              }`}>
+                                {(emp as any).role || 'User'}
+                              </span>
+                            </td>
                             <td className="py-3 px-4 truncate max-w-[130px] text-slate-400 dark:text-[#94a3b8]" title={emp.Action}>
                               {emp.Action || <span className="italic text-[10px] text-slate-400/50">N/A</span>}
                             </td>
@@ -550,7 +622,7 @@ export default function ConfigView({
                       })
                     ) : (
                       <tr>
-                        <td colSpan={7} className="py-8 text-center text-slate-400 dark:text-[#94a3b8] font-bold">
+                        <td colSpan={8} className="py-8 text-center text-slate-400 dark:text-[#94a3b8] font-bold">
                           No se encontraron colaboradores que coincidan con la búsqueda.
                         </td>
                       </tr>
@@ -729,6 +801,27 @@ export default function ConfigView({
                   className="w-full px-3.5 py-2.5 rounded-xl text-xs bg-slate-50 dark:bg-[#273449] border border-slate-200 dark:border-[#334155] text-slate-800 dark:text-[#f8fafc] placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all font-semibold"
                   placeholder="Complete, Create Form, etc."
                 />
+              </div>
+
+              {/* Rol Administrativo (Editable - Supabase) */}
+              <div>
+                <label className="block text-[10px] font-bold text-slate-400 dark:text-[#94a3b8] uppercase tracking-wider mb-1">
+                  Rol Administrativo (Supabase)
+                </label>
+                <select
+                  value={editRole}
+                  onChange={(e) => setEditRole(e.target.value as 'Admin' | 'User')}
+                  disabled={supabaseStatus !== 'online'}
+                  className="w-full px-3.5 py-2.5 rounded-xl text-xs bg-slate-50 dark:bg-[#273449] border border-slate-200 dark:border-[#334155] text-slate-800 dark:text-[#f8fafc] disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all font-bold cursor-pointer"
+                >
+                  <option value="User" className="dark:bg-[#1e293b] dark:text-[#f8fafc]">User (Solo lectura)</option>
+                  <option value="Admin" className="dark:bg-[#1e293b] dark:text-[#f8fafc]">Admin (Lectura/Escritura)</option>
+                </select>
+                {supabaseStatus !== 'online' && (
+                  <p className="text-[10px] text-amber-500 font-bold mt-1">
+                    * Modificación deshabilitada en modo offline.
+                  </p>
+                )}
               </div>
             </div>
 

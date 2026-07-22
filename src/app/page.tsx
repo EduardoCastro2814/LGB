@@ -29,6 +29,21 @@ import { processLgbData, computeKPIs, computeDepartmentSummaries } from './utils
 import { Loader2, AlertCircle } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import { getAssetPath } from './utils/paths';
+import {
+  testSupabaseConnection,
+  getSupabaseEmployees,
+  importEmployeesToSupabase,
+  updateSupabaseEmployeeRole,
+  updateSupabaseEmployeeDetails,
+  getSupabaseCourses,
+  saveSupabaseCourse,
+  deleteSupabaseCourse,
+  getSupabaseExams,
+  saveSupabaseExam,
+  getSupabaseProgress,
+  saveSupabaseUserProgress,
+  saveSupabaseCertificate
+} from './utils/supabaseService';
 
 // Cursos predeterminados exigidos por las reglas del negocio
 const defaultCourses: Course[] = [
@@ -302,6 +317,10 @@ const defaultCertConfig: CertificateConfig = {
 };
 
 export default function DashboardPage() {
+  // ESTADOS DE INTEGRACIÓN CON SUPABASE
+  const [supabaseStatus, setSupabaseStatus] = useState<'online' | 'offline'>('offline');
+  const [isImporting, setIsImporting] = useState<boolean>(false);
+
   const [hcData, setHcData] = useState<any[]>([]);
   const [reportData, setReportData] = useState<any[]>([]);
   const [darkMode, setDarkMode] = useState<boolean>(true);
@@ -410,21 +429,111 @@ export default function DashboardPage() {
     }
   }, []);
 
-  // Carga inicial automática de archivos Excel desde la carpeta public/data de forma estática
+  // Carga inicial automática y sincronización de datos con Supabase
   const loadPreloadedData = async () => {
     setIsLoading(true);
     setApiError(null);
     try {
+      console.log('[LGB App debug] Probando conexión a Supabase...');
+      const isConnected = await testSupabaseConnection();
+      
+      if (isConnected) {
+        console.log('[LGB App debug] Supabase conectado.');
+        setSupabaseStatus('online');
+
+        // 1. Cargar cursos de Supabase
+        let dbCourses = await getSupabaseCourses();
+        if (dbCourses.length === 0) {
+          console.log('[LGB App debug] Sembrando cursos predeterminados en Supabase...');
+          for (const c of defaultCourses) {
+            await saveSupabaseCourse(c);
+          }
+          dbCourses = await getSupabaseCourses();
+        }
+        setCourses(dbCourses);
+        localStorage.setItem('lgb_courses_list', JSON.stringify(dbCourses));
+
+        // 2. Cargar exámenes de Supabase
+        let dbExams = await getSupabaseExams();
+        if (dbExams.length === 0) {
+          console.log('[LGB App debug] Sembrando exámenes predeterminados en Supabase...');
+          for (const e of defaultExams) {
+            await saveSupabaseExam(e);
+          }
+          dbExams = await getSupabaseExams();
+        }
+        setExams(dbExams);
+        localStorage.setItem('lgb_exams_list', JSON.stringify(dbExams));
+
+        // 3. Cargar progreso global de Supabase
+        const dbProgress = await getSupabaseProgress();
+        setTrainingState(dbProgress);
+        localStorage.setItem('lgb_training_state', JSON.stringify(dbProgress));
+
+        // 4. Cargar colaboradores de Supabase
+        const dbEmployees = await getSupabaseEmployees();
+        if (dbEmployees.length > 0) {
+          console.log(`[LGB App debug] Cargados ${dbEmployees.length} colaboradores desde Supabase.`);
+          
+          // Reconstruir hcData y reportData a partir de los datos de Supabase para alimentar el Dashboard
+          const reconstructedHc = dbEmployees.map(emp => ({
+            ID: emp.ID,
+            Nombre: emp.Nombre,
+            Departamento: emp.Departamento,
+            Puesto: emp.Puesto || 'Operador DL',
+            Manager: emp.Manager || 'N/A',
+            TipoPersonal: emp.TipoPersonal || 'DL',
+            role: emp.role || 'User' // Conservar el rol administrativo
+          }));
+
+          const reconstructedReport = dbEmployees.map(emp => ({
+            'Employee#': emp.ID,
+            Action: emp.Action || ''
+          }));
+
+          setHcData(reconstructedHc);
+          setReportData(reconstructedReport);
+          setIsPreloaded(true);
+
+          const nowStr = new Date().toLocaleString('es-MX');
+          setHcFileMetadata({
+            name: 'Base de datos Supabase',
+            size: 'N/A',
+            lastUpdated: nowStr,
+            state: 'Cargado de Servidor',
+          });
+          setReportFileMetadata({
+            name: 'Base de datos Supabase',
+            size: 'N/A',
+            lastUpdated: nowStr,
+            state: 'Cargado de Servidor',
+          });
+        } else {
+          // Si Supabase está en blanco, sembrar temporalmente con los Excel estáticos
+          console.log('[LGB App debug] Supabase sin empleados. Cargando Excel inicial...');
+          await loadFromStaticExcel();
+        }
+      } else {
+        throw new Error('Supabase no disponible');
+      }
+    } catch (err: any) {
+      console.warn('[LGB App debug] Supabase desconectado, usando base de datos local y fallbacks Excel.', err.message);
+      setSupabaseStatus('offline');
+      // Cargar localmente desde Excel
+      await loadFromStaticExcel();
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Función interna para leer los Excel locales en modo estático/fallback
+  const loadFromStaticExcel = async () => {
+    try {
       const hcUrl = getAssetPath('/data/HC B29 2026 Junio.xlsx');
       const reportUrl = getAssetPath('/data/ReportLGB.xlsx');
 
-      console.log('[LGB App debug] Iniciando carga de Excels...');
-      console.log('[LGB App debug] URL de Headcount:', hcUrl);
-      console.log('[LGB App debug] URL de ReportLGB:', reportUrl);
-
       // 1. Cargar Headcount Excel
       const resHC = await fetch(hcUrl);
-      console.log('[LGB App debug] Res Headcount fetch status:', resHC.status);
       if (!resHC.ok) {
         throw new Error('No se encontró el archivo de datos requerido.');
       }
@@ -433,11 +542,9 @@ export default function DashboardPage() {
       const sheetNameHC = hcWorkbook.SheetNames[1] || hcWorkbook.SheetNames[0];
       const sheetHC = hcWorkbook.Sheets[sheetNameHC];
       const hcRawData = XLSX.utils.sheet_to_json(sheetHC, { range: 1 });
-      console.log('[LGB App debug] Headcount parsed rows count:', hcRawData.length);
 
       // 2. Cargar ReportLGB Excel
       const resReport = await fetch(reportUrl);
-      console.log('[LGB App debug] Res ReportLGB fetch status:', resReport.status);
       if (!resReport.ok) {
         throw new Error('No se encontró el archivo de datos requerido.');
       }
@@ -446,14 +553,12 @@ export default function DashboardPage() {
       const sheetNameReport = reportWorkbook.SheetNames[0];
       const sheetReport = reportWorkbook.Sheets[sheetNameReport];
       const reportRawData = XLSX.utils.sheet_to_json(sheetReport);
-      console.log('[LGB App debug] ReportLGB parsed rows count:', reportRawData.length);
 
       // Cargar datos en los estados
       setHcData(hcRawData);
       setReportData(reportRawData);
       setIsPreloaded(true);
 
-      // Registrar metadatos del servidor
       const nowStr = new Date().toLocaleString('es-MX');
       setHcFileMetadata({
         name: 'HC B29 2026 Junio.xlsx',
@@ -467,15 +572,12 @@ export default function DashboardPage() {
         lastUpdated: nowStr,
         state: 'Cargado de Servidor',
       });
-    } catch (err: any) {
-      // Mensaje de fallback amigable
-      const userMessage = err.message === 'No se encontró el archivo de datos requerido.'
-        ? err.message
-        : `No se pudieron cargar los archivos iniciales: ${err.message}`;
+    } catch (excelErr: any) {
+      const userMessage = excelErr.message === 'No se encontró el archivo de datos requerido.'
+        ? excelErr.message
+        : `No se pudieron cargar los archivos iniciales: ${excelErr.message}`;
       setApiError(userMessage);
       setIsPreloaded(false);
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -507,7 +609,7 @@ export default function DashboardPage() {
   };
 
   // Guardar override manual del administrador
-  const handleSaveOverride = (id: string, override: EmployeeOverride) => {
+  const handleSaveOverride = async (id: string, override: EmployeeOverride) => {
     const updatedOverrides = {
       ...overrides,
       [id]: {
@@ -520,6 +622,32 @@ export default function DashboardPage() {
       localStorage.setItem('lgb_dashboard_overrides', JSON.stringify(updatedOverrides));
     } catch (e) {
       console.error('Error al guardar overrides en localStorage:', e);
+    }
+
+    // Sincronizar cambios en Supabase si está en línea
+    if (supabaseStatus === 'online') {
+      try {
+        await updateSupabaseEmployeeDetails(id, {
+          department: override.Departamento,
+          certification_status: override.Estatus,
+          employee_type: override.TipoPersonal
+        });
+
+        // Refrescar el estado de headcount local reactivamente
+        setHcData(prev => prev.map(emp => {
+          if (emp.ID === id) {
+            return {
+              ...emp,
+              Departamento: override.Departamento || emp.Departamento,
+              Estatus: override.Estatus || emp.Estatus,
+              TipoPersonal: override.TipoPersonal || emp.TipoPersonal
+            };
+          }
+          return emp;
+        }));
+      } catch (err) {
+        console.error('Error al actualizar colaborador en Supabase:', err);
+      }
     }
   };
 
@@ -535,15 +663,87 @@ export default function DashboardPage() {
     }
   };
 
-  // MANEJADORES DE GUARDADO DE CONFIGURACIONES
-  const handleSaveCourses = (newCourses: Course[]) => {
-    setCourses(newCourses);
-    localStorage.setItem('lgb_courses_list', JSON.stringify(newCourses));
+  // Importar headcount unificado a Supabase en lote
+  const handleImportToSupabase = async () => {
+    if (mergedEmployees.length === 0) {
+      alert('No hay datos de headcount cargados para importar.');
+      return;
+    }
+    setIsImporting(true);
+    try {
+      await importEmployeesToSupabase(mergedEmployees);
+      alert('¡Sincronización Exitosa! Los registros de headcount han sido importados a Supabase.');
+      
+      // Recargar base de datos desde Supabase
+      const dbEmployees = await getSupabaseEmployees();
+      if (dbEmployees.length > 0) {
+        const reconstructedHc = dbEmployees.map(emp => ({
+          ID: emp.ID,
+          Nombre: emp.Nombre,
+          Departamento: emp.Departamento,
+          Puesto: emp.Puesto || 'Operador DL',
+          Manager: emp.Manager || 'N/A',
+          TipoPersonal: emp.TipoPersonal || 'DL',
+          role: (emp as any).role || 'User'
+        }));
+        const reconstructedReport = dbEmployees.map(emp => ({
+          'Employee#': emp.ID,
+          Action: emp.Action || ''
+        }));
+        setHcData(reconstructedHc);
+        setReportData(reconstructedReport);
+      }
+    } catch (err: any) {
+      alert(`Error al importar datos a Supabase: ${err.message}`);
+    } finally {
+      setIsImporting(false);
+    }
   };
 
-  const handleSaveExams = (newExams: Exam[]) => {
+  // Actualizar rol de un colaborador en Supabase
+  const handleUpdateEmployeeRole = async (employeeNumber: string, role: 'Admin' | 'User') => {
+    try {
+      await updateSupabaseEmployeeRole(employeeNumber, role);
+      // Refrescar estado local para mantener reactividad
+      setHcData(prev => prev.map(emp => {
+        if (emp.ID === employeeNumber) {
+          return { ...emp, role };
+        }
+        return emp;
+      }));
+    } catch (err: any) {
+      alert(`Error al guardar el rol en Supabase: ${err.message}`);
+      throw err;
+    }
+  };
+
+  // MANEJADORES DE GUARDADO DE CONFIGURACIONES
+  const handleSaveCourses = async (newCourses: Course[]) => {
+    setCourses(newCourses);
+    localStorage.setItem('lgb_courses_list', JSON.stringify(newCourses));
+    if (supabaseStatus === 'online') {
+      try {
+        for (const c of newCourses) {
+          await saveSupabaseCourse(c);
+        }
+      } catch (e) {
+        console.error('Error al guardar cursos en Supabase:', e);
+      }
+    }
+  };
+
+  const handleSaveExams = async (newExams: Exam[]) => {
     setExams(newExams);
     localStorage.setItem('lgb_exams_list', JSON.stringify(newExams));
+    if (supabaseStatus === 'online') {
+      try {
+        for (const e of newExams) {
+          await saveSupabaseExam(e);
+        }
+      } catch (e) {
+        console.error('Error al guardar exámenes en Supabase:', e);
+      }
+    }
   };
 
   const handleSaveCertConfig = (newConfig: CertificateConfig) => {
@@ -552,7 +752,7 @@ export default function DashboardPage() {
   };
 
   // Actualizar el progreso de un colaborador en particular
-  const handleUpdateUserProgress = (courseId: string, updatedProgress: Partial<UserCourseProgress>) => {
+  const handleUpdateUserProgress = async (courseId: string, updatedProgress: Partial<UserCourseProgress>) => {
     if (!currentUser) return;
     
     const userProgMap = trainingState[currentUser.ID] || {};
@@ -584,6 +784,30 @@ export default function DashboardPage() {
 
     setTrainingState(newTrainingState);
     localStorage.setItem('lgb_training_state', JSON.stringify(newTrainingState));
+
+    // Guardar progreso en Supabase
+    if (supabaseStatus === 'online') {
+      try {
+        await saveSupabaseUserProgress(currentUser.ID, courseId, newCourseProg);
+
+        // Si aprobó, guardar también el certificado en Supabase
+        if (newCourseProg.examPassed && newCourseProg.certificateFolio) {
+          const courseName = courses.find(c => c.id === courseId)?.name || courseId;
+          const certId = `${currentUser.ID}-${courseId}`;
+          await saveSupabaseCertificate(
+            certId,
+            currentUser.ID,
+            courseId,
+            courseName,
+            newCourseProg.completionDate || new Date().toISOString(),
+            newCourseProg.examScore || 0,
+            newCourseProg.certificateFolio
+          );
+        }
+      } catch (e) {
+        console.error('Error al guardar el progreso en Supabase:', e);
+      }
+    }
 
     // Si el usuario actualmente logueado cambia su progreso, refrescar su copia en sesión
     // para que la interfaz (sidebar, perfil, etc.) se redibuje inmediatamente.
@@ -752,6 +976,19 @@ export default function DashboardPage() {
       {/* Contenedor de contenido de la derecha */}
       <div className="flex-1 flex flex-col p-4 md:p-8 overflow-y-auto max-w-7xl mx-auto w-full min-h-screen">
         
+        {/* Banner informativo si Supabase está desconectado */}
+        {supabaseStatus === 'offline' && (
+          <div className="bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-400 p-4 rounded-2xl mb-6 flex items-start gap-3 text-xs font-bold animate-fade-in">
+            <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="font-bold">Modo Offline Activo:</p>
+              <p className="font-medium text-slate-600 dark:text-[#cbd5e1] mt-0.5">
+                La conexión con Supabase no se pudo establecer. Los cambios y progresos se guardarán en tu navegador local (localStorage).
+              </p>
+            </div>
+          </div>
+        )}
+
         {/* Alerta de archivos no cargados para administradores */}
         {currentRole === 'Admin' && apiError && !hcData.length && (
           <div className="bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-400 p-4 rounded-2xl mb-6 flex items-start gap-3 text-sm font-semibold animate-fade-in">
@@ -848,6 +1085,10 @@ export default function DashboardPage() {
                 onSaveCourses={handleSaveCourses}
                 onSaveExams={handleSaveExams}
                 onSaveCertConfig={handleSaveCertConfig}
+                supabaseStatus={supabaseStatus}
+                onImportToSupabase={handleImportToSupabase}
+                isImporting={isImporting}
+                onUpdateEmployeeRole={handleUpdateEmployeeRole}
               />
             )}
 

@@ -27,6 +27,7 @@ export interface MergedEmployee {
   Action: string; // Action value from ReportLGB (e.g. 'Complete', 'Create Form', or empty)
   Estatus: LGBStatus;
   TipoPersonal: TipoPersonal; // Clasificación: Direct (DL) o Indirect (IDL)
+  role?: UserRole;
 }
 
 export interface KPIStats {
@@ -48,7 +49,7 @@ export interface DepartmentSummary {
 
 // NUEVOS TIPOS PARA LAS MEJORAS DE ADMINISTRACIÓN
 
-export type UserRole = 'General' | 'Admin';
+export type UserRole = 'General' | 'Admin' | 'User';
 
 export interface EmployeeOverride {
   Departamento?: string;

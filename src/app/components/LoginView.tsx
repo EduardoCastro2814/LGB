@@ -49,8 +49,8 @@ export default function LoginView({ employees, onLogin, hcLoaded }: LoginViewPro
     const foundEmployee = employees.find(emp => normalizeId(emp.ID) === normalizedInput);
 
     if (foundEmployee) {
-      // Determinar rol: si el departamento es BE, es Admin. De lo contrario, General.
-      const role: UserRole = foundEmployee.Departamento.toUpperCase() === 'BE' ? 'Admin' : 'General';
+      // Determinar rol: si el rol es Admin o pertenece a BE, es Admin. De lo contrario, General.
+      const role: UserRole = (foundEmployee as any).role === 'Admin' || foundEmployee.Departamento.toUpperCase() === 'BE' ? 'Admin' : 'General';
       onLogin(foundEmployee, role);
     } else {
       // Como contingencia, permitir un ID administrador universal 'admin'
@@ -75,16 +75,16 @@ export default function LoginView({ employees, onLogin, hcLoaded }: LoginViewPro
   const handleTestLogin = (isAdmin: boolean) => {
     if (employees.length > 0) {
       if (isAdmin) {
-        // Encontrar el primer empleado del departamento BE
-        const beEmp = employees.find(e => e.Departamento.toUpperCase() === 'BE');
+        // Encontrar el primer empleado del departamento BE o con rol Admin
+        const beEmp = employees.find(e => (e as any).role === 'Admin' || e.Departamento.toUpperCase() === 'BE');
         if (beEmp) {
           onLogin(beEmp, 'Admin');
           return;
         }
       } else {
-        // Encontrar el primer empleado de producción / DL (cualquiera no BE)
-        const dlEmp = employees.find(e => e.Departamento.toUpperCase() !== 'BE' && e.TipoPersonal === 'DL') 
-                     || employees.find(e => e.Departamento.toUpperCase() !== 'BE');
+        // Encontrar el primer empleado de producción / DL (cualquiera no Admin)
+        const dlEmp = employees.find(e => (e as any).role !== 'Admin' && e.Departamento.toUpperCase() !== 'BE' && e.TipoPersonal === 'DL') 
+                     || employees.find(e => (e as any).role !== 'Admin' && e.Departamento.toUpperCase() !== 'BE');
         if (dlEmp) {
           onLogin(dlEmp, 'General');
           return;
