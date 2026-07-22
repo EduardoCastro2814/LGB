@@ -178,3 +178,98 @@ CREATE INDEX IF NOT EXISTS idx_course_progress_emp ON public.course_progress(emp
 CREATE INDEX IF NOT EXISTS idx_course_progress_course ON public.course_progress(course_id);
 CREATE INDEX IF NOT EXISTS idx_certificates_emp ON public.certificates(employee_number);
 CREATE INDEX IF NOT EXISTS idx_certificates_folio ON public.certificates(folio);
+
+-- -------------------------------------------------------------------------
+-- 11. HABILITACIÓN DE RLS Y POLÍTICAS DE ACCESO PÚBLICO (ANON/AUTHENTICATED)
+-- -------------------------------------------------------------------------
+-- Habilitar Row Level Security (RLS) en todas las tablas y crear políticas 
+-- de lectura/escritura total para los roles 'anon' y 'authenticated', 
+-- permitiendo llamadas CRUD del lado del cliente sin fricciones de permisos.
+
+-- Tabla: roles
+ALTER TABLE public.roles ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Permitir select a todos en roles" ON public.roles;
+CREATE POLICY "Permitir select a todos en roles" ON public.roles FOR SELECT TO anon, authenticated USING (true);
+DROP POLICY IF EXISTS "Permitir insert a todos en roles" ON public.roles;
+CREATE POLICY "Permitir insert a todos en roles" ON public.roles FOR INSERT TO anon, authenticated WITH CHECK (true);
+DROP POLICY IF EXISTS "Permitir update a todos en roles" ON public.roles;
+CREATE POLICY "Permitir update a todos en roles" ON public.roles FOR UPDATE TO anon, authenticated USING (true) WITH CHECK (true);
+DROP POLICY IF EXISTS "Permitir delete a todos en roles" ON public.roles;
+CREATE POLICY "Permitir delete a todos en roles" ON public.roles FOR DELETE TO anon, authenticated USING (true);
+
+-- Tabla: employees
+ALTER TABLE public.employees ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Permitir select a todos en employees" ON public.employees;
+CREATE POLICY "Permitir select a todos en employees" ON public.employees FOR SELECT TO anon, authenticated USING (true);
+DROP POLICY IF EXISTS "Permitir insert a todos en employees" ON public.employees;
+CREATE POLICY "Permitir insert a todos en employees" ON public.employees FOR INSERT TO anon, authenticated WITH CHECK (true);
+DROP POLICY IF EXISTS "Permitir update a todos en employees" ON public.employees;
+CREATE POLICY "Permitir update a todos en employees" ON public.employees FOR UPDATE TO anon, authenticated USING (true) WITH CHECK (true);
+DROP POLICY IF EXISTS "Permitir delete a todos en employees" ON public.employees;
+CREATE POLICY "Permitir delete a todos en employees" ON public.employees FOR DELETE TO anon, authenticated USING (true);
+
+-- Tabla: courses
+ALTER TABLE public.courses ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Permitir select a todos en courses" ON public.courses;
+CREATE POLICY "Permitir select a todos en courses" ON public.courses FOR SELECT TO anon, authenticated USING (true);
+DROP POLICY IF EXISTS "Permitir insert a todos en courses" ON public.courses;
+CREATE POLICY "Permitir insert a todos en courses" ON public.courses FOR INSERT TO anon, authenticated WITH CHECK (true);
+DROP POLICY IF EXISTS "Permitir update a todos en courses" ON public.courses;
+CREATE POLICY "Permitir update a todos en courses" ON public.courses FOR UPDATE TO anon, authenticated USING (true) WITH CHECK (true);
+DROP POLICY IF EXISTS "Permitir delete a todos en courses" ON public.courses;
+CREATE POLICY "Permitir delete a todos en courses" ON public.courses FOR DELETE TO anon, authenticated USING (true);
+
+-- Tabla: course_content
+ALTER TABLE public.course_content ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Permitir select a todos en course_content" ON public.course_content;
+CREATE POLICY "Permitir select a todos en course_content" ON public.course_content FOR SELECT TO anon, authenticated USING (true);
+DROP POLICY IF EXISTS "Permitir insert a todos en course_content" ON public.course_content;
+CREATE POLICY "Permitir insert a todos en course_content" ON public.course_content FOR INSERT TO anon, authenticated WITH CHECK (true);
+DROP POLICY IF EXISTS "Permitir update a todos en course_content" ON public.course_content;
+CREATE POLICY "Permitir update a todos en course_content" ON public.course_content FOR UPDATE TO anon, authenticated USING (true) WITH CHECK (true);
+DROP POLICY IF EXISTS "Permitir delete a todos en course_content" ON public.course_content;
+CREATE POLICY "Permitir delete a todos en course_content" ON public.course_content FOR DELETE TO anon, authenticated USING (true);
+
+-- Tabla: exams
+ALTER TABLE public.exams ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Permitir select a todos en exams" ON public.exams;
+CREATE POLICY "Permitir select a todos en exams" ON public.exams FOR SELECT TO anon, authenticated USING (true);
+DROP POLICY IF EXISTS "Permitir insert a todos en exams" ON public.exams;
+CREATE POLICY "Permitir insert a todos en exams" ON public.exams FOR INSERT TO anon, authenticated WITH CHECK (true);
+DROP POLICY IF EXISTS "Permitir update a todos en exams" ON public.exams;
+CREATE POLICY "Permitir update a todos en exams" ON public.exams FOR UPDATE TO anon, authenticated USING (true) WITH CHECK (true);
+DROP POLICY IF EXISTS "Permitir delete a todos en exams" ON public.exams;
+CREATE POLICY "Permitir delete a todos en exams" ON public.exams FOR DELETE TO anon, authenticated USING (true);
+
+-- Tabla: questions
+ALTER TABLE public.questions ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Permitir select a todos en questions" ON public.questions;
+CREATE POLICY "Permitir select a todos en questions" ON public.questions FOR SELECT TO anon, authenticated USING (true);
+DROP POLICY IF EXISTS "Permitir insert a todos en questions" ON public.questions;
+CREATE POLICY "Permitir insert a todos en questions" ON public.questions FOR INSERT TO anon, authenticated WITH CHECK (true);
+DROP POLICY IF EXISTS "Permitir update a todos en questions" ON public.questions;
+CREATE POLICY "Permitir update a todos en questions" ON public.questions FOR UPDATE TO anon, authenticated USING (true) WITH CHECK (true);
+DROP POLICY IF EXISTS "Permitir delete a todos en questions" ON public.questions;
+CREATE POLICY "Permitir delete a todos en questions" ON public.questions FOR DELETE TO anon, authenticated USING (true);
+
+-- Tabla: course_progress
+ALTER TABLE public.course_progress ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Permitir select a todos en course_progress" ON public.course_progress;
+CREATE POLICY "Permitir select a todos en course_progress" ON public.course_progress FOR SELECT TO anon, authenticated USING (true);
+DROP POLICY IF EXISTS "Permitir insert a todos en course_progress" ON public.course_progress;
+CREATE POLICY "Permitir insert a todos en course_progress" ON public.course_progress FOR INSERT TO anon, authenticated WITH CHECK (true);
+DROP POLICY IF EXISTS "Permitir update a todos en course_progress" ON public.course_progress;
+CREATE POLICY "Permitir update a todos en course_progress" ON public.course_progress FOR UPDATE TO anon, authenticated USING (true) WITH CHECK (true);
+DROP POLICY IF EXISTS "Permitir delete a todos en course_progress" ON public.course_progress;
+CREATE POLICY "Permitir delete a todos en course_progress" ON public.course_progress FOR DELETE TO anon, authenticated USING (true);
+
+-- Tabla: certificates
+ALTER TABLE public.certificates ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Permitir select a todos en certificates" ON public.certificates;
+CREATE POLICY "Permitir select a todos en certificates" ON public.certificates FOR SELECT TO anon, authenticated USING (true);
+DROP POLICY IF EXISTS "Permitir insert a todos en certificates" ON public.certificates;
+CREATE POLICY "Permitir insert a todos en certificates" ON public.certificates FOR INSERT TO anon, authenticated WITH CHECK (true);
+DROP POLICY IF EXISTS "Permitir update a todos en certificates" ON public.certificates;
+CREATE POLICY "Permitir update a todos en certificates" ON public.certificates FOR UPDATE TO anon, authenticated USING (true) WITH CHECK (true);
+DROP POLICY IF EXISTS "Permitir delete a todos en certificates" ON public.certificates;
+CREATE POLICY "Permitir delete a todos en certificates" ON public.certificates FOR DELETE TO anon, authenticated USING (true);
