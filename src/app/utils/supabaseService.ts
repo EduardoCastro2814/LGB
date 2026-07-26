@@ -229,7 +229,11 @@ export async function getSupabaseEmployees(): Promise<MergedEmployee[]> {
     Manager: emp.manager || 'N/A',
     Estatus: (emp.certification_status || 'Por Certificar') as LGBStatus,
     TipoPersonal: (emp.employee_type || 'DL') as TipoPersonal,
-    Action: (emp.certification_status || 'Por Certificar') === 'Certificado' ? 'Complete' : 'Create Form',
+    Action: emp.certification_status === 'Certificado' 
+      ? 'Complete' 
+      : emp.certification_status === 'Potencial' 
+        ? 'Create Form' 
+        : '',
     role: emp.role || 'User' // Atributo para control de roles
   }));
 }
@@ -410,16 +414,25 @@ export async function importReportLgbStatuses(
       summary.potencialesActualizados++;
     }
 
-    // Solo actualizar si el estatus cambia para optimizar tráfico
     const existingEmp = dbEmpMap.get(empNo);
     const currentStatus = existingEmp.certification_status || 'Por Certificar';
 
+    // Si ya es Certificado, no sobrescribir bajo ninguna circunstancia (permanece Certificado)
+    if (currentStatus === 'Certificado') {
+      console.log(`MATCH ENCONTRADO (PROTEGIDO):
+Employee#: ${empNo}
+Action encontrada: ${actionVal}
+Estatus anterior: ${currentStatus}
+Estatus nuevo: ${currentStatus} (Sin cambio - Certificado Protegido)`);
+      continue;
+    }
+
     // LOG DE MATCH ENCONTRADO EN CONSOLA (Como fue solicitado por el usuario)
     console.log(`MATCH ENCONTRADO:
-employee_number: ${empNo}
-action: ${actionVal}
-estado_anterior: ${currentStatus}
-estado_nuevo: ${status}`);
+Employee#: ${empNo}
+Action encontrada: ${actionVal}
+Estatus anterior: ${currentStatus}
+Estatus nuevo: ${status}`);
 
     if (currentStatus !== status) {
       // Importante: incluir campos NOT NULL para que Postgres no falle en el INSERT del UPSERT
@@ -438,12 +451,24 @@ estado_nuevo: ${status}`);
     }
   }
 
-  // 3. Forzar a 'Por Certificar' a los colaboradores sin coincidencia en el reporte
+  // 3. Resetear a 'Por Certificar' a los colaboradores sin coincidencia en el reporte
   summary.sinCoincidencia = unmatchedDbIds.size;
   for (const empNo of unmatchedDbIds) {
     const existingEmp = dbEmpMap.get(empNo);
     const currentStatus = existingEmp.certification_status || 'Por Certificar';
+    
+    // Si ya es Certificado, no sobrescribir bajo ninguna circunstancia (permanece Certificado)
+    if (currentStatus === 'Certificado') {
+      continue;
+    }
+    
     if (currentStatus !== 'Por Certificar') {
+      console.log(`SIN MATCH (RESET):
+Employee#: ${empNo}
+Action encontrada: N/A
+Estatus anterior: ${currentStatus}
+Estatus nuevo: Por Certificar`);
+
       const payload = await buildSafePayload('employees', {
         employee_number: empNo,
         name: existingEmp.name,
@@ -548,15 +573,60 @@ estado_nuevo: ${status}`);
     }
   }
 
+  // 5. Obtener los conteos finales reales desde la base de datos para los logs de depuración (paginando)
+  const finalDbEmployees: any[] = [];
+  let finalFrom = 0;
+  let finalHasMore = true;
+
+  while (finalHasMore) {
+    const { data: chunk, error: chunkErr } = await supabase
+      .from('employees')
+      .select('certification_status')
+      .range(finalFrom, finalFrom + step - 1);
+
+    if (chunkErr) {
+      console.error('Error al realizar conteo final de verificación:', chunkErr.message);
+      break;
+    }
+
+    if (chunk && chunk.length > 0) {
+      finalDbEmployees.push(...chunk);
+      finalFrom += step;
+      if (chunk.length < step) {
+        finalHasMore = false;
+      }
+    } else {
+      finalHasMore = false;
+    }
+  }
+
+  let countCertificados = 0;
+  let countPotenciales = 0;
+  let countPorCertificar = 0;
+
+  finalDbEmployees.forEach((e: any) => {
+    if (e.certification_status === 'Certificado') {
+      countCertificados++;
+    } else if (e.certification_status === 'Potencial') {
+      countPotenciales++;
+    } else {
+      countPorCertificar++;
+    }
+  });
+
+  const finalTotal = countCertificados + countPotenciales + countPorCertificar;
+  const validationMatches = finalTotal === summary.empleadosHcProcesados;
+
   // LOGS DETALLADOS DE DEPURACIÓN EN CONSOLA (Como fue solicitado por el usuario)
   console.log('=== LOGS DE DEPURACIÓN IMPORTACIÓN REPORTLGB ===');
   console.log(`Total HC: ${summary.empleadosHcProcesados}`);
   console.log(`Total ReportLGB: ${summary.registrosReportLgbProcesados}`);
   console.log(`Matches: ${summary.matchesEncontrados}`);
   console.log(`Sin Match: ${noMatchList.length}`);
-  console.log(`Certificados: ${summary.certificadosActualizados}`);
-  console.log(`Potenciales: ${summary.potencialesActualizados}`);
-  console.log(`Total Matches: ${summary.matchesEncontrados}`);
+  console.log(`Certificados: ${countCertificados}`);
+  console.log(`Potenciales: ${countPotenciales}`);
+  console.log(`Por Certificar: ${countPorCertificar}`);
+  console.log(`Suma Coincide con HC Total (100% de la base de datos): ${validationMatches ? 'SÍ' : 'NO'} (Suma: ${finalTotal} vs Total: ${summary.empleadosHcProcesados})`);
   console.log(`Total Updates Exitosos: ${summary.totalUpdatesExitosos}`);
   console.log(`Total Updates Fallidos: ${summary.totalUpdatesFallidos}`);
   console.log('Primeros 20 sin match:', summary.primerosVeinteSinMatch);
