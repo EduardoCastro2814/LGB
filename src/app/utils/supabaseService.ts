@@ -378,6 +378,12 @@ export async function importReportLgbStatuses(
   const updatePayloads: any[] = [];
   const noMatchList: string[] = [];
 
+  // Contadores para tipos de Action encontrados
+  let countComplete = 0;
+  let countCompleteResigned = 0;
+  let countCreateForm = 0;
+  let countOtherAction = 0;
+
   // 2. Procesar registros de ReportLGB y realizar cruces
   for (const row of reportRawData) {
     // Buscar la columna de ID insensible a mayúsculas/minúsculas
@@ -393,7 +399,7 @@ export async function importReportLgbStatuses(
 
     const empNo = normalizeId(rawIdVal);
     const actionVal = row['Action'] || row['action'] || row['Status'] || row['status'] || '';
-    const action = normalizeText(actionVal).toLowerCase();
+    const actionNormalized = String(actionVal).trim().toUpperCase();
 
     if (!empNo || !dbEmpMap.has(empNo)) {
       const nombreVal = row['Nombre'] || row['nombre'] || row['Name'] || row['name'] || 'Sin Nombre';
@@ -405,11 +411,22 @@ export async function importReportLgbStatuses(
     summary.matchesEncontrados++;
     unmatchedDbIds.delete(empNo); // Marcado como encontrado
 
+    // Incrementar contadores correspondientes
+    if (actionNormalized === 'COMPLETE') {
+      countComplete++;
+    } else if (actionNormalized === 'COMPLETE/RESIGNED') {
+      countCompleteResigned++;
+    } else if (actionNormalized === 'CREATE FORM') {
+      countCreateForm++;
+    } else {
+      countOtherAction++;
+    }
+
     let status: LGBStatus = 'Por Certificar';
-    if (action === 'complete' || action === 'complete/resigned') {
+    if (actionNormalized === 'COMPLETE' || actionNormalized === 'COMPLETE/RESIGNED') {
       status = 'Certificado';
       summary.certificadosActualizados++;
-    } else if (action === 'create form') {
+    } else if (actionNormalized === 'CREATE FORM') {
       status = 'Potencial';
       summary.potencialesActualizados++;
     }
@@ -421,18 +438,18 @@ export async function importReportLgbStatuses(
     if (currentStatus === 'Certificado') {
       console.log(`MATCH ENCONTRADO (PROTEGIDO):
 Employee#: ${empNo}
-Action encontrada: ${actionVal}
-Estatus anterior: ${currentStatus}
-Estatus nuevo: ${currentStatus} (Sin cambio - Certificado Protegido)`);
+Action original: ${actionVal}
+Action normalizada: ${actionNormalized}
+Estado asignado: Certificado (Protegido - No se sobrescribe)`);
       continue;
     }
 
     // LOG DE MATCH ENCONTRADO EN CONSOLA (Como fue solicitado por el usuario)
     console.log(`MATCH ENCONTRADO:
 Employee#: ${empNo}
-Action encontrada: ${actionVal}
-Estatus anterior: ${currentStatus}
-Estatus nuevo: ${status}`);
+Action original: ${actionVal}
+Action normalizada: ${actionNormalized}
+Estado asignado: ${status}`);
 
     if (currentStatus !== status) {
       // Importante: incluir campos NOT NULL para que Postgres no falle en el INSERT del UPSERT
@@ -627,6 +644,10 @@ Estatus nuevo: Por Certificar`);
   console.log(`Potenciales: ${countPotenciales}`);
   console.log(`Por Certificar: ${countPorCertificar}`);
   console.log(`Suma Coincide con HC Total (100% de la base de datos): ${validationMatches ? 'SÍ' : 'NO'} (Suma: ${finalTotal} vs Total: ${summary.empleadosHcProcesados})`);
+  console.log(`Complete encontrados: ${countComplete}`);
+  console.log(`Complete/Resigned encontrados: ${countCompleteResigned}`);
+  console.log(`Create Form encontrados: ${countCreateForm}`);
+  console.log(`Sin match (Excel): ${noMatchList.length}`);
   console.log(`Total Updates Exitosos: ${summary.totalUpdatesExitosos}`);
   console.log(`Total Updates Fallidos: ${summary.totalUpdatesFallidos}`);
   console.log('Primeros 20 sin match:', summary.primerosVeinteSinMatch);
