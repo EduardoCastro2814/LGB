@@ -243,8 +243,47 @@ export async function getSupabaseEmployees(): Promise<MergedEmployee[]> {
  * Asigna 'Por Certificar' como estatus inicial de certificación.
  */
 export async function importHcEmployees(hcRawData: any[]): Promise<void> {
+  // 1. Obtener estatus de certificación de los empleados existentes para no sobrescribirlos
+  const dbEmployees: any[] = [];
+  let from = 0;
+  const step = 1000;
+  let hasMore = true;
+
+  while (hasMore) {
+    const { data: chunk, error: fetchError } = await supabase
+      .from('employees')
+      .select('employee_number, certification_status')
+      .range(from, from + step - 1);
+
+    if (fetchError) {
+      console.error('Error al consultar empleados existentes para importación HC:', fetchError.message);
+      break;
+    }
+
+    if (chunk && chunk.length > 0) {
+      dbEmployees.push(...chunk);
+      from += step;
+      if (chunk.length < step) {
+        hasMore = false;
+      }
+    } else {
+      hasMore = false;
+    }
+  }
+
+  const existingStatusMap = new Map<string, string>();
+  dbEmployees.forEach((e: any) => {
+    const normId = normalizeId(e.employee_number);
+    if (normId) {
+      existingStatusMap.set(normId, e.certification_status || 'Por Certificar');
+    }
+  });
+
   const nameKeys = ['Employee Name', 'Full Name', 'Nombre Completo', 'Nombre', 'Name', 'Empleado'];
   const payload: any[] = [];
+
+  let dlCount = 0;
+  let idlCount = 0;
 
   hcRawData.forEach(row => {
     const idVal = row['ID'] || row['Empleado#'] || row['Numero'];
@@ -263,8 +302,19 @@ export async function importHcEmployees(hcRawData: any[]): Promise<void> {
     const puesto = normalizeText(row['Puesto'] || row['Puesto/Posición'] || row['Job Title'] || 'Puesto General');
     const manager = normalizeText(row['Manager N1'] || row['Manager'] || row['Supervisor'] || 'Sin Supervisor');
 
-    const clasif = normalizeText(row['Clasificación'] || row['Clasificacion'] || row['Tipo Personal'] || 'Direct');
-    const employee_type = (clasif.toLowerCase().includes('indirect') || clasif.toLowerCase() === 'idl') ? 'IDL' : 'DL';
+    // Mapear Clasificación de forma robusta
+    const clasifVal = row['Clasificación'] || row['Clasificacion'] || row['Tipo Personal'] || row['TipoPersonal'] || 'Direct';
+    const clasif = normalizeText(clasifVal).trim().toUpperCase();
+    const employee_type = (clasif.includes('INDIRECT') || clasif.includes('IDL')) ? 'IDL' : 'DL';
+
+    if (employee_type === 'DL') {
+      dlCount++;
+    } else {
+      idlCount++;
+    }
+
+    // Conservar estatus existente en base de datos si existe, de lo contrario 'Por Certificar'
+    const currentStatus = existingStatusMap.get(empNo) || 'Por Certificar';
 
     payload.push({
       employee_number: empNo,
@@ -274,7 +324,7 @@ export async function importHcEmployees(hcRawData: any[]): Promise<void> {
       role: department.toUpperCase() === 'BE' ? 'Admin' : 'User',
       puesto,
       manager,
-      certification_status: 'Por Certificar',
+      certification_status: currentStatus,
       updated_at: new Date().toISOString()
     });
   });
@@ -290,6 +340,13 @@ export async function importHcEmployees(hcRawData: any[]): Promise<void> {
     .upsert(safePayloads, { onConflict: 'employee_number' });
 
   if (error) throw error;
+
+  // LOGS DE VALIDACIÓN FINAL EN CONSOLA (Como fue solicitado por el usuario)
+  console.log('=== LOGS DE DEPURACIÓN IMPORTACIÓN HC ===');
+  console.log(`DL encontrados: ${dlCount}`);
+  console.log(`IDL encontrados: ${idlCount}`);
+  console.log(`Total HC: ${dlCount + idlCount}`);
+  console.log('========================================');
 }
 
 export interface ImportProgress {

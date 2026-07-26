@@ -77,7 +77,8 @@ export function processLgbData(
     const manager = normalizeText(row['Manager N1'] || row['Manager'] || row['Supervisor'] || 'Sin Supervisor');
 
     // Detección de Tipo de Personal (IDL vs DL) basándose en la columna Clasificación
-    const clasif = normalizeText(row['Clasificación'] || row['Clasificacion'] || row['Tipo Personal'] || 'Direct');
+    const clasifVal = row['Clasificación'] || row['Clasificacion'] || row['Tipo Personal'] || row['TipoPersonal'] || 'Direct';
+    const clasif = normalizeText(clasifVal);
     let tipoPersonal: TipoPersonal = 'DL';
     if (clasif.toLowerCase().includes('indirect') || clasif.toLowerCase() === 'idl') {
       tipoPersonal = 'IDL';
