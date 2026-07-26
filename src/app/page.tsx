@@ -45,7 +45,9 @@ import {
   saveSupabaseUserProgress,
   saveSupabaseCertificate,
   diagnoseSupabaseSchema,
-  SchemaDiagnosis
+  SchemaDiagnosis,
+  ImportProgress,
+  ImportSummary
 } from './utils/supabaseService';
 
 // Cursos predeterminados exigidos por las reglas del negocio
@@ -325,6 +327,8 @@ export default function DashboardPage() {
   const [isImportingHC, setIsImportingHC] = useState<boolean>(false);
   const [isImportingReport, setIsImportingReport] = useState<boolean>(false);
   const [schemaDiagnosis, setSchemaDiagnosis] = useState<SchemaDiagnosis[]>([]);
+  const [importProgress, setImportProgress] = useState<ImportProgress | null>(null);
+  const [importSummary, setImportSummary] = useState<ImportSummary | null>(null);
 
   const [hcData, setHcData] = useState<any[]>([]);
   const [reportData, setReportData] = useState<any[]>([]);
@@ -753,9 +757,13 @@ export default function DashboardPage() {
       return;
     }
     setIsImportingReport(true);
+    setImportProgress(null);
+    setImportSummary(null);
     try {
-      await importReportLgbStatuses(reportData);
-      alert('¡Actualización Exitosa! Los estatus de certificación de los empleados existentes han sido actualizados en Supabase.');
+      const summary = await importReportLgbStatuses(reportData, (progress) => {
+        setImportProgress(progress);
+      });
+      setImportSummary(summary);
       
       // Recargar base de datos desde Supabase
       const dbEmployees = await getSupabaseEmployees();
@@ -1175,6 +1183,8 @@ export default function DashboardPage() {
                 isImportingReport={isImportingReport}
                 onUpdateEmployeeRole={handleUpdateEmployeeRole}
                 schemaDiagnosis={schemaDiagnosis}
+                importProgress={importProgress}
+                importSummary={importSummary}
               />
             )}
 

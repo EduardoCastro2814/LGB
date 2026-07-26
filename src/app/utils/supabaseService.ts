@@ -271,39 +271,138 @@ export async function importHcEmployees(hcRawData: any[]): Promise<void> {
   if (error) throw error;
 }
 
+export interface ImportProgress {
+  total: number;
+  processed: number;
+  pending: number;
+  percentage: number;
+}
+
+export interface ImportSummary {
+  certificados: number;
+  potenciales: number;
+  noEncontrados: number;
+}
+
 /**
  * Lee el archivo de certificaciones (ReportLGB.xlsx) y actualiza el estatus de certificación
- * de los empleados existentes en Supabase.
+ * de los empleados existentes en Supabase por lotes (batch) para optimizar recursos.
  */
-export async function importReportLgbStatuses(reportRawData: any[]): Promise<void> {
+export async function importReportLgbStatuses(
+  reportRawData: any[],
+  onProgress?: (progress: ImportProgress) => void
+): Promise<ImportSummary> {
+  const summary: ImportSummary = {
+    certificados: 0,
+    potenciales: 0,
+    noEncontrados: 0
+  };
+
+  const totalRecords = reportRawData.length;
+  if (totalRecords === 0) {
+    return summary;
+  }
+
+  // 1. Obtener todos los employee_number existentes en Supabase
+  const { data: existingEmployees, error: fetchError } = await supabase
+    .from('employees')
+    .select('employee_number');
+
+  if (fetchError) {
+    throw new Error(`Error al validar colaboradores existentes: ${fetchError.message}`);
+  }
+
+  const existingSet = new Set((existingEmployees || []).map((e: any) => e.employee_number));
+
+  // 2. Clasificar registros y preparar payloads filtrados
+  const updatePayloads: any[] = [];
+
   for (const row of reportRawData) {
     const empNo = normalizeId(row['Employee#'] || row['Employee'] || row['ID'] || row['NumEmp']);
-    if (!empNo) continue;
+    if (!empNo || !existingSet.has(empNo)) {
+      summary.noEncontrados++;
+      continue;
+    }
 
     const action = normalizeText(row['Action']).toLowerCase();
     let status: LGBStatus = 'Por Certificar';
 
     if (action === 'complete' || action === 'complete/resigned') {
       status = 'Certificado';
+      summary.certificados++;
     } else if (action === 'create form') {
       status = 'Potencial';
+      summary.potenciales++;
     }
 
     const payload = await buildSafePayload('employees', {
+      employee_number: empNo,
       certification_status: status,
       updated_at: new Date().toISOString()
     });
 
-    // Actualizar solo para empleados existentes en Supabase
-    const { error } = await supabase
-      .from('employees')
-      .update(payload)
-      .eq('employee_number', empNo);
+    updatePayloads.push(payload);
+  }
 
-    if (error) {
-      console.warn(`[Supabase Import Warning] Error actualizando estatus para ${empNo}:`, error.message);
+  const totalToUpdate = updatePayloads.length;
+  let processed = summary.noEncontrados;
+
+  if (onProgress) {
+    onProgress({
+      total: totalRecords,
+      processed: processed,
+      pending: totalToUpdate,
+      percentage: Math.round((processed / totalRecords) * 100)
+    });
+  }
+
+  // 3. Procesar en lotes de máximo 50
+  const BATCH_SIZE = 50;
+  for (let i = 0; i < totalToUpdate; i += BATCH_SIZE) {
+    const batch = updatePayloads.slice(i, i + BATCH_SIZE);
+    try {
+      const { error: upsertError } = await supabase
+        .from('employees')
+        .upsert(batch, { onConflict: 'employee_number' });
+
+      if (upsertError) {
+        console.error(`[Supabase Import Batch Error] Error en lote iniciando en índice ${i}:`, upsertError.message);
+        // Fallback a uno-por-uno para este lote para capturar errores individuales sin detener el proceso
+        for (const item of batch) {
+          try {
+            const { error: singleError } = await supabase
+              .from('employees')
+              .upsert(item, { onConflict: 'employee_number' });
+            if (singleError) {
+              console.warn(`[Supabase Import Record Error] Colaborador ${item.employee_number}:`, singleError.message);
+            }
+          } catch (singleExc: any) {
+            console.error(`[Supabase Import Record Exception] Colaborador ${item.employee_number}:`, singleExc.message);
+          }
+        }
+      }
+    } catch (batchExc: any) {
+      console.error(`[Supabase Import Batch Exception] Excepción en lote en índice ${i}:`, batchExc.message);
+    }
+
+    processed += batch.length;
+    const pending = totalRecords - processed;
+    if (onProgress) {
+      onProgress({
+        total: totalRecords,
+        processed: processed,
+        pending: pending,
+        percentage: Math.round((processed / totalRecords) * 100)
+      });
+    }
+
+    // Esperar entre lotes para no saturar Supabase ni la red
+    if (i + BATCH_SIZE < totalToUpdate) {
+      await new Promise(resolve => setTimeout(resolve, 150));
     }
   }
+
+  return summary;
 }
 
 /**

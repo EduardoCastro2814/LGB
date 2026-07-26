@@ -8,7 +8,7 @@ import ConfigCourses from './ConfigCourses';
 import ConfigExams from './ConfigExams';
 import ConfigCertificates from './ConfigCertificates';
 
-import { SchemaDiagnosis } from '../utils/supabaseService';
+import { SchemaDiagnosis, ImportProgress, ImportSummary } from '../utils/supabaseService';
 
 interface ConfigViewProps {
   employees: MergedEmployee[];
@@ -33,6 +33,8 @@ interface ConfigViewProps {
   isImportingReport: boolean;
   onUpdateEmployeeRole: (employeeNumber: string, role: 'Admin' | 'User') => Promise<void>;
   schemaDiagnosis: SchemaDiagnosis[];
+  importProgress?: ImportProgress | null;
+  importSummary?: ImportSummary | null;
 }
 
 export default function ConfigView({
@@ -58,6 +60,8 @@ export default function ConfigView({
   isImportingReport,
   onUpdateEmployeeRole,
   schemaDiagnosis,
+  importProgress,
+  importSummary,
 }: ConfigViewProps) {
   const [activeTab, setActiveTab] = useState<'files' | 'employees' | 'courses' | 'exams' | 'certificates'>('files');
   
@@ -485,6 +489,74 @@ export default function ConfigView({
                     )}
                   </button>
                 </div>
+
+                {/* Visualización de Progreso de Importación */}
+                {importProgress && (
+                  <div className="flex flex-col gap-3 mt-4 p-4 rounded-xl bg-slate-500/5 dark:bg-slate-950/10 border border-slate-200 dark:border-[#334155] animate-fade-in text-xs font-semibold">
+                    <div className="flex justify-between items-center text-slate-700 dark:text-slate-300">
+                      <span>Progreso de Sincronización</span>
+                      <span className="font-mono text-blue-500 dark:text-blue-400 font-extrabold">{importProgress.percentage}%</span>
+                    </div>
+                    
+                    {/* Barra de progreso con gradiente y animación */}
+                    <div className="w-full h-2.5 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
+                      <div 
+                        className="h-full bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full transition-all duration-300 animate-pulse"
+                        style={{ width: `${importProgress.percentage}%` }}
+                      ></div>
+                    </div>
+
+                    <div className="grid grid-cols-3 gap-2 text-center text-[10px] text-slate-400 dark:text-slate-400 font-bold uppercase tracking-wider mt-1">
+                      <div className="bg-slate-500/5 p-2 rounded-lg">
+                        <span className="block text-slate-600 dark:text-slate-300 text-xs font-extrabold">{importProgress.total}</span>
+                        Total registros
+                      </div>
+                      <div className="bg-emerald-500/5 p-2 rounded-lg border border-emerald-500/10">
+                        <span className="block text-emerald-600 dark:text-emerald-400 text-xs font-extrabold">{importProgress.processed}</span>
+                        Procesados
+                      </div>
+                      <div className="bg-amber-500/5 p-2 rounded-lg border border-amber-500/10">
+                        <span className="block text-amber-600 dark:text-amber-400 text-xs font-extrabold">{importProgress.pending}</span>
+                        Pendientes
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Resumen Final de Importación */}
+                {importSummary && (
+                  <div className="flex flex-col gap-3 mt-4 p-4 rounded-xl bg-blue-500/5 dark:bg-blue-950/10 border border-blue-500/20 animate-fade-in text-xs">
+                    <h5 className="font-extrabold text-blue-600 dark:text-blue-400 flex items-center gap-1.5 font-sans uppercase tracking-wider text-[10px]">
+                      📊 Resumen de Actualización
+                    </h5>
+                    
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 font-semibold text-slate-600 dark:text-[#cbd5e1] mt-1">
+                      <div className="flex items-center gap-2 p-2 rounded-lg bg-emerald-500/5 border border-emerald-500/10">
+                        <span className="text-emerald-500 text-base">✅</span>
+                        <div>
+                          <span className="block text-emerald-600 dark:text-emerald-400 font-extrabold text-sm">{importSummary.certificados}</span>
+                          <span className="text-[10px] text-slate-400 dark:text-slate-400 font-bold uppercase">Certificados</span>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2 p-2 rounded-lg bg-blue-500/5 border border-blue-500/10">
+                        <span className="text-blue-500 text-base">⚡</span>
+                        <div>
+                          <span className="block text-blue-600 dark:text-blue-400 font-extrabold text-sm">{importSummary.potenciales}</span>
+                          <span className="text-[10px] text-slate-400 dark:text-slate-400 font-bold uppercase">Potenciales</span>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2 p-2 rounded-lg bg-slate-500/5 border border-slate-200 dark:border-slate-800">
+                        <span className="text-slate-400 text-base">🔍</span>
+                        <div>
+                          <span className="block text-slate-600 dark:text-slate-300 font-extrabold text-sm">{importSummary.noEncontrados}</span>
+                          <span className="text-[10px] text-slate-400 dark:text-slate-400 font-bold uppercase text-ellipsis overflow-hidden whitespace-nowrap">No en Supabase</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             ) : (
               <div className="glass-panel p-5 rounded-2xl bg-amber-500/5 dark:bg-amber-950/10 border border-amber-500/20 flex items-start gap-3 mt-2">
