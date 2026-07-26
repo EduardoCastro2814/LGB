@@ -562,6 +562,29 @@ export default function ConfigView({
                       </div>
                     </div>
 
+                    {/* Reporte de Escritura */}
+                    {(importSummary.totalUpdatesExitosos !== undefined || importSummary.totalUpdatesFallidos !== undefined) && (
+                      <div className="mt-2 pt-3 border-t border-slate-200/10 flex flex-col gap-2">
+                        <span className="text-[10px] text-slate-400 dark:text-slate-400 font-bold uppercase block">
+                          💾 Estatus de Escritura en Supabase
+                        </span>
+                        <div className="grid grid-cols-2 gap-3 font-sans">
+                          <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-3 flex justify-between items-center text-emerald-700 dark:text-emerald-400 font-bold">
+                            <span>Actualizaciones Exitosas:</span>
+                            <span className="text-sm font-mono font-extrabold">{importSummary.totalUpdatesExitosos || 0}</span>
+                          </div>
+                          <div className={`rounded-xl p-3 flex justify-between items-center font-bold ${
+                            (importSummary.totalUpdatesFallidos || 0) > 0 
+                              ? 'bg-rose-500/10 border border-rose-500/20 text-rose-700 dark:text-rose-450' 
+                              : 'bg-slate-500/5 border border-slate-200/10 text-slate-400 dark:text-slate-400'
+                          }`}>
+                            <span>Actualizaciones Fallidas:</span>
+                            <span className="text-sm font-mono font-extrabold">{importSummary.totalUpdatesFallidos || 0}</span>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
                     {importSummary.primerosVeinteSinMatch && importSummary.primerosVeinteSinMatch.length > 0 && (
                       <div className="mt-2 border-t border-slate-200/10 pt-3">
                         <span className="text-[10px] text-slate-400 dark:text-slate-400 font-bold uppercase block mb-1">

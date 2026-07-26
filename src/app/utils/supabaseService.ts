@@ -186,17 +186,34 @@ export async function buildSafePayload(table: string, fullPayload: Record<string
  * Obtiene el headcount unificado de colaboradores de Supabase.
  */
 export async function getSupabaseEmployees(): Promise<MergedEmployee[]> {
-  const { data, error } = await supabase
-    .from('employees')
-    .select('*')
-    .order('name');
-    
-  if (error) throw error;
-  if (!data) return [];
+  const dbEmployees: any[] = [];
+  let from = 0;
+  const step = 1000;
+  let hasMore = true;
 
-  if (data.length > 0) {
+  while (hasMore) {
+    const { data, error } = await supabase
+      .from('employees')
+      .select('*')
+      .order('name')
+      .range(from, from + step - 1);
+
+    if (error) throw error;
+
+    if (data && data.length > 0) {
+      dbEmployees.push(...data);
+      from += step;
+      if (data.length < step) {
+        hasMore = false;
+      }
+    } else {
+      hasMore = false;
+    }
+  }
+
+  if (dbEmployees.length > 0) {
     const expectedCols = ['puesto', 'manager', 'employee_type', 'role', 'certification_status'];
-    const firstRow = data[0];
+    const firstRow = dbEmployees[0];
     expectedCols.forEach(col => {
       if (!(col in firstRow)) {
         console.warn(`[LGB App Column Warning] La columna opcional '${col}' no existe en la tabla 'employees'. Usando valor por defecto.`);
@@ -204,7 +221,7 @@ export async function getSupabaseEmployees(): Promise<MergedEmployee[]> {
     });
   }
   
-  return data.map((emp: any) => ({
+  return dbEmployees.map((emp: any) => ({
     ID: emp.employee_number,
     Nombre: emp.name || 'Sin Nombre',
     Departamento: emp.department || 'SIN DEPARTAMENTO',
@@ -286,6 +303,8 @@ export interface ImportSummary {
   potencialesActualizados: number;
   sinCoincidencia: number;
   primerosVeinteSinMatch: string[];
+  totalUpdatesExitosos: number;
+  totalUpdatesFallidos: number;
 }
 
 /**
@@ -303,34 +322,52 @@ export async function importReportLgbStatuses(
     certificadosActualizados: 0,
     potencialesActualizados: 0,
     sinCoincidencia: 0,
-    primerosVeinteSinMatch: []
+    primerosVeinteSinMatch: [],
+    totalUpdatesExitosos: 0,
+    totalUpdatesFallidos: 0
   };
 
   if (reportRawData.length === 0) {
     return summary;
   }
 
-  // 1. Obtener todos los colaboradores de Supabase con todos sus campos obligatorios y de estatus
-  const { data: dbEmployees, error: fetchError } = await supabase
-    .from('employees')
-    .select('employee_number, name, department, puesto, manager, employee_type, role, certification_status');
+  // 1. Obtener todos los colaboradores de Supabase con paginación secuencial (evitando el límite de 1000 de PostgREST)
+  const dbEmployees: any[] = [];
+  let from = 0;
+  const step = 1000;
+  let hasMore = true;
 
-  if (fetchError) {
-    throw new Error(`Error al validar colaboradores existentes: ${fetchError.message}`);
+  while (hasMore) {
+    const { data: chunk, error: fetchError } = await supabase
+      .from('employees')
+      .select('employee_number, name, department, puesto, manager, employee_type, role, certification_status')
+      .range(from, from + step - 1);
+
+    if (fetchError) {
+      throw new Error(`Error al validar colaboradores existentes: ${fetchError.message}`);
+    }
+
+    if (chunk && chunk.length > 0) {
+      dbEmployees.push(...chunk);
+      from += step;
+      if (chunk.length < step) {
+        hasMore = false;
+      }
+    } else {
+      hasMore = false;
+    }
   }
 
-  summary.empleadosHcProcesados = dbEmployees ? dbEmployees.length : 0;
+  summary.empleadosHcProcesados = dbEmployees.length;
 
   // Mapa de número de empleado -> objeto completo del colaborador
   const dbEmpMap = new Map<string, any>();
-  if (dbEmployees) {
-    dbEmployees.forEach((e: any) => {
-      const normId = normalizeId(e.employee_number);
-      if (normId) {
-        dbEmpMap.set(normId, e);
-      }
-    });
-  }
+  dbEmployees.forEach((e: any) => {
+    const normId = normalizeId(e.employee_number);
+    if (normId) {
+      dbEmpMap.set(normId, e);
+    }
+  });
 
   // Set de IDs de base de datos para identificar cuáles no coincidieron
   const unmatchedDbIds = new Set<string>(dbEmpMap.keys());
@@ -376,6 +413,14 @@ export async function importReportLgbStatuses(
     // Solo actualizar si el estatus cambia para optimizar tráfico
     const existingEmp = dbEmpMap.get(empNo);
     const currentStatus = existingEmp.certification_status || 'Por Certificar';
+
+    // LOG DE MATCH ENCONTRADO EN CONSOLA (Como fue solicitado por el usuario)
+    console.log(`MATCH ENCONTRADO:
+employee_number: ${empNo}
+action: ${actionVal}
+estado_anterior: ${currentStatus}
+estado_nuevo: ${status}`);
+
     if (currentStatus !== status) {
       // Importante: incluir campos NOT NULL para que Postgres no falle en el INSERT del UPSERT
       const payload = await buildSafePayload('employees', {
@@ -416,17 +461,6 @@ export async function importReportLgbStatuses(
 
   summary.primerosVeinteSinMatch = noMatchList.slice(0, 20);
 
-  // LOGS DETALLADOS DE DEPURACIÓN EN CONSOLA
-  console.log('=== LOGS DE DEPURACIÓN IMPORTACIÓN REPORTLGB ===');
-  console.log(`Total HC: ${summary.empleadosHcProcesados}`);
-  console.log(`Total ReportLGB: ${summary.registrosReportLgbProcesados}`);
-  console.log(`Matches: ${summary.matchesEncontrados}`);
-  console.log(`Sin Match: ${noMatchList.length}`);
-  console.log(`Certificados: ${summary.certificadosActualizados}`);
-  console.log(`Potenciales: ${summary.potencialesActualizados}`);
-  console.log('Primeros 20 sin match:', summary.primerosVeinteSinMatch);
-  console.log('================================================');
-
   // 4. Actualizar por lotes de 50
   const totalToUpdate = updatePayloads.length;
   let processed = 0;
@@ -453,19 +487,49 @@ export async function importReportLgbStatuses(
         // Fallback individual si el lote falla
         for (const item of batch) {
           try {
+            // Intentar actualizar usando UPDATE directo para el campo específico
             const { error: singleError } = await supabase
               .from('employees')
-              .upsert(item, { onConflict: 'employee_number' });
+              .update({
+                certification_status: item.certification_status,
+                updated_at: item.updated_at
+              })
+              .eq('employee_number', item.employee_number);
+
             if (singleError) {
               console.warn(`[Supabase Import Record Error] Colaborador ${item.employee_number}:`, singleError.message);
+              summary.totalUpdatesFallidos++;
+            } else {
+              summary.totalUpdatesExitosos++;
             }
           } catch (singleExc: any) {
             console.error(`[Supabase Import Record Exception] Colaborador ${item.employee_number}:`, singleExc.message);
+            summary.totalUpdatesFallidos++;
           }
         }
+      } else {
+        summary.totalUpdatesExitosos += batch.length;
       }
     } catch (batchExc: any) {
       console.error(`[Supabase Import Batch Exception] Excepción en lote en índice ${i}:`, batchExc.message);
+      for (const item of batch) {
+        try {
+          const { error: singleError } = await supabase
+            .from('employees')
+            .update({
+              certification_status: item.certification_status,
+              updated_at: item.updated_at
+            })
+            .eq('employee_number', item.employee_number);
+          if (singleError) {
+            summary.totalUpdatesFallidos++;
+          } else {
+            summary.totalUpdatesExitosos++;
+          }
+        } catch (singleExc) {
+          summary.totalUpdatesFallidos++;
+        }
+      }
     }
 
     processed += batch.length;
@@ -483,6 +547,20 @@ export async function importReportLgbStatuses(
       await new Promise(resolve => setTimeout(resolve, 150));
     }
   }
+
+  // LOGS DETALLADOS DE DEPURACIÓN EN CONSOLA (Como fue solicitado por el usuario)
+  console.log('=== LOGS DE DEPURACIÓN IMPORTACIÓN REPORTLGB ===');
+  console.log(`Total HC: ${summary.empleadosHcProcesados}`);
+  console.log(`Total ReportLGB: ${summary.registrosReportLgbProcesados}`);
+  console.log(`Matches: ${summary.matchesEncontrados}`);
+  console.log(`Sin Match: ${noMatchList.length}`);
+  console.log(`Certificados: ${summary.certificadosActualizados}`);
+  console.log(`Potenciales: ${summary.potencialesActualizados}`);
+  console.log(`Total Matches: ${summary.matchesEncontrados}`);
+  console.log(`Total Updates Exitosos: ${summary.totalUpdatesExitosos}`);
+  console.log(`Total Updates Fallidos: ${summary.totalUpdatesFallidos}`);
+  console.log('Primeros 20 sin match:', summary.primerosVeinteSinMatch);
+  console.log('================================================');
 
   return summary;
 }
