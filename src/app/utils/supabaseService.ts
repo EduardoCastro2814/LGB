@@ -279,9 +279,13 @@ export interface ImportProgress {
 }
 
 export interface ImportSummary {
-  certificados: number;
-  potenciales: number;
-  noEncontrados: number;
+  empleadosHcProcesados: number;
+  registrosReportLgbProcesados: number;
+  matchesEncontrados: number;
+  certificadosActualizados: number;
+  potencialesActualizados: number;
+  sinCoincidencia: number;
+  primerosDiezSinMatch: string[];
 }
 
 /**
@@ -293,70 +297,123 @@ export async function importReportLgbStatuses(
   onProgress?: (progress: ImportProgress) => void
 ): Promise<ImportSummary> {
   const summary: ImportSummary = {
-    certificados: 0,
-    potenciales: 0,
-    noEncontrados: 0
+    empleadosHcProcesados: 0,
+    registrosReportLgbProcesados: reportRawData.length,
+    matchesEncontrados: 0,
+    certificadosActualizados: 0,
+    potencialesActualizados: 0,
+    sinCoincidencia: 0,
+    primerosDiezSinMatch: []
   };
 
-  const totalRecords = reportRawData.length;
-  if (totalRecords === 0) {
+  if (reportRawData.length === 0) {
     return summary;
   }
 
-  // 1. Obtener todos los employee_number existentes en Supabase
-  const { data: existingEmployees, error: fetchError } = await supabase
+  // 1. Obtener todos los colaboradores de Supabase
+  const { data: dbEmployees, error: fetchError } = await supabase
     .from('employees')
-    .select('employee_number');
+    .select('employee_number, certification_status');
 
   if (fetchError) {
     throw new Error(`Error al validar colaboradores existentes: ${fetchError.message}`);
   }
 
-  const existingSet = new Set((existingEmployees || []).map((e: any) => e.employee_number));
+  summary.empleadosHcProcesados = dbEmployees ? dbEmployees.length : 0;
 
-  // 2. Clasificar registros y preparar payloads filtrados
+  // Mapa de número de empleado -> estatus actual en Supabase
+  const dbEmpMap = new Map<string, string>();
+  if (dbEmployees) {
+    dbEmployees.forEach((e: any) => {
+      const normId = normalizeId(e.employee_number);
+      if (normId) {
+        dbEmpMap.set(normId, e.certification_status || 'Por Certificar');
+      }
+    });
+  }
+
+  // Set de IDs de base de datos para identificar cuáles no coincidieron
+  const unmatchedDbIds = new Set<string>(dbEmpMap.keys());
   const updatePayloads: any[] = [];
+  const noMatchList: string[] = [];
 
+  // 2. Procesar registros de ReportLGB y realizar cruces
   for (const row of reportRawData) {
-    const empNo = normalizeId(row['Employee#'] || row['Employee'] || row['ID'] || row['NumEmp']);
-    if (!empNo || !existingSet.has(empNo)) {
-      summary.noEncontrados++;
+    // Buscar la columna de ID insensible a mayúsculas/minúsculas
+    let rawIdVal: any = null;
+    const rowKeys = Object.keys(row);
+    const targetKeys = ['employee#', 'employee', 'id', 'numemp', 'empleado#', 'empleado', 'numero'];
+    for (const k of rowKeys) {
+      if (targetKeys.includes(k.toLowerCase().trim())) {
+        rawIdVal = row[k];
+        break;
+      }
+    }
+
+    const empNo = normalizeId(rawIdVal);
+    const actionVal = row['Action'] || row['action'] || row['Status'] || row['status'] || '';
+    const action = normalizeText(actionVal).toLowerCase();
+
+    if (!empNo || !dbEmpMap.has(empNo)) {
+      const nombreVal = row['Nombre'] || row['nombre'] || row['Name'] || row['name'] || 'Sin Nombre';
+      const displayId = empNo || 'S/N';
+      noMatchList.push(`${nombreVal} (${displayId})`);
       continue;
     }
 
-    const action = normalizeText(row['Action']).toLowerCase();
-    let status: LGBStatus = 'Por Certificar';
+    summary.matchesEncontrados++;
+    unmatchedDbIds.delete(empNo); // Marcado como encontrado
 
+    let status: LGBStatus = 'Por Certificar';
     if (action === 'complete' || action === 'complete/resigned') {
       status = 'Certificado';
-      summary.certificados++;
+      summary.certificadosActualizados++;
     } else if (action === 'create form') {
       status = 'Potencial';
-      summary.potenciales++;
+      summary.potencialesActualizados++;
     }
 
-    const payload = await buildSafePayload('employees', {
-      employee_number: empNo,
-      certification_status: status,
-      updated_at: new Date().toISOString()
-    });
-
-    updatePayloads.push(payload);
+    // Solo actualizar si el estatus cambia para optimizar tráfico
+    const currentStatus = dbEmpMap.get(empNo);
+    if (currentStatus !== status) {
+      const payload = await buildSafePayload('employees', {
+        employee_number: empNo,
+        certification_status: status,
+        updated_at: new Date().toISOString()
+      });
+      updatePayloads.push(payload);
+    }
   }
 
+  // 3. Forzar a 'Por Certificar' a los colaboradores sin coincidencia en el reporte
+  summary.sinCoincidencia = unmatchedDbIds.size;
+  for (const empNo of unmatchedDbIds) {
+    const currentStatus = dbEmpMap.get(empNo);
+    if (currentStatus !== 'Por Certificar') {
+      const payload = await buildSafePayload('employees', {
+        employee_number: empNo,
+        certification_status: 'Por Certificar',
+        updated_at: new Date().toISOString()
+      });
+      updatePayloads.push(payload);
+    }
+  }
+
+  summary.primerosDiezSinMatch = noMatchList.slice(0, 10);
+
+  // 4. Actualizar por lotes de 50
   const totalToUpdate = updatePayloads.length;
-  let processed = summary.noEncontrados;
+  let processed = 0;
 
   if (onProgress) {
     onProgress({
-      total: totalRecords,
-      processed: processed,
+      total: totalToUpdate,
+      processed: 0,
       pending: totalToUpdate,
-      percentage: Math.round((processed / totalRecords) * 100)
+      percentage: 0
     });
   }
 
-  // 3. Procesar en lotes de máximo 50
   const BATCH_SIZE = 50;
   for (let i = 0; i < totalToUpdate; i += BATCH_SIZE) {
     const batch = updatePayloads.slice(i, i + BATCH_SIZE);
@@ -367,7 +424,7 @@ export async function importReportLgbStatuses(
 
       if (upsertError) {
         console.error(`[Supabase Import Batch Error] Error en lote iniciando en índice ${i}:`, upsertError.message);
-        // Fallback a uno-por-uno para este lote para capturar errores individuales sin detener el proceso
+        // Fallback individual si el lote falla
         for (const item of batch) {
           try {
             const { error: singleError } = await supabase
@@ -386,17 +443,16 @@ export async function importReportLgbStatuses(
     }
 
     processed += batch.length;
-    const pending = totalRecords - processed;
+    const pending = totalToUpdate - processed;
     if (onProgress) {
       onProgress({
-        total: totalRecords,
+        total: totalToUpdate,
         processed: processed,
         pending: pending,
-        percentage: Math.round((processed / totalRecords) * 100)
+        percentage: Math.round((processed / totalToUpdate) * 100)
       });
     }
 
-    // Esperar entre lotes para no saturar Supabase ni la red
     if (i + BATCH_SIZE < totalToUpdate) {
       await new Promise(resolve => setTimeout(resolve, 150));
     }

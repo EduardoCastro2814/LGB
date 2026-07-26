@@ -525,36 +525,58 @@ export default function ConfigView({
 
                 {/* Resumen Final de Importación */}
                 {importSummary && (
-                  <div className="flex flex-col gap-3 mt-4 p-4 rounded-xl bg-blue-500/5 dark:bg-blue-950/10 border border-blue-500/20 animate-fade-in text-xs">
-                    <h5 className="font-extrabold text-blue-600 dark:text-blue-400 flex items-center gap-1.5 font-sans uppercase tracking-wider text-[10px]">
-                      📊 Resumen de Actualización
-                    </h5>
+                  <div className="flex flex-col gap-4 mt-4 p-5 rounded-2xl bg-blue-500/5 dark:bg-blue-950/10 border border-blue-500/20 animate-fade-in text-xs">
+                    <div className="flex items-center justify-between border-b border-blue-500/10 pb-2">
+                      <h5 className="font-extrabold text-blue-600 dark:text-blue-400 flex items-center gap-1.5 font-sans uppercase tracking-wider text-[10px]">
+                        📊 Reporte Detallado de Importación
+                      </h5>
+                      <span className="text-[10px] font-bold bg-blue-500/10 text-blue-600 px-2 py-0.5 rounded-full font-sans">
+                        Completado
+                      </span>
+                    </div>
                     
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 font-semibold text-slate-600 dark:text-[#cbd5e1] mt-1">
-                      <div className="flex items-center gap-2 p-2 rounded-lg bg-emerald-500/5 border border-emerald-500/10">
-                        <span className="text-emerald-500 text-base">✅</span>
-                        <div>
-                          <span className="block text-emerald-600 dark:text-emerald-400 font-extrabold text-sm">{importSummary.certificados}</span>
-                          <span className="text-[10px] text-slate-400 dark:text-slate-400 font-bold uppercase">Certificados</span>
-                        </div>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 font-semibold text-slate-600 dark:text-[#cbd5e1]">
+                      <div className="bg-slate-500/5 p-3 rounded-xl border border-slate-200/10">
+                        <span className="text-[10px] text-slate-400 dark:text-slate-400 font-bold uppercase block">Empleados HC (DB)</span>
+                        <span className="text-base font-extrabold text-slate-700 dark:text-slate-200">{importSummary.empleadosHcProcesados}</span>
                       </div>
-
-                      <div className="flex items-center gap-2 p-2 rounded-lg bg-blue-500/5 border border-blue-500/10">
-                        <span className="text-blue-500 text-base">⚡</span>
-                        <div>
-                          <span className="block text-blue-600 dark:text-blue-400 font-extrabold text-sm">{importSummary.potenciales}</span>
-                          <span className="text-[10px] text-slate-400 dark:text-slate-400 font-bold uppercase">Potenciales</span>
-                        </div>
+                      <div className="bg-slate-500/5 p-3 rounded-xl border border-slate-200/10">
+                        <span className="text-[10px] text-slate-400 dark:text-slate-400 font-bold uppercase block">Registros ReportLGB</span>
+                        <span className="text-base font-extrabold text-slate-700 dark:text-slate-200">{importSummary.registrosReportLgbProcesados}</span>
                       </div>
-
-                      <div className="flex items-center gap-2 p-2 rounded-lg bg-slate-500/5 border border-slate-200 dark:border-slate-800">
-                        <span className="text-slate-400 text-base">🔍</span>
-                        <div>
-                          <span className="block text-slate-600 dark:text-slate-300 font-extrabold text-sm">{importSummary.noEncontrados}</span>
-                          <span className="text-[10px] text-slate-400 dark:text-slate-400 font-bold uppercase text-ellipsis overflow-hidden whitespace-nowrap">No en Supabase</span>
-                        </div>
+                      <div className="bg-blue-500/5 p-3 rounded-xl border border-blue-500/10">
+                        <span className="text-[10px] text-blue-400 dark:text-blue-400 font-bold uppercase block">Matches Encontrados</span>
+                        <span className="text-base font-extrabold text-blue-600 dark:text-blue-400">{importSummary.matchesEncontrados}</span>
+                      </div>
+                      <div className="bg-emerald-500/5 p-3 rounded-xl border border-emerald-500/10">
+                        <span className="text-[10px] text-emerald-400 dark:text-emerald-400 font-bold uppercase block">Certificados</span>
+                        <span className="text-base font-extrabold text-emerald-600 dark:text-emerald-400">{importSummary.certificadosActualizados}</span>
+                      </div>
+                      <div className="bg-indigo-500/5 p-3 rounded-xl border border-indigo-500/10">
+                        <span className="text-[10px] text-indigo-400 dark:text-indigo-400 font-bold uppercase block">Potenciales</span>
+                        <span className="text-base font-extrabold text-indigo-600 dark:text-indigo-400">{importSummary.potencialesActualizados}</span>
+                      </div>
+                      <div className="bg-amber-500/5 p-3 rounded-xl border border-amber-500/10">
+                        <span className="text-[10px] text-amber-400 dark:text-amber-400 font-bold uppercase block">Sin Coincidencia</span>
+                        <span className="text-base font-extrabold text-amber-600 dark:text-amber-400">{importSummary.sinCoincidencia}</span>
                       </div>
                     </div>
+
+                    {importSummary.primerosDiezSinMatch && importSummary.primerosDiezSinMatch.length > 0 && (
+                      <div className="mt-2 border-t border-slate-200/10 pt-3">
+                        <span className="text-[10px] text-slate-400 dark:text-slate-400 font-bold uppercase block mb-1">
+                          ⚠️ Primeros 10 registros del Excel sin coincidencia en Supabase:
+                        </span>
+                        <div className="bg-amber-500/5 border border-amber-500/10 rounded-xl p-3 max-h-[140px] overflow-y-auto font-mono text-[10px] text-amber-750 dark:text-amber-400 flex flex-col gap-1">
+                          {importSummary.primerosDiezSinMatch.map((item, idx) => (
+                            <div key={idx} className="flex justify-between border-b border-amber-500/5 pb-0.5 last:border-0 last:pb-0">
+                              <span>{item}</span>
+                              <span className="opacity-70 font-semibold uppercase tracking-wider text-[8px] bg-amber-500/10 px-1.5 rounded-full flex items-center">No encontrado</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
