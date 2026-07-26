@@ -3,7 +3,7 @@
 import React, { useState, useMemo } from 'react';
 import { X, Download, FileSpreadsheet, FileText, Search, AlertCircle, Users, CheckCircle2, Clock } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
-import { MergedEmployee, DepartmentSummary, TipoPersonal } from '../types';
+import { MergedEmployee, DepartmentSummary, TipoPersonal, LGBStatus } from '../types';
 import { exportToExcel, exportToCSV } from '../utils/exportUtils';
 
 interface DepartmentModalProps {
@@ -14,6 +14,15 @@ interface DepartmentModalProps {
   onClose: () => void;
 }
 
+// Helper para búsquedas insensibles a mayúsculas, minúsculas y acentos
+function normalizeStringForSearch(str: string | null | undefined): string {
+  if (!str) return '';
+  return String(str)
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '');
+}
+
 export default function DepartmentModal({
   deptName,
   deptSummary,
@@ -22,8 +31,9 @@ export default function DepartmentModal({
   onClose,
 }: DepartmentModalProps) {
   const [searchTerm, setSearchTerm] = useState('');
+  const [activeFilter, setActiveFilter] = useState<'Todos' | 'Certificados' | 'Potencial' | 'Por Certificar'>('Todos');
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 6; // ligeramente menor para ajustarse mejor a pantallas pequeñas
+  const itemsPerPage = 6;
 
   // 1. Filtrar los empleados del departamento por el Tipo de Personal global
   const deptEmployeesByTipo = useMemo(() => {
@@ -49,33 +59,35 @@ export default function DepartmentModal({
   const { totalHC, certified, potential, pending, percentage } = modalStats;
   const faltantes = potential + pending;
 
-  // 2. Filtrar para la lista detallada de no certificados aplicando la búsqueda
-  const pendingEmployees = useMemo(() => {
+  // 2. Filtrar para la lista detallada aplicando el filtro interactivo de estado y la búsqueda
+  const filteredEmployees = useMemo(() => {
     return deptEmployeesByTipo.filter((emp) => {
-      // Excluir certificados
-      if (emp.Estatus === 'Certificado') return false;
+      // Filtrar por estatus
+      if (activeFilter === 'Certificados' && emp.Estatus !== 'Certificado') return false;
+      if (activeFilter === 'Potencial' && emp.Estatus !== 'Potencial') return false;
+      if (activeFilter === 'Por Certificar' && emp.Estatus !== 'Por Certificar') return false;
       
-      // Filtrar por búsqueda de texto
+      // Filtrar por búsqueda de texto (Nombre, ID, Puesto, Manager)
       if (searchTerm.trim() !== '') {
-        const term = searchTerm.toLowerCase();
+        const term = normalizeStringForSearch(searchTerm);
         return (
-          emp.Nombre.toLowerCase().includes(term) ||
-          emp.ID.toLowerCase().includes(term) ||
-          emp.Puesto.toLowerCase().includes(term) ||
-          emp.Manager.toLowerCase().includes(term)
+          normalizeStringForSearch(emp.Nombre).includes(term) ||
+          normalizeStringForSearch(emp.ID).includes(term) ||
+          normalizeStringForSearch(emp.Puesto).includes(term) ||
+          normalizeStringForSearch(emp.Manager).includes(term)
         );
       }
       
       return true;
     });
-  }, [deptEmployeesByTipo, searchTerm]);
+  }, [deptEmployeesByTipo, activeFilter, searchTerm]);
 
   // Paginación
-  const totalPages = Math.ceil(pendingEmployees.length / itemsPerPage) || 1;
+  const totalPages = Math.ceil(filteredEmployees.length / itemsPerPage) || 1;
   const paginatedEmployees = useMemo(() => {
     const start = (currentPage - 1) * itemsPerPage;
-    return pendingEmployees.slice(start, start + itemsPerPage);
-  }, [pendingEmployees, currentPage]);
+    return filteredEmployees.slice(start, start + itemsPerPage);
+  }, [filteredEmployees, currentPage]);
 
   const handlePageChange = (page: number) => {
     if (page >= 1 && page <= totalPages) {
@@ -112,11 +124,13 @@ export default function DepartmentModal({
   };
 
   const handleExportExcel = () => {
-    exportToExcel(pendingEmployees, `${deptName}_${selectedTipoPersonal}`);
+    // Exporta únicamente los registros actualmente visibles
+    exportToExcel(filteredEmployees, `${deptName}_${selectedTipoPersonal}_${activeFilter}`);
   };
 
   const handleExportCSV = () => {
-    exportToCSV(pendingEmployees, `${deptName}_${selectedTipoPersonal}`);
+    // Exporta únicamente los registros actualmente visibles
+    exportToCSV(filteredEmployees, `${deptName}_${selectedTipoPersonal}_${activeFilter}`);
   };
 
   return (
@@ -136,7 +150,7 @@ export default function DepartmentModal({
               </span>
             </h2>
             <p className="text-xs text-slate-400 dark:text-[#94a3b8] font-bold uppercase mt-0.5 tracking-wider">
-              Análisis y Personal Pendiente
+              Análisis y Plantilla del Departamento
             </p>
           </div>
           <button
@@ -155,7 +169,14 @@ export default function DepartmentModal({
             <div className="md:col-span-2 flex flex-col justify-center gap-4">
               <div className="grid grid-cols-2 gap-4">
                 {/* HC */}
-                <div className="bg-slate-50 dark:bg-[#273449] border border-slate-200 dark:border-[#334155] p-4 rounded-2xl flex items-center gap-3">
+                <div 
+                  onClick={() => { setActiveFilter('Todos'); setCurrentPage(1); }}
+                  className={`border p-4 rounded-2xl flex items-center gap-3 cursor-pointer transition-all duration-200 hover:scale-[1.02] ${
+                    activeFilter === 'Todos'
+                      ? 'bg-blue-500/10 border-blue-500 dark:bg-blue-950/20'
+                      : 'bg-slate-50 dark:bg-[#273449] border-slate-200 dark:border-[#334155]'
+                  }`}
+                >
                   <div className="p-2.5 rounded-xl bg-blue-500/10 text-blue-500">
                     <Users className="w-5 h-5" />
                   </div>
@@ -166,7 +187,14 @@ export default function DepartmentModal({
                 </div>
 
                 {/* Certificados */}
-                <div className="bg-slate-50 dark:bg-[#273449] border border-slate-200 dark:border-[#334155] p-4 rounded-2xl flex items-center gap-3">
+                <div 
+                  onClick={() => { setActiveFilter('Certificados'); setCurrentPage(1); }}
+                  className={`border p-4 rounded-2xl flex items-center gap-3 cursor-pointer transition-all duration-200 hover:scale-[1.02] ${
+                    activeFilter === 'Certificados'
+                      ? 'bg-emerald-500/10 border-emerald-500 dark:bg-emerald-950/20'
+                      : 'bg-slate-50 dark:bg-[#273449] border-slate-200 dark:border-[#334155]'
+                  }`}
+                >
                   <div className="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-500">
                     <CheckCircle2 className="w-5 h-5" />
                   </div>
@@ -177,7 +205,14 @@ export default function DepartmentModal({
                 </div>
 
                 {/* Potencial */}
-                <div className="bg-slate-50 dark:bg-[#273449] border border-slate-200 dark:border-[#334155] p-4 rounded-2xl flex items-center gap-3">
+                <div 
+                  onClick={() => { setActiveFilter('Potencial'); setCurrentPage(1); }}
+                  className={`border p-4 rounded-2xl flex items-center gap-3 cursor-pointer transition-all duration-200 hover:scale-[1.02] ${
+                    activeFilter === 'Potencial'
+                      ? 'bg-amber-500/10 border-amber-500 dark:bg-amber-950/20'
+                      : 'bg-slate-50 dark:bg-[#273449] border-slate-200 dark:border-[#334155]'
+                  }`}
+                >
                   <div className="p-2.5 rounded-xl bg-amber-500/10 text-amber-500">
                     <AlertCircle className="w-5 h-5" />
                   </div>
@@ -188,7 +223,14 @@ export default function DepartmentModal({
                 </div>
 
                 {/* Por Certificar */}
-                <div className="bg-slate-50 dark:bg-[#273449] border border-slate-200 dark:border-[#334155] p-4 rounded-2xl flex items-center gap-3">
+                <div 
+                  onClick={() => { setActiveFilter('Por Certificar'); setCurrentPage(1); }}
+                  className={`border p-4 rounded-2xl flex items-center gap-3 cursor-pointer transition-all duration-200 hover:scale-[1.02] ${
+                    activeFilter === 'Por Certificar'
+                      ? 'bg-red-500/10 border-red-500 dark:bg-red-950/20'
+                      : 'bg-slate-50 dark:bg-[#273449] border-slate-200 dark:border-[#334155]'
+                  }`}
+                >
                   <div className="p-2.5 rounded-xl bg-red-500/10 text-red-500">
                     <Clock className="w-5 h-5" />
                   </div>
@@ -261,8 +303,27 @@ export default function DepartmentModal({
 
           {/* Table Container */}
           <div className="flex-1 flex flex-col">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-4">
-              <div className="relative w-full sm:max-w-xs">
+            {/* Filters and Search Row */}
+            <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4 mb-4">
+              {/* Interactive Tab Filters */}
+              <div className="flex items-center gap-1.5 p-1 rounded-xl bg-slate-100 dark:bg-[#273449]/50 border border-slate-200/50 dark:border-[#334155] self-start">
+                {(['Todos', 'Certificados', 'Potencial', 'Por Certificar'] as const).map((filter) => (
+                  <button
+                    key={filter}
+                    onClick={() => { setActiveFilter(filter); setCurrentPage(1); }}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                      activeFilter === filter
+                        ? 'bg-slate-900 text-white dark:bg-[#f8fafc] dark:text-slate-900 shadow-sm'
+                        : 'text-slate-500 hover:text-slate-700 dark:text-[#cbd5e1] dark:hover:text-[#f8fafc]'
+                    }`}
+                  >
+                    {filter}
+                  </button>
+                ))}
+              </div>
+
+              {/* Local Search Input */}
+              <div className="relative w-full lg:max-w-xs flex-1">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400 dark:text-[#cbd5e1]">
                   <Search className="w-4 h-4" />
                 </div>
@@ -270,31 +331,45 @@ export default function DepartmentModal({
                   type="text"
                   value={searchTerm}
                   onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }}
-                  placeholder="Buscar en lista pendiente..."
+                  placeholder="Buscar por ID, Nombre, Puesto o Manager..."
                   className="w-full pl-9 pr-4 py-2 rounded-xl text-xs bg-slate-50 dark:bg-[#273449] border border-slate-200 dark:border-[#334155] text-slate-800 dark:text-[#f8fafc] placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all font-semibold"
                 />
               </div>
 
               {/* Export Buttons */}
-              <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
+              <div className="flex items-center gap-2 self-end lg:self-auto">
                 <button
                   onClick={handleExportExcel}
-                  disabled={pendingEmployees.length === 0}
+                  disabled={filteredEmployees.length === 0}
                   className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold bg-emerald-500 hover:bg-emerald-600 text-white transition-colors cursor-pointer disabled:opacity-50"
-                  title="Exportar a archivo Excel"
+                  title="Exportar registros actualmente visibles"
                 >
                   <Download className="w-3.5 h-3.5" />
-                  <span>Exportar Excel</span>
+                  <span>Excel</span>
                 </button>
                 <button
                   onClick={handleExportCSV}
-                  disabled={pendingEmployees.length === 0}
+                  disabled={filteredEmployees.length === 0}
                   className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold bg-slate-100 hover:bg-[#e2e8f0] dark:bg-[#273449] dark:hover:bg-[#2d3b52] text-slate-750 dark:text-[#cbd5e1] border border-slate-200 dark:border-[#334155] transition-colors cursor-pointer disabled:opacity-50"
-                  title="Exportar a CSV"
+                  title="Exportar CSV de registros actualmente visibles"
                 >
                   <FileText className="w-3.5 h-3.5" />
                   <span>CSV</span>
                 </button>
+              </div>
+            </div>
+
+            {/* UX Information Status Bar */}
+            <div className="flex items-center justify-between text-[11px] text-slate-550 dark:text-[#cbd5e1] font-bold bg-slate-500/5 border border-slate-200/50 dark:border-[#334155] rounded-xl px-4 py-2.5 mb-3 font-sans">
+              <div>
+                <span>Departamento: </span>
+                <span className="text-slate-800 dark:text-[#f8fafc] font-extrabold mr-3">{deptName}</span>
+                <span>Filtro activo: </span>
+                <span className="text-emerald-600 dark:text-emerald-400 font-extrabold">{activeFilter}</span>
+              </div>
+              <div>
+                <span>Mostrando: </span>
+                <span className="text-slate-800 dark:text-[#f8fafc] font-extrabold">{filteredEmployees.length}</span> de <span className="text-slate-800 dark:text-[#f8fafc] font-extrabold">{totalHC}</span> colaboradores
               </div>
             </div>
 
@@ -326,12 +401,16 @@ export default function DepartmentModal({
                             {emp.Action || <span className="italic text-[10px] text-slate-400/70">N/A</span>}
                           </td>
                           <td className="py-3 px-4">
-                            {emp.Estatus === 'Potencial' ? (
-                              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/10 text-amber-500 border border-amber-500/20">
+                            {emp.Estatus === 'Certificado' ? (
+                              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 animate-fade-in">
+                                Certificado
+                              </span>
+                            ) : emp.Estatus === 'Potencial' ? (
+                              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/10 text-amber-500 border border-amber-500/20 animate-fade-in">
                                 Potencial
                               </span>
                             ) : (
-                              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-500/10 text-red-500 border border-red-500/20">
+                              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-500/10 text-red-500 border border-red-500/20 animate-fade-in">
                                 Por Certificar
                               </span>
                             )}
@@ -341,7 +420,7 @@ export default function DepartmentModal({
                     ) : (
                       <tr>
                         <td colSpan={7} className="py-8 text-center text-slate-400 dark:text-[#94a3b8] font-bold">
-                          No se encontraron colaboradores pendientes en este departamento
+                          No se encontraron colaboradores con los criterios seleccionados
                         </td>
                       </tr>
                     )}
@@ -353,8 +432,8 @@ export default function DepartmentModal({
               {totalPages > 1 && (
                 <div className="p-4 border-t border-slate-200 dark:border-[#334155] bg-slate-50/30 dark:bg-[#273449]/10 flex items-center justify-between text-xs font-semibold text-slate-500 dark:text-[#cbd5e1]">
                   <div>
-                    Mostrando {Math.min(pendingEmployees.length, (currentPage - 1) * itemsPerPage + 1)}-
-                    {Math.min(pendingEmployees.length, currentPage * itemsPerPage)} de {pendingEmployees.length} registros
+                    Mostrando {Math.min(filteredEmployees.length, (currentPage - 1) * itemsPerPage + 1)}-
+                    {Math.min(filteredEmployees.length, currentPage * itemsPerPage)} de {filteredEmployees.length} registros
                   </div>
                   <div className="flex items-center gap-1">
                     <button

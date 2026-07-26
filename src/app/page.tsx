@@ -321,6 +321,14 @@ const defaultCertConfig: CertificateConfig = {
   }
 };
 
+function normalizeStringForSearch(str: string | null | undefined): string {
+  if (!str) return '';
+  return String(str)
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '');
+}
+
 export default function DashboardPage() {
   // ESTADOS DE INTEGRACIÓN CON SUPABASE
   const [supabaseStatus, setSupabaseStatus] = useState<'online' | 'offline'>('offline');
@@ -970,12 +978,15 @@ export default function DashboardPage() {
         return false;
       }
       if (searchTerm.trim() !== '') {
-        const term = searchTerm.toLowerCase();
+        const term = normalizeStringForSearch(searchTerm);
         return (
-          emp.Nombre.toLowerCase().includes(term) ||
-          emp.ID.toLowerCase().includes(term) ||
-          emp.Puesto.toLowerCase().includes(term) ||
-          emp.Manager.toLowerCase().includes(term)
+          normalizeStringForSearch(emp.ID).includes(term) ||
+          normalizeStringForSearch(emp.Nombre).includes(term) ||
+          normalizeStringForSearch(emp.Departamento).includes(term) ||
+          normalizeStringForSearch(emp.Puesto).includes(term) ||
+          normalizeStringForSearch(emp.Manager).includes(term) ||
+          normalizeStringForSearch(emp.Estatus).includes(term) ||
+          normalizeStringForSearch(emp.Action).includes(term)
         );
       }
       return true;
@@ -1126,6 +1137,8 @@ export default function DashboardPage() {
                       selectedTipoPersonal={selectedTipoPersonal}
                       setSelectedTipoPersonal={setSelectedTipoPersonal}
                       departments={uniqueDepartments}
+                      filteredCount={filteredEmployees.length}
+                      totalCount={mergedEmployees.length}
                     />
 
                     <MainChartSection

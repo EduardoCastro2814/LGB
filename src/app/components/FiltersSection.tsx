@@ -14,6 +14,8 @@ interface FiltersSectionProps {
   selectedTipoPersonal: TipoPersonal | 'Todos';
   setSelectedTipoPersonal: (val: TipoPersonal | 'Todos') => void;
   departments: string[];
+  filteredCount?: number;
+  totalCount?: number;
 }
 
 export default function FiltersSection({
@@ -26,6 +28,8 @@ export default function FiltersSection({
   selectedTipoPersonal,
   setSelectedTipoPersonal,
   departments,
+  filteredCount,
+  totalCount,
 }: FiltersSectionProps) {
   const statusFilters: { label: string; value: LGBStatus | 'Todos'; icon: any; colorClass: string; activeColor: string }[] = [
     { 
@@ -71,9 +75,14 @@ export default function FiltersSection({
             type="text"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Buscar por Nombre, ID, Puesto o Supervisor..."
-            className="w-full pl-10 pr-4 py-2.5 rounded-xl text-sm bg-slate-50 dark:bg-[#273449] border border-slate-200 dark:border-[#334155] text-slate-800 dark:text-[#f8fafc] placeholder-slate-400 dark:placeholder-[#94a3b8] focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all font-semibold"
+            placeholder="Buscar por ID, Nombre, Depto, Estatus..."
+            className="w-full pl-10 pr-24 py-2.5 rounded-xl text-sm bg-slate-50 dark:bg-[#273449] border border-slate-200 dark:border-[#334155] text-slate-800 dark:text-[#f8fafc] placeholder-slate-400 dark:placeholder-[#94a3b8] focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all font-semibold"
           />
+          {filteredCount !== undefined && totalCount !== undefined && (
+            <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[9px] font-bold text-slate-500 bg-slate-200/60 dark:bg-slate-850 px-2 py-1 rounded-lg font-mono">
+              {filteredCount}/{totalCount}
+            </span>
+          )}
         </div>
 
         {/* Selector Tipo de Personal (Filtro Global 1) */}
