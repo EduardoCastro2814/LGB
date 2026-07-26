@@ -562,13 +562,13 @@ export default function ConfigView({
                       </div>
                     </div>
 
-                    {importSummary.primerosDiezSinMatch && importSummary.primerosDiezSinMatch.length > 0 && (
+                    {importSummary.primerosVeinteSinMatch && importSummary.primerosVeinteSinMatch.length > 0 && (
                       <div className="mt-2 border-t border-slate-200/10 pt-3">
                         <span className="text-[10px] text-slate-400 dark:text-slate-400 font-bold uppercase block mb-1">
-                          ⚠️ Primeros 10 registros del Excel sin coincidencia en Supabase:
+                          ⚠️ Primeros 20 registros del Excel sin coincidencia en Supabase:
                         </span>
                         <div className="bg-amber-500/5 border border-amber-500/10 rounded-xl p-3 max-h-[140px] overflow-y-auto font-mono text-[10px] text-amber-750 dark:text-amber-400 flex flex-col gap-1">
-                          {importSummary.primerosDiezSinMatch.map((item, idx) => (
+                          {importSummary.primerosVeinteSinMatch.map((item, idx) => (
                             <div key={idx} className="flex justify-between border-b border-amber-500/5 pb-0.5 last:border-0 last:pb-0">
                               <span>{item}</span>
                               <span className="opacity-70 font-semibold uppercase tracking-wider text-[8px] bg-amber-500/10 px-1.5 rounded-full flex items-center">No encontrado</span>

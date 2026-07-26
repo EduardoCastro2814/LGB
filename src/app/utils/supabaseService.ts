@@ -285,7 +285,7 @@ export interface ImportSummary {
   certificadosActualizados: number;
   potencialesActualizados: number;
   sinCoincidencia: number;
-  primerosDiezSinMatch: string[];
+  primerosVeinteSinMatch: string[];
 }
 
 /**
@@ -303,17 +303,17 @@ export async function importReportLgbStatuses(
     certificadosActualizados: 0,
     potencialesActualizados: 0,
     sinCoincidencia: 0,
-    primerosDiezSinMatch: []
+    primerosVeinteSinMatch: []
   };
 
   if (reportRawData.length === 0) {
     return summary;
   }
 
-  // 1. Obtener todos los colaboradores de Supabase
+  // 1. Obtener todos los colaboradores de Supabase con todos sus campos obligatorios y de estatus
   const { data: dbEmployees, error: fetchError } = await supabase
     .from('employees')
-    .select('employee_number, certification_status');
+    .select('employee_number, name, department, puesto, manager, employee_type, role, certification_status');
 
   if (fetchError) {
     throw new Error(`Error al validar colaboradores existentes: ${fetchError.message}`);
@@ -321,13 +321,13 @@ export async function importReportLgbStatuses(
 
   summary.empleadosHcProcesados = dbEmployees ? dbEmployees.length : 0;
 
-  // Mapa de número de empleado -> estatus actual en Supabase
-  const dbEmpMap = new Map<string, string>();
+  // Mapa de número de empleado -> objeto completo del colaborador
+  const dbEmpMap = new Map<string, any>();
   if (dbEmployees) {
     dbEmployees.forEach((e: any) => {
       const normId = normalizeId(e.employee_number);
       if (normId) {
-        dbEmpMap.set(normId, e.certification_status || 'Por Certificar');
+        dbEmpMap.set(normId, e);
       }
     });
   }
@@ -374,10 +374,18 @@ export async function importReportLgbStatuses(
     }
 
     // Solo actualizar si el estatus cambia para optimizar tráfico
-    const currentStatus = dbEmpMap.get(empNo);
+    const existingEmp = dbEmpMap.get(empNo);
+    const currentStatus = existingEmp.certification_status || 'Por Certificar';
     if (currentStatus !== status) {
+      // Importante: incluir campos NOT NULL para que Postgres no falle en el INSERT del UPSERT
       const payload = await buildSafePayload('employees', {
         employee_number: empNo,
+        name: existingEmp.name,
+        department: existingEmp.department,
+        puesto: existingEmp.puesto,
+        manager: existingEmp.manager,
+        employee_type: existingEmp.employee_type,
+        role: existingEmp.role,
         certification_status: status,
         updated_at: new Date().toISOString()
       });
@@ -388,10 +396,17 @@ export async function importReportLgbStatuses(
   // 3. Forzar a 'Por Certificar' a los colaboradores sin coincidencia en el reporte
   summary.sinCoincidencia = unmatchedDbIds.size;
   for (const empNo of unmatchedDbIds) {
-    const currentStatus = dbEmpMap.get(empNo);
+    const existingEmp = dbEmpMap.get(empNo);
+    const currentStatus = existingEmp.certification_status || 'Por Certificar';
     if (currentStatus !== 'Por Certificar') {
       const payload = await buildSafePayload('employees', {
         employee_number: empNo,
+        name: existingEmp.name,
+        department: existingEmp.department,
+        puesto: existingEmp.puesto,
+        manager: existingEmp.manager,
+        employee_type: existingEmp.employee_type,
+        role: existingEmp.role,
         certification_status: 'Por Certificar',
         updated_at: new Date().toISOString()
       });
@@ -399,7 +414,18 @@ export async function importReportLgbStatuses(
     }
   }
 
-  summary.primerosDiezSinMatch = noMatchList.slice(0, 10);
+  summary.primerosVeinteSinMatch = noMatchList.slice(0, 20);
+
+  // LOGS DETALLADOS DE DEPURACIÓN EN CONSOLA
+  console.log('=== LOGS DE DEPURACIÓN IMPORTACIÓN REPORTLGB ===');
+  console.log(`Total HC: ${summary.empleadosHcProcesados}`);
+  console.log(`Total ReportLGB: ${summary.registrosReportLgbProcesados}`);
+  console.log(`Matches: ${summary.matchesEncontrados}`);
+  console.log(`Sin Match: ${noMatchList.length}`);
+  console.log(`Certificados: ${summary.certificadosActualizados}`);
+  console.log(`Potenciales: ${summary.potencialesActualizados}`);
+  console.log('Primeros 20 sin match:', summary.primerosVeinteSinMatch);
+  console.log('================================================');
 
   // 4. Actualizar por lotes de 50
   const totalToUpdate = updatePayloads.length;
