@@ -110,6 +110,12 @@ export async function testSupabaseConnection(): Promise<boolean> {
     const { data, error } = await supabase.from('courses').select('id').limit(1);
     if (error) {
       console.warn('[Supabase Connection Warning]', error.message);
+      // Si la base de datos responde con un código de error de Postgres (ej. tabla o columna no encontrada),
+      // significa que pudimos conectarnos correctamente y el servidor respondió.
+      if (error.code) {
+        console.log('[Supabase Connection debug] Conexión establecida (la base respondió con código):', error.code);
+        return true;
+      }
       return false;
     }
     return true;
@@ -117,6 +123,63 @@ export async function testSupabaseConnection(): Promise<boolean> {
     console.warn('[Supabase Connection Error]', err);
     return false;
   }
+}
+
+// Caché de existencia de columnas para evitar consultas redundantes
+const columnCache: Record<string, Record<string, boolean>> = {};
+
+/**
+ * Verifica dinámicamente si una columna existe en una tabla de Supabase.
+ */
+export async function checkColumnExists(table: string, column: string): Promise<boolean> {
+  if (columnCache[table] && columnCache[table][column] !== undefined) {
+    return columnCache[table][column];
+  }
+  
+  try {
+    const { error } = await supabase.from(table).select(column).limit(1);
+    // Si no hay error, o el error no indica que la columna no existe (código 42703), la columna existe
+    const exists = !error || error.code !== '42703';
+    if (!columnCache[table]) {
+      columnCache[table] = {};
+    }
+    columnCache[table][column] = exists;
+    return exists;
+  } catch (err) {
+    return false;
+  }
+}
+
+/**
+ * Indica si una columna es obligatoria en el esquema de base de datos local / de producción.
+ */
+function isMandatoryColumn(table: string, column: string): boolean {
+  const mandatory: Record<string, string[]> = {
+    employees: ['employee_number', 'name', 'department'],
+    courses: ['id', 'name'],
+    course_content: ['id', 'course_id', 'name', 'type', 'url'],
+    exams: ['course_id'],
+    questions: ['id', 'exam_id', 'text', 'options', 'correct_option_index'],
+    course_progress: ['employee_number', 'course_id'],
+    certificates: ['id', 'employee_number', 'course_id', 'course_name', 'date_issued', 'grade', 'folio']
+  };
+  return mandatory[table]?.includes(column) || false;
+}
+
+/**
+ * Filtra el payload de escritura para enviar únicamente las columnas que existen en la base de datos de Supabase.
+ */
+export async function buildSafePayload(table: string, fullPayload: Record<string, any>): Promise<Record<string, any>> {
+  const safePayload: Record<string, any> = {};
+  for (const [key, value] of Object.entries(fullPayload)) {
+    if (value === undefined) continue;
+    if (isMandatoryColumn(table, key) || await checkColumnExists(table, key)) {
+      safePayload[key] = value;
+    } else {
+      console.warn(`[LGB App Column Warning] La columna opcional '${key}' no existe en la tabla '${table}'. Se omitirá en la escritura.`);
+    }
+  }
+  return safePayload;
 }
 
 /**
@@ -130,16 +193,26 @@ export async function getSupabaseEmployees(): Promise<MergedEmployee[]> {
     
   if (error) throw error;
   if (!data) return [];
+
+  if (data.length > 0) {
+    const expectedCols = ['puesto', 'manager', 'employee_type', 'role', 'certification_status'];
+    const firstRow = data[0];
+    expectedCols.forEach(col => {
+      if (!(col in firstRow)) {
+        console.warn(`[LGB App Column Warning] La columna opcional '${col}' no existe en la tabla 'employees'. Usando valor por defecto.`);
+      }
+    });
+  }
   
   return data.map((emp: any) => ({
     ID: emp.employee_number,
-    Nombre: emp.name,
-    Departamento: emp.department,
+    Nombre: emp.name || 'Sin Nombre',
+    Departamento: emp.department || 'SIN DEPARTAMENTO',
     Puesto: emp.puesto || 'Operador DL',
     Manager: emp.manager || 'N/A',
-    Estatus: emp.certification_status as LGBStatus,
-    TipoPersonal: emp.employee_type as TipoPersonal,
-    Action: emp.certification_status === 'Certificado' ? 'Complete' : 'Create Form',
+    Estatus: (emp.certification_status || 'Por Certificar') as LGBStatus,
+    TipoPersonal: (emp.employee_type || 'DL') as TipoPersonal,
+    Action: (emp.certification_status || 'Por Certificar') === 'Certificado' ? 'Complete' : 'Create Form',
     role: emp.role || 'User' // Atributo para control de roles
   }));
 }
@@ -187,9 +260,13 @@ export async function importHcEmployees(hcRawData: any[]): Promise<void> {
 
   if (payload.length === 0) return;
 
+  const safePayloads = await Promise.all(
+    payload.map(item => buildSafePayload('employees', item))
+  );
+
   const { error } = await supabase
     .from('employees')
-    .upsert(payload, { onConflict: 'employee_number' });
+    .upsert(safePayloads, { onConflict: 'employee_number' });
 
   if (error) throw error;
 }
@@ -212,13 +289,15 @@ export async function importReportLgbStatuses(reportRawData: any[]): Promise<voi
       status = 'Potencial';
     }
 
+    const payload = await buildSafePayload('employees', {
+      certification_status: status,
+      updated_at: new Date().toISOString()
+    });
+
     // Actualizar solo para empleados existentes en Supabase
     const { error } = await supabase
       .from('employees')
-      .update({
-        certification_status: status,
-        updated_at: new Date().toISOString()
-      })
+      .update(payload)
       .eq('employee_number', empNo);
 
     if (error) {
@@ -231,9 +310,10 @@ export async function importReportLgbStatuses(reportRawData: any[]): Promise<voi
  * Actualiza el rol de acceso de un empleado en Supabase.
  */
 export async function updateSupabaseEmployeeRole(employeeNumber: string, role: 'Admin' | 'User'): Promise<void> {
+  const payload = await buildSafePayload('employees', { role, updated_at: new Date().toISOString() });
   const { error } = await supabase
     .from('employees')
-    .update({ role, updated_at: new Date().toISOString() })
+    .update(payload)
     .eq('employee_number', employeeNumber);
     
   if (error) throw error;
@@ -243,15 +323,32 @@ export async function updateSupabaseEmployeeRole(employeeNumber: string, role: '
  * Obtiene los cursos con sus respectivos materiales cargados de Supabase.
  */
 export async function getSupabaseCourses(): Promise<Course[]> {
-  // 1. Cargar cursos
+  // 1. Cargar cursos (sin filtros ni ordenación en BD para evitar fallos si faltan columnas opcionales)
   const { data: coursesData, error: coursesError } = await supabase
     .from('courses')
-    .select('*')
-    .eq('is_active', true)
-    .order('order_num');
+    .select('*');
     
   if (coursesError) throw coursesError;
-  if (!coursesData) return [];
+  let rawCourses = coursesData || [];
+
+  if (rawCourses.length > 0) {
+    const expectedCols = ['description', 'duration', 'order_num', 'is_active'];
+    const firstRow = rawCourses[0];
+    expectedCols.forEach(col => {
+      if (!(col in firstRow)) {
+        console.warn(`[LGB App Column Warning] La columna opcional '${col}' no existe en la tabla 'courses'. Usando valor por defecto.`);
+      }
+    });
+
+    // Filtrado en memoria si existe la columna is_active
+    if ('is_active' in firstRow) {
+      rawCourses = rawCourses.filter((c: any) => c.is_active !== false);
+    }
+    // Ordenamiento en memoria si existe la columna order_num
+    if ('order_num' in firstRow) {
+      rawCourses.sort((a: any, b: any) => (a.order_num || 0) - (b.order_num || 0));
+    }
+  }
 
   // 2. Cargar materiales
   const { data: contentData, error: contentError } = await supabase
@@ -261,12 +358,22 @@ export async function getSupabaseCourses(): Promise<Course[]> {
   if (contentError) throw contentError;
   const materials = contentData || [];
 
-  return coursesData.map((c: any) => ({
+  if (materials.length > 0) {
+    const expectedCols = ['size'];
+    const firstRow = materials[0];
+    expectedCols.forEach(col => {
+      if (!(col in firstRow)) {
+        console.warn(`[LGB App Column Warning] La columna opcional '${col}' no existe en la tabla 'course_content'. Usando valor por defecto.`);
+      }
+    });
+  }
+
+  return rawCourses.map((c: any) => ({
     id: c.id,
     name: c.name,
     description: c.description || '',
     duration: c.duration || '',
-    order: c.order_num,
+    order: c.order_num !== undefined ? c.order_num : 0,
     materials: materials
       .filter((m: any) => m.course_id === c.id)
       .map((m: any) => ({
@@ -284,16 +391,18 @@ export async function getSupabaseCourses(): Promise<Course[]> {
  */
 export async function saveSupabaseCourse(course: Course): Promise<void> {
   // 1. Guardar curso
+  const coursePayload = await buildSafePayload('courses', {
+    id: course.id,
+    name: course.name,
+    description: course.description,
+    duration: course.duration,
+    order_num: course.order,
+    is_active: true
+  });
+
   const { error: courseError } = await supabase
     .from('courses')
-    .upsert({
-      id: course.id,
-      name: course.name,
-      description: course.description,
-      duration: course.duration,
-      order_num: course.order,
-      is_active: true
-    }, { onConflict: 'id' });
+    .upsert(coursePayload, { onConflict: 'id' });
     
   if (courseError) throw courseError;
 
@@ -307,18 +416,20 @@ export async function saveSupabaseCourse(course: Course): Promise<void> {
 
   // 3. Insertar nuevos materiales
   if (course.materials && course.materials.length > 0) {
-    const materialsPayload = course.materials.map(m => ({
-      id: m.id,
-      course_id: course.id,
-      name: m.name,
-      type: m.type,
-      url: m.url,
-      size: m.size || ''
-    }));
+    const materialsPayloads = await Promise.all(
+      course.materials.map(m => buildSafePayload('course_content', {
+        id: m.id,
+        course_id: course.id,
+        name: m.name,
+        type: m.type,
+        url: m.url,
+        size: m.size || ''
+      }))
+    );
 
     const { error: insertError } = await supabase
       .from('course_content')
-      .insert(materialsPayload);
+      .insert(materialsPayloads);
       
     if (insertError) throw insertError;
   }
@@ -356,17 +467,37 @@ export async function getSupabaseExams(): Promise<Exam[]> {
   if (questionsError) throw questionsError;
   const questions = questionsData || [];
 
+  if (examsData.length > 0) {
+    const expectedCols = ['min_score'];
+    const firstRow = examsData[0];
+    expectedCols.forEach(col => {
+      if (!(col in firstRow)) {
+        console.warn(`[LGB App Column Warning] La columna opcional '${col}' no existe en la tabla 'exams'. Usando valor por defecto.`);
+      }
+    });
+  }
+
+  if (questions.length > 0) {
+    const expectedCols = ['points'];
+    const firstRow = questions[0];
+    expectedCols.forEach(col => {
+      if (!(col in firstRow)) {
+        console.warn(`[LGB App Column Warning] La columna opcional '${col}' no existe en la tabla 'questions'. Usando valor por defecto.`);
+      }
+    });
+  }
+
   return examsData.map((e: any) => ({
     courseId: e.course_id,
-    minScore: e.min_score,
+    minScore: e.min_score !== undefined ? e.min_score : 80,
     questions: questions
       .filter((q: any) => q.exam_id === e.course_id)
       .map((q: any) => ({
         id: q.id,
         text: q.text,
-        options: Array.isArray(q.options) ? q.options : JSON.parse(q.options),
+        options: Array.isArray(q.options) ? q.options : JSON.parse(q.options || '[]'),
         correctOptionIndex: q.correct_option_index,
-        points: q.points
+        points: q.points !== undefined ? q.points : 10
       }))
   }));
 }
@@ -376,12 +507,14 @@ export async function getSupabaseExams(): Promise<Exam[]> {
  */
 export async function saveSupabaseExam(exam: Exam): Promise<void> {
   // 1. Guardar examen
+  const examPayload = await buildSafePayload('exams', {
+    course_id: exam.courseId,
+    min_score: exam.minScore
+  });
+
   const { error: examError } = await supabase
     .from('exams')
-    .upsert({
-      course_id: exam.courseId,
-      min_score: exam.minScore
-    }, { onConflict: 'course_id' });
+    .upsert(examPayload, { onConflict: 'course_id' });
     
   if (examError) throw examError;
 
@@ -395,18 +528,20 @@ export async function saveSupabaseExam(exam: Exam): Promise<void> {
 
   // 3. Insertar nuevas preguntas
   if (exam.questions && exam.questions.length > 0) {
-    const questionsPayload = exam.questions.map(q => ({
-      id: q.id,
-      exam_id: exam.courseId,
-      text: q.text,
-      options: JSON.stringify(q.options),
-      correct_option_index: q.correctOptionIndex,
-      points: q.points
-    }));
+    const questionsPayloads = await Promise.all(
+      exam.questions.map(q => buildSafePayload('questions', {
+        id: q.id,
+        exam_id: exam.courseId,
+        text: q.text,
+        options: JSON.stringify(q.options),
+        correct_option_index: q.correctOptionIndex,
+        points: q.points
+      }))
+    );
 
     const { error: insertError } = await supabase
       .from('questions')
-      .insert(questionsPayload);
+      .insert(questionsPayloads);
       
     if (insertError) throw insertError;
   }
@@ -423,23 +558,37 @@ export async function getSupabaseProgress(): Promise<TrainingState> {
   if (error) throw error;
   if (!data) return {};
 
+  if (data.length > 0) {
+    const expectedCols = [
+      'status', 'progress', 'content_viewed', 'exam_attempts', 
+      'exam_score', 'exam_passed', 'completion_date', 'certificate_folio'
+    ];
+    const firstRow = data[0];
+    expectedCols.forEach(col => {
+      if (!(col in firstRow)) {
+        console.warn(`[LGB App Column Warning] La columna opcional '${col}' no existe en la tabla 'course_progress'. Usando valor por defecto.`);
+      }
+    });
+  }
+
   const trainingState: TrainingState = {};
 
   data.forEach((p: any) => {
     const empNum = p.employee_number;
+    if (!empNum) return;
     if (!trainingState[empNum]) {
       trainingState[empNum] = {};
     }
     
     trainingState[empNum][p.course_id] = {
-      status: p.status as 'no-iniciado' | 'en-progreso' | 'completado',
-      progress: p.progress,
-      contentViewed: p.content_viewed,
-      examAttempts: p.exam_attempts,
-      examScore: p.exam_score,
-      examPassed: p.exam_passed,
-      completionDate: p.completion_date,
-      certificateFolio: p.certificate_folio
+      status: (p.status || 'no-iniciado') as 'no-iniciado' | 'en-progreso' | 'completado',
+      progress: p.progress !== undefined ? p.progress : 0,
+      contentViewed: p.content_viewed !== undefined ? p.content_viewed : false,
+      examAttempts: p.exam_attempts !== undefined ? p.exam_attempts : 0,
+      examScore: p.exam_score !== undefined ? p.exam_score : null,
+      examPassed: p.exam_passed !== undefined ? p.exam_passed : false,
+      completionDate: p.completion_date || null,
+      certificateFolio: p.certificate_folio || null
     };
   });
 
@@ -454,21 +603,23 @@ export async function saveSupabaseUserProgress(
   courseId: string, 
   progress: UserCourseProgress
 ): Promise<void> {
+  const payload = await buildSafePayload('course_progress', {
+    employee_number: employeeNumber,
+    course_id: courseId,
+    status: progress.status,
+    progress: progress.progress,
+    content_viewed: progress.contentViewed,
+    exam_attempts: progress.examAttempts,
+    exam_score: progress.examScore,
+    exam_passed: progress.examPassed,
+    completion_date: progress.completionDate,
+    certificate_folio: progress.certificateFolio,
+    updated_at: new Date().toISOString()
+  });
+
   const { error } = await supabase
     .from('course_progress')
-    .upsert({
-      employee_number: employeeNumber,
-      course_id: courseId,
-      status: progress.status,
-      progress: progress.progress,
-      content_viewed: progress.contentViewed,
-      exam_attempts: progress.examAttempts,
-      exam_score: progress.examScore,
-      exam_passed: progress.examPassed,
-      completion_date: progress.completionDate,
-      certificate_folio: progress.certificateFolio,
-      updated_at: new Date().toISOString()
-    }, { onConflict: 'employee_number,course_id' });
+    .upsert(payload, { onConflict: 'employee_number,course_id' });
     
   if (error) throw error;
 }
@@ -485,17 +636,19 @@ export async function saveSupabaseCertificate(
   grade: number,
   folio: string
 ): Promise<void> {
+  const payload = await buildSafePayload('certificates', {
+    id,
+    employee_number: employeeNumber,
+    course_id: courseId,
+    course_name: courseName,
+    date_issued: dateIssued,
+    grade,
+    folio
+  });
+
   const { error } = await supabase
     .from('certificates')
-    .upsert({
-      id,
-      employee_number: employeeNumber,
-      course_id: courseId,
-      course_name: courseName,
-      date_issued: dateIssued,
-      grade,
-      folio
-    }, { onConflict: 'id' });
+    .upsert(payload, { onConflict: 'id' });
     
   if (error) throw error;
 }
@@ -511,14 +664,16 @@ export async function updateSupabaseEmployeeDetails(
     employee_type?: string;
   }
 ): Promise<void> {
+  const payload = await buildSafePayload('employees', {
+    department: details.department,
+    certification_status: details.certification_status,
+    employee_type: details.employee_type,
+    updated_at: new Date().toISOString()
+  });
+
   const { error } = await supabase
     .from('employees')
-    .update({
-      department: details.department,
-      certification_status: details.certification_status,
-      employee_type: details.employee_type,
-      updated_at: new Date().toISOString()
-    })
+    .update(payload)
     .eq('employee_number', employeeNumber);
     
   if (error) throw error;

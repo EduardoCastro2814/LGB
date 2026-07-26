@@ -443,18 +443,27 @@ export default function DashboardPage() {
       const isConnected = await testSupabaseConnection();
       
       if (isConnected) {
-        console.log('[LGB App debug] Supabase conectado. Iniciando diagnóstico...');
+        console.log('[LGB App debug] Supabase conectado.');
         setSupabaseStatus('online');
-        const diagnosis = await diagnoseSupabaseSchema();
-        setSchemaDiagnosis(diagnosis);
-        const hasSchemaErrors = diagnosis.some(d => d.status !== 'ok');
 
-        if (hasSchemaErrors) {
-          console.warn('[LGB App debug] Se detectaron discrepancias de esquema. Cargando fallback Excel local.');
-          await loadFromStaticExcel();
-        } else {
-          // 1. Cargar cursos de Supabase
-          let dbCourses = await getSupabaseCourses();
+        // Ejecutar diagnóstico en segundo plano para la UI sin bloquear la carga
+        diagnoseSupabaseSchema()
+          .then((diagnosis) => {
+            setSchemaDiagnosis(diagnosis);
+            diagnosis.forEach((d) => {
+              if (d.status === 'missing_columns') {
+                console.warn(`[LGB App Schema Warning] Se detectaron columnas faltantes en la tabla '${d.table}': ${d.errorDetails}`);
+              }
+            });
+          })
+          .catch((diagErr) => {
+            console.warn('[LGB App debug] Error al ejecutar diagnóstico de esquema:', diagErr);
+          });
+
+        // 1. Cargar cursos de Supabase
+        let dbCourses: any[] = [];
+        try {
+          dbCourses = await getSupabaseCourses();
           if (dbCourses.length === 0) {
             console.log('[LGB App debug] Sembrando cursos predeterminados en Supabase...');
             for (const c of defaultCourses) {
@@ -464,9 +473,16 @@ export default function DashboardPage() {
           }
           setCourses(dbCourses);
           localStorage.setItem('lgb_courses_list', JSON.stringify(dbCourses));
+        } catch (courseErr) {
+          console.error('[LGB App debug] Error al cargar cursos de Supabase:', courseErr);
+          const savedCourses = localStorage.getItem('lgb_courses_list');
+          setCourses(savedCourses ? JSON.parse(savedCourses) : defaultCourses);
+        }
 
-          // 2. Cargar exámenes de Supabase
-          let dbExams = await getSupabaseExams();
+        // 2. Cargar exámenes de Supabase
+        let dbExams: any[] = [];
+        try {
+          dbExams = await getSupabaseExams();
           if (dbExams.length === 0) {
             console.log('[LGB App debug] Sembrando exámenes predeterminados en Supabase...');
             for (const e of defaultExams) {
@@ -476,13 +492,27 @@ export default function DashboardPage() {
           }
           setExams(dbExams);
           localStorage.setItem('lgb_exams_list', JSON.stringify(dbExams));
+        } catch (examErr) {
+          console.error('[LGB App debug] Error al cargar exámenes de Supabase:', examErr);
+          const savedExams = localStorage.getItem('lgb_exams_list');
+          setExams(savedExams ? JSON.parse(savedExams) : defaultExams);
+        }
 
-          // 3. Cargar progreso global de Supabase
+        // 3. Cargar progreso global de Supabase
+        try {
           const dbProgress = await getSupabaseProgress();
           setTrainingState(dbProgress);
           localStorage.setItem('lgb_training_state', JSON.stringify(dbProgress));
+        } catch (progressErr) {
+          console.error('[LGB App debug] Error al cargar progreso de Supabase:', progressErr);
+          const savedTraining = localStorage.getItem('lgb_training_state');
+          if (savedTraining) {
+            setTrainingState(JSON.parse(savedTraining));
+          }
+        }
 
-          // 4. Cargar colaboradores de Supabase
+        // 4. Cargar colaboradores de Supabase
+        try {
           const dbEmployees = await getSupabaseEmployees();
           if (dbEmployees.length > 0) {
             console.log(`[LGB App debug] Cargados ${dbEmployees.length} colaboradores desde Supabase.`);
@@ -525,6 +555,9 @@ export default function DashboardPage() {
             console.log('[LGB App debug] Supabase sin empleados. Cargando Excel inicial...');
             await loadFromStaticExcel();
           }
+        } catch (employeesErr) {
+          console.error('[LGB App debug] Error al cargar colaboradores de Supabase:', employeesErr);
+          await loadFromStaticExcel();
         }
       } else {
         throw new Error('Supabase no disponible');
