@@ -12,10 +12,7 @@ import {
   Menu, 
   X, 
   User, 
-  GraduationCap,
-  Monitor,
-  ClipboardList,
-  ShieldCheck
+  GraduationCap 
 } from 'lucide-react';
 import { MergedEmployee, UserRole } from '../types';
 
@@ -42,9 +39,6 @@ export default function Sidebar({
 
   const adminMenu = [
     { id: 'dashboard', label: 'Dashboard LGB', icon: LayoutDashboard },
-    { id: 'monitor', label: 'Monitor LinePulse', icon: Monitor },
-    { id: 'reportes', label: 'Reportes Competencias', icon: ClipboardList },
-    { id: 'competencias', label: 'Competencias', icon: ShieldCheck },
     { id: 'matrix', label: 'Matriz de Entrenamiento', icon: Grid },
     { id: 'academia', label: 'Academia Lean', icon: GraduationCap },
     { id: 'config', label: 'Configuración', icon: Settings },

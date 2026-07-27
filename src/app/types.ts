@@ -136,39 +136,3 @@ export interface CertificateConfig {
   };
 }
 
-// TIPOS PARA COMPETENCIAS Y VALIDACIÓN OPERATIVA DE LINEPULSE
-export interface Station {
-  id: string;
-  name: string;
-  created_at?: string;
-}
-
-export interface StationRequirement {
-  id?: number;
-  station_id: string;
-  training_name: string;
-  created_at?: string;
-}
-
-export interface TrainingRecord {
-  id?: number;
-  employee_number: string;
-  employee_name: string;
-  training_name: string;
-  status: string;
-  completion_date: string;
-  created_at?: string;
-}
-
-export interface LayoutPosition {
-  id?: number;
-  code: string;
-  station_id: string;
-  employee_number?: string | null;
-  coverage_type: 'Normal' | 'Comedor';
-  line: string;
-  shift: string;
-  updated_at?: string;
-}
-
-

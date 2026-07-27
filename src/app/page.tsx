@@ -11,9 +11,6 @@ import FiltersSection from './components/FiltersSection';
 import MainChartSection from './components/MainChartSection';
 import EmployeeTable from './components/EmployeeTable';
 import DepartmentModal from './components/DepartmentModal';
-import MonitorView from './components/MonitorView';
-import ReportesView from './components/ReportesView';
-import CompetenciasView from './components/CompetenciasView';
 import { 
   MergedEmployee, 
   LGBStatus, 
@@ -26,11 +23,7 @@ import {
   Exam,
   UserCourseProgress,
   TrainingState,
-  CertificateConfig,
-  Station,
-  StationRequirement,
-  TrainingRecord,
-  LayoutPosition
+  CertificateConfig
 } from './types';
 import { processLgbData, computeKPIs, computeDepartmentSummaries } from './utils/dataProcessor';
 import { Loader2, AlertCircle } from 'lucide-react';
@@ -54,19 +47,7 @@ import {
   diagnoseSupabaseSchema,
   SchemaDiagnosis,
   ImportProgress,
-  ImportSummary,
-  getSupabaseStations,
-  saveSupabaseStation,
-  deleteSupabaseStation,
-  getSupabaseStationRequirements,
-  saveSupabaseStationRequirement,
-  deleteSupabaseStationRequirement,
-  getSupabaseTrainingRecords,
-  saveSupabaseTrainingRecords,
-  getSupabaseLayoutPositions,
-  saveSupabaseLayoutPosition,
-  updateSupabaseLayoutPositionAssignment,
-  deleteSupabaseLayoutPosition
+  ImportSummary
 } from './utils/supabaseService';
 
 // Cursos predeterminados exigidos por las reglas del negocio
@@ -340,38 +321,6 @@ const defaultCertConfig: CertificateConfig = {
   }
 };
 
-const defaultStations: Station[] = [
-  { id: 'stencil', name: 'Stencil' },
-  { id: 'spi', name: 'SPI' },
-  { id: 'siplace-01', name: 'Siplace 01' },
-  { id: 'siplace-02', name: 'Siplace 02' },
-  { id: 'aoi', name: 'AOI' },
-  { id: 'rayos-x', name: 'Rayos X' },
-  { id: 'empaque', name: 'Empaque' },
-  { id: 'test', name: 'Test' }
-];
-
-const defaultRequirements: StationRequirement[] = [
-  { station_id: 'stencil', training_name: 'SMT Básico' },
-  { station_id: 'spi', training_name: 'SMT Básico' },
-  { station_id: 'spi', training_name: 'SPI' },
-  { station_id: 'rayos-x', training_name: 'SMT Básico' },
-  { station_id: 'rayos-x', training_name: 'Certificación Rayos X' },
-  { station_id: 'siplace-01', training_name: 'SMT Básico' },
-  { station_id: 'siplace-01', training_name: 'Siplace' },
-  { station_id: 'siplace-02', training_name: 'SMT Básico' },
-  { station_id: 'siplace-02', training_name: 'Siplace' }
-];
-
-const defaultLayoutPositions: LayoutPosition[] = [
-  { code: 'POS01', station_id: 'stencil', line: 'Línea 1', shift: 'Turno 1', coverage_type: 'Normal' },
-  { code: 'POS02', station_id: 'spi', line: 'Línea 1', shift: 'Turno 1', coverage_type: 'Normal' },
-  { code: 'POS03', station_id: 'siplace-01', line: 'Línea 1', shift: 'Turno 1', coverage_type: 'Normal' },
-  { code: 'POS04', station_id: 'siplace-02', line: 'Línea 1', shift: 'Turno 1', coverage_type: 'Normal' },
-  { code: 'POS05', station_id: 'aoi', line: 'Línea 1', shift: 'Turno 1', coverage_type: 'Normal' },
-  { code: 'POS06', station_id: 'rayos-x', line: 'Línea 1', shift: 'Turno 1', coverage_type: 'Normal' }
-];
-
 function normalizeStringForSearch(str: string | null | undefined): string {
   if (!str) return '';
   return String(str)
@@ -400,12 +349,6 @@ export default function DashboardPage() {
   const [currentUser, setCurrentUser] = useState<MergedEmployee | null>(null);
   const [currentRole, setCurrentRole] = useState<UserRole>('General'); 
   const [currentView, setCurrentView] = useState<string>('academia');
-
-  // ESTADOS DEL MÓDULO DE COMPETENCIAS Y LINEPULSE
-  const [stations, setStations] = useState<Station[]>([]);
-  const [requirements, setRequirements] = useState<StationRequirement[]>([]);
-  const [positions, setPositions] = useState<LayoutPosition[]>([]);
-  const [trainingRecords, setTrainingRecords] = useState<TrainingRecord[]>([]);
 
   // CONFIGURACIÓN DE ACADEMIA Y EXÁMENES
   const [courses, setCourses] = useState<Course[]>([]);
@@ -497,35 +440,6 @@ export default function DashboardPage() {
       const savedOverrides = localStorage.getItem('lgb_dashboard_overrides');
       if (savedOverrides) {
         setOverrides(JSON.parse(savedOverrides));
-      }
-
-      // 7. Cargar datos de competencias y LinePulse
-      const savedStations = localStorage.getItem('lp_stations');
-      if (savedStations) setStations(JSON.parse(savedStations));
-      else {
-        setStations(defaultStations);
-        localStorage.setItem('lp_stations', JSON.stringify(defaultStations));
-      }
-
-      const savedRequirements = localStorage.getItem('lp_requirements');
-      if (savedRequirements) setRequirements(JSON.parse(savedRequirements));
-      else {
-        setRequirements(defaultRequirements);
-        localStorage.setItem('lp_requirements', JSON.stringify(defaultRequirements));
-      }
-
-      const savedPositions = localStorage.getItem('lp_positions');
-      if (savedPositions) setPositions(JSON.parse(savedPositions));
-      else {
-        setPositions(defaultLayoutPositions);
-        localStorage.setItem('lp_positions', JSON.stringify(defaultLayoutPositions));
-      }
-
-      const savedTrainingRecords = localStorage.getItem('lp_training_records');
-      if (savedTrainingRecords) setTrainingRecords(JSON.parse(savedTrainingRecords));
-      else {
-        setTrainingRecords([]);
-        localStorage.setItem('lp_training_records', JSON.stringify([]));
       }
     } catch (e) {
       console.error('Error al inicializar bases de datos locales:', e);
@@ -656,51 +570,6 @@ export default function DashboardPage() {
         } catch (employeesErr) {
           console.error('[LGB App debug] Error al cargar colaboradores de Supabase:', employeesErr);
           await loadFromStaticExcel();
-        }
-
-        // 5. Cargar datos de LinePulse (Estaciones, Requerimientos, Posiciones, Entrenamientos)
-        try {
-          let dbStations = await getSupabaseStations();
-          if (dbStations.length === 0) {
-            for (const s of defaultStations) await saveSupabaseStation(s);
-            dbStations = await getSupabaseStations();
-          }
-          setStations(dbStations);
-          localStorage.setItem('lp_stations', JSON.stringify(dbStations));
-        } catch (e) {
-          console.error('Error al cargar estaciones de Supabase:', e);
-        }
-
-        try {
-          let dbReqs = await getSupabaseStationRequirements();
-          if (dbReqs.length === 0) {
-            for (const r of defaultRequirements) await saveSupabaseStationRequirement(r);
-            dbReqs = await getSupabaseStationRequirements();
-          }
-          setRequirements(dbReqs);
-          localStorage.setItem('lp_requirements', JSON.stringify(dbReqs));
-        } catch (e) {
-          console.error('Error al cargar requerimientos de Supabase:', e);
-        }
-
-        try {
-          let dbPositions = await getSupabaseLayoutPositions();
-          if (dbPositions.length === 0) {
-            for (const p of defaultLayoutPositions) await saveSupabaseLayoutPosition(p);
-            dbPositions = await getSupabaseLayoutPositions();
-          }
-          setPositions(dbPositions);
-          localStorage.setItem('lp_positions', JSON.stringify(dbPositions));
-        } catch (e) {
-          console.error('Error al cargar posiciones de Supabase:', e);
-        }
-
-        try {
-          const dbRecords = await getSupabaseTrainingRecords();
-          setTrainingRecords(dbRecords);
-          localStorage.setItem('lp_training_records', JSON.stringify(dbRecords));
-        } catch (e) {
-          console.error('Error al cargar historial de entrenamientos de Supabase:', e);
         }
       } else {
         throw new Error('Supabase no disponible');
@@ -947,174 +816,6 @@ export default function DashboardPage() {
     }
   };
 
-  // =========================================================================
-  // MANEJADORES CRUD Y SIMULACIÓN DE ESCANEO DE LINEPULSE
-  // =========================================================================
-
-  const handleAddStation = async (station: Station) => {
-    const updated = [...stations.filter(s => s.id !== station.id), station];
-    setStations(updated);
-    localStorage.setItem('lp_stations', JSON.stringify(updated));
-    if (supabaseStatus === 'online') {
-      try {
-        await saveSupabaseStation(station);
-      } catch (e) {
-        console.error('Error al guardar estación en Supabase:', e);
-      }
-    }
-  };
-
-  const handleDeleteStation = async (id: string) => {
-    const updated = stations.filter(s => s.id !== id);
-    setStations(updated);
-    localStorage.setItem('lp_stations', JSON.stringify(updated));
-    // Borrar requerimientos de esa estación
-    const updatedReqs = requirements.filter(r => r.station_id !== id);
-    setRequirements(updatedReqs);
-    localStorage.setItem('lp_requirements', JSON.stringify(updatedReqs));
-
-    if (supabaseStatus === 'online') {
-      try {
-        await deleteSupabaseStation(id);
-      } catch (e) {
-        console.error('Error al eliminar estación en Supabase:', e);
-      }
-    }
-  };
-
-  const handleAddRequirement = async (req: StationRequirement) => {
-    const updated = [...requirements, req];
-    setRequirements(updated);
-    localStorage.setItem('lp_requirements', JSON.stringify(updated));
-    if (supabaseStatus === 'online') {
-      try {
-        await saveSupabaseStationRequirement(req);
-      } catch (e) {
-        console.error('Error al guardar requerimiento en Supabase:', e);
-      }
-    }
-  };
-
-  const handleDeleteRequirement = async (stationId: string, trainingName: string) => {
-    const updated = requirements.filter(r => !(r.station_id === stationId && r.training_name === trainingName));
-    setRequirements(updated);
-    localStorage.setItem('lp_requirements', JSON.stringify(updated));
-    if (supabaseStatus === 'online') {
-      try {
-        await deleteSupabaseStationRequirement(stationId, trainingName);
-      } catch (e) {
-        console.error('Error al eliminar requerimiento en Supabase:', e);
-      }
-    }
-  };
-
-  const handleImportTrainingRecords = async (records: TrainingRecord[]) => {
-    const getUniqueKey = (empNo: string, courseName: string) => 
-      `${empNo.trim().toLowerCase()}_${courseName.trim().toLowerCase()}`;
-
-    const existingMap = new Map<string, TrainingRecord>();
-    trainingRecords.forEach(r => {
-      existingMap.set(getUniqueKey(r.employee_number, r.training_name), r);
-    });
-
-    const updated = [...trainingRecords];
-    records.forEach(rec => {
-      const key = getUniqueKey(rec.employee_number, rec.training_name);
-      const matched = existingMap.get(key);
-      if (matched) {
-        matched.status = rec.status;
-        matched.completion_date = rec.completion_date;
-        matched.employee_name = rec.employee_name;
-      } else {
-        updated.push(rec);
-      }
-    });
-
-    setTrainingRecords(updated);
-    localStorage.setItem('lp_training_records', JSON.stringify(updated));
-
-    if (supabaseStatus === 'online') {
-      try {
-        await saveSupabaseTrainingRecords(records);
-        const dbRecords = await getSupabaseTrainingRecords();
-        setTrainingRecords(dbRecords);
-        localStorage.setItem('lp_training_records', JSON.stringify(dbRecords));
-      } catch (e) {
-        console.error('Error al guardar entrenamientos en Supabase:', e);
-      }
-    }
-  };
-
-  const handleSaveLayoutPosition = async (pos: LayoutPosition) => {
-    const updated = [...positions.filter(p => p.code !== pos.code), pos];
-    setPositions(updated);
-    localStorage.setItem('lp_positions', JSON.stringify(updated));
-    if (supabaseStatus === 'online') {
-      try {
-        await saveSupabaseLayoutPosition(pos);
-      } catch (e) {
-        console.error('Error al guardar posición en Supabase:', e);
-      }
-    }
-  };
-
-  const handleDeleteLayoutPosition = async (code: string) => {
-    const updated = positions.filter(p => p.code !== code);
-    setPositions(updated);
-    localStorage.setItem('lp_positions', JSON.stringify(updated));
-    if (supabaseStatus === 'online') {
-      try {
-        await deleteSupabaseLayoutPosition(code);
-      } catch (e) {
-        console.error('Error al eliminar posición en Supabase:', e);
-      }
-    }
-  };
-
-  const handleAssignOperator = async (code: string, employeeNumber: string | null, coverageType: 'Normal' | 'Comedor') => {
-    const updated = positions.map(pos => {
-      if (pos.code === code) {
-        return {
-          ...pos,
-          employee_number: employeeNumber,
-          coverage_type: coverageType
-        };
-      }
-      return pos;
-    });
-    setPositions(updated);
-    localStorage.setItem('lp_positions', JSON.stringify(updated));
-
-    if (supabaseStatus === 'online') {
-      try {
-        await updateSupabaseLayoutPositionAssignment(code, employeeNumber, coverageType);
-      } catch (e) {
-        console.error('Error al actualizar asignación en Supabase:', e);
-      }
-    }
-  };
-
-  const handleRefreshLinePulseData = async () => {
-    setIsLoading(true);
-    try {
-      if (supabaseStatus === 'online') {
-        const dbStations = await getSupabaseStations();
-        setStations(dbStations);
-        const dbReqs = await getSupabaseStationRequirements();
-        setRequirements(dbReqs);
-        const dbPositions = await getSupabaseLayoutPositions();
-        setPositions(dbPositions);
-        const dbRecords = await getSupabaseTrainingRecords();
-        setTrainingRecords(dbRecords);
-      }
-    } catch (e) {
-      console.error('Error al refrescar datos de LinePulse:', e);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-
   // MANEJADORES DE GUARDADO DE CONFIGURACIONES
   const handleSaveCourses = async (newCourses: Course[]) => {
     setCourses(newCourses);
@@ -1263,90 +964,6 @@ export default function DashboardPage() {
       return emp;
     });
   }, [hcData, reportData, overrides, trainingState]);
-
-  // Cálculo de Cobertura Calificada LinePulse
-  const linePulseStats = useMemo(() => {
-    const target = positions.length;
-    const presentPositions = positions.filter(p => p.employee_number !== null && p.employee_number !== '');
-    const present = presentPositions.length;
-
-    let certified = 0;
-    
-    const reqsMap: Record<string, string[]> = {};
-    requirements.forEach(r => {
-      if (!reqsMap[r.station_id]) reqsMap[r.station_id] = [];
-      reqsMap[r.station_id].push(r.training_name);
-    });
-
-    const getCompleted = (empNo: string): Set<string> => {
-      const completed = new Set<string>();
-      trainingRecords.filter(r => r.employee_number === empNo).forEach(r => {
-        const s = r.status.toLowerCase().trim();
-        if (s.includes('completado') || s.includes('aprobado') || s === 'ok' || s === 'complete') {
-          completed.add(r.training_name.trim().toLowerCase());
-        }
-      });
-      const userProgMap = trainingState[empNo] || {};
-      Object.keys(userProgMap).forEach(cid => {
-        const p = userProgMap[cid];
-        if (p.examPassed === true || p.status === 'completado') {
-          const namesMap: Record<string, string> = {
-            'lean-basics-1': 'lean basics 1',
-            '5s-1': '5s + 1',
-            '5-whys': '5 whys',
-            '7-ways': '7 ways',
-            'sga-guide': 'small group activities (sga) guide'
-          };
-          const mapped = namesMap[cid];
-          if (mapped) completed.add(mapped);
-          completed.add(cid.toLowerCase());
-        }
-      });
-      return completed;
-    };
-
-    presentPositions.forEach(pos => {
-      if (pos.coverage_type === 'Comedor') {
-        certified++;
-        return;
-      }
-      const reqs = reqsMap[pos.station_id] || [];
-      if (reqs.length === 0) {
-        certified++;
-        return;
-      }
-      const completed = getCompleted(pos.employee_number!);
-      let hasAll = true;
-      reqs.forEach(req => {
-        const norm = req.trim().toLowerCase();
-        
-        const getVariations = (n: string) => {
-          const v = [n];
-          const noAcs = n.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-          if (noAcs !== n) v.push(noAcs);
-          return v;
-        };
-
-        const variations = getVariations(norm);
-        const isCompleted = variations.some(variant => completed.has(variant));
-        if (!isCompleted) {
-          hasAll = false;
-        }
-      });
-      if (hasAll) {
-        certified++;
-      }
-    });
-
-    const percentage = present > 0 ? Math.round((certified / present) * 100) : 0;
-
-    return {
-      target,
-      present,
-      certified,
-      percentage
-    };
-  }, [positions, requirements, trainingRecords, trainingState, mergedEmployees]);
 
   // Filtrado de la lista para el dashboard
   const filteredEmployees = useMemo(() => {
@@ -1508,7 +1125,7 @@ export default function DashboardPage() {
 
                 {hcData.length > 0 ? (
                   <>
-                    <KPISection stats={dashboardKPIs} selectedTipoPersonal={selectedTipoPersonal} linePulseStats={linePulseStats} />
+                    <KPISection stats={dashboardKPIs} selectedTipoPersonal={selectedTipoPersonal} />
 
                     <FiltersSection
                       searchTerm={searchTerm}
@@ -1581,58 +1198,6 @@ export default function DashboardPage() {
                 schemaDiagnosis={schemaDiagnosis}
                 importProgress={importProgress}
                 importSummary={importSummary}
-                stations={stations}
-                positions={positions}
-                onSaveLayoutPosition={handleSaveLayoutPosition}
-                onDeleteLayoutPosition={handleDeleteLayoutPosition}
-              />
-            )}
-
-            {currentView === 'monitor' && currentRole === 'Admin' && (
-              /* MONITOR DE COBERTURA LINEPULSE */
-              <MonitorView
-                positions={positions}
-                stations={stations}
-                employees={mergedEmployees}
-                trainingRecords={trainingRecords}
-                courseProgress={trainingState}
-                requirements={requirements}
-                onAssignOperator={handleAssignOperator}
-                supabaseStatus={supabaseStatus}
-                isLoading={isLoading}
-                onRefresh={handleRefreshLinePulseData}
-              />
-            )}
-
-            {currentView === 'reportes' && currentRole === 'Admin' && (
-              /* REPORTES DE CUMPLIMIENTO */
-              <ReportesView
-                positions={positions}
-                stations={stations}
-                employees={mergedEmployees}
-                trainingRecords={trainingRecords}
-                courseProgress={trainingState}
-                requirements={requirements}
-                supabaseStatus={supabaseStatus}
-                isLoading={isLoading}
-                onRefresh={handleRefreshLinePulseData}
-              />
-            )}
-
-            {currentView === 'competencias' && currentRole === 'Admin' && (
-              /* MATRIZ DE COMPETENCIAS Y ESTACIONES */
-              <CompetenciasView
-                stations={stations}
-                requirements={requirements}
-                trainingRecords={trainingRecords}
-                onAddStation={handleAddStation}
-                onDeleteStation={handleDeleteStation}
-                onAddRequirement={handleAddRequirement}
-                onDeleteRequirement={handleDeleteRequirement}
-                onImportTrainingRecords={handleImportTrainingRecords}
-                supabaseStatus={supabaseStatus}
-                isLoading={isLoading}
-                onRefresh={handleRefreshLinePulseData}
               />
             )}
 

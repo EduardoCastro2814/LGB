@@ -3,7 +3,7 @@
 import React, { useState, useMemo } from 'react';
 import { FileSpreadsheet, Search, Edit2, Save, X, Trash2, CheckCircle2, AlertCircle, Clock, UploadCloud, Database, GraduationCap, Settings, Award } from 'lucide-react';
 import * as XLSX from 'xlsx';
-import { MergedEmployee, LGBStatus, FileMetadata, EmployeeOverride, TipoPersonal, Course, Exam, CertificateConfig, Station, LayoutPosition } from '../types';
+import { MergedEmployee, LGBStatus, FileMetadata, EmployeeOverride, TipoPersonal, Course, Exam, CertificateConfig } from '../types';
 import ConfigCourses from './ConfigCourses';
 import ConfigExams from './ConfigExams';
 import ConfigCertificates from './ConfigCertificates';
@@ -35,10 +35,6 @@ interface ConfigViewProps {
   schemaDiagnosis: SchemaDiagnosis[];
   importProgress?: ImportProgress | null;
   importSummary?: ImportSummary | null;
-  stations: Station[];
-  positions: LayoutPosition[];
-  onSaveLayoutPosition: (pos: LayoutPosition) => Promise<void>;
-  onDeleteLayoutPosition: (code: string) => Promise<void>;
 }
 
 export default function ConfigView({
@@ -66,53 +62,8 @@ export default function ConfigView({
   schemaDiagnosis,
   importProgress,
   importSummary,
-  stations,
-  positions,
-  onSaveLayoutPosition,
-  onDeleteLayoutPosition,
 }: ConfigViewProps) {
-  const [activeTab, setActiveTab] = useState<'files' | 'employees' | 'courses' | 'exams' | 'certificates' | 'positions'>('files');
-  
-  // Estados para la pestaña de posiciones
-  const [newPosCode, setNewPosCode] = useState('');
-  const [newPosStation, setNewPosStation] = useState('');
-  const [newPosLine, setNewPosLine] = useState('Línea 1');
-  const [newPosShift, setNewPosShift] = useState('Turno 1');
-
-  const handleAddPositionSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newPosCode.trim() || !newPosStation) {
-      alert('Por favor ingrese el código y seleccione una estación');
-      return;
-    }
-    const code = newPosCode.trim().toUpperCase();
-    if (positions.some(p => p.code === code)) {
-      alert('Ya existe una posición con este código');
-      return;
-    }
-    try {
-      await onSaveLayoutPosition({
-        code,
-        station_id: newPosStation,
-        line: newPosLine,
-        shift: newPosShift,
-        coverage_type: 'Normal'
-      });
-      setNewPosCode('');
-    } catch (err: any) {
-      alert(`Error al guardar la posición: ${err.message}`);
-    }
-  };
-
-  const handleDeletePositionClick = async (code: string) => {
-    if (confirm(`¿Está seguro de que desea eliminar la posición "${code}"?`)) {
-      try {
-        await onDeleteLayoutPosition(code);
-      } catch (err: any) {
-        alert(`Error al eliminar la posición: ${err.message}`);
-      }
-    }
-  };
+  const [activeTab, setActiveTab] = useState<'files' | 'employees' | 'courses' | 'exams' | 'certificates'>('files');
   
   // Estados para la pestaña de colaboradores
   const [searchTermName, setSearchTermName] = useState('');
@@ -362,17 +313,6 @@ export default function ConfigView({
         >
           <Award className="w-4 h-4" />
           <span>📜 Adm. Certificados</span>
-        </button>
-        <button
-          onClick={() => { setActiveTab('positions'); setCurrentPage(1); }}
-          className={`px-4 py-2.5 text-xs font-bold border-b-2 cursor-pointer transition-all flex items-center gap-2 ${
-            activeTab === 'positions'
-              ? 'border-emerald-500 text-emerald-600 dark:text-emerald-400'
-              : 'border-transparent text-slate-500 hover:text-slate-750 dark:text-[#cbd5e1] dark:hover:text-[#f8fafc]'
-          }`}
-        >
-          <Settings className="w-4 h-4" />
-          <span>⚙ Layout y Posiciones</span>
         </button>
       </div>
 
@@ -948,119 +888,6 @@ export default function ConfigView({
 
         {activeTab === 'certificates' && (
           <ConfigCertificates certConfig={certConfig} onSaveConfig={onSaveCertConfig} />
-        )}
-
-        {activeTab === 'positions' && (
-          <div className="flex flex-col gap-6">
-            {/* Formulario Agregar Posición */}
-            <div className="glass-panel p-6 bg-white dark:bg-[#1e293b] border border-slate-200 dark:border-[#334155] rounded-3xl shadow-sm">
-              <h3 className="text-sm font-bold text-slate-800 dark:text-white mb-2">Configurar Nueva Posición Física</h3>
-              <p className="text-xs text-slate-400 mb-4">Agregue posiciones físicas (ej: POS01) al layout de planta y asócielas a una estación.</p>
-
-              <form onSubmit={handleAddPositionSubmit} className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 items-end">
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Código de Posición</label>
-                  <input
-                    type="text"
-                    placeholder="Ej: POS07"
-                    value={newPosCode}
-                    onChange={(e) => setNewPosCode(e.target.value.toUpperCase())}
-                    className="block w-full px-3 py-2 bg-slate-50 dark:bg-[#273449] border border-slate-200 dark:border-[#334155] rounded-xl text-xs font-bold"
-                  />
-                </div>
-
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Estación Asociada</label>
-                  <select
-                    value={newPosStation}
-                    onChange={(e) => setNewPosStation(e.target.value)}
-                    className="block w-full px-3 py-2 bg-slate-50 dark:bg-[#273449] border border-slate-200 dark:border-[#334155] rounded-xl text-xs font-bold text-slate-705 dark:text-slate-300 cursor-pointer"
-                  >
-                    <option value="">Seleccione estación...</option>
-                    {stations.map(s => (
-                      <option key={s.id} value={s.id}>{s.name}</option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Línea</label>
-                  <input
-                    type="text"
-                    value={newPosLine}
-                    onChange={(e) => setNewPosLine(e.target.value)}
-                    className="block w-full px-3 py-2 bg-slate-50 dark:bg-[#273449] border border-slate-200 dark:border-[#334155] rounded-xl text-xs font-bold"
-                  />
-                </div>
-
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Turno</label>
-                  <input
-                    type="text"
-                    value={newPosShift}
-                    onChange={(e) => setNewPosShift(e.target.value)}
-                    className="block w-full px-3 py-2 bg-slate-50 dark:bg-[#273449] border border-slate-200 dark:border-[#334155] rounded-xl text-xs font-bold"
-                  />
-                </div>
-
-                <div className="sm:col-span-2 md:col-span-4 flex justify-end gap-2 mt-2">
-                  <button
-                    type="submit"
-                    className="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs shadow-md transition-colors cursor-pointer"
-                  >
-                    Agregar Posición
-                  </button>
-                </div>
-              </form>
-            </div>
-
-            {/* Listado de Posiciones */}
-            <div className="glass-panel p-6 bg-white dark:bg-[#1e293b] border border-slate-200 dark:border-[#334155] rounded-3xl shadow-sm">
-              <h3 className="text-sm font-bold text-slate-800 dark:text-white mb-2">Posiciones Configuradas</h3>
-              <p className="text-xs text-slate-400 mb-6">Listado de posiciones físicas registradas en el layout</p>
-
-              <div className="border border-slate-200 dark:border-[#334155] rounded-2xl overflow-hidden">
-                <table className="w-full text-left border-collapse text-xs">
-                  <thead>
-                    <tr className="bg-slate-50 dark:bg-[#273449]/40 border-b border-slate-200 dark:border-[#334155] text-[10px] font-bold text-slate-400 dark:text-[#94a3b8] uppercase tracking-wider">
-                      <th className="py-3 px-4">Código</th>
-                      <th className="py-3 px-4">Estación</th>
-                      <th className="py-3 px-4">Línea</th>
-                      <th className="py-3 px-4">Turno</th>
-                      <th className="py-3 px-4 text-center">Acciones</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-200 dark:divide-[#334155]/60 font-semibold text-slate-650 dark:text-[#cbd5e1]">
-                    {positions.length > 0 ? (
-                      positions.map(p => (
-                        <tr key={p.code} className="hover:bg-slate-50/50 dark:hover:bg-[#273449]/20 transition-colors">
-                          <td className="py-3 px-4 font-bold text-slate-850 dark:text-white">{p.code}</td>
-                          <td className="py-3 px-4">{stations.find(s => s.id === p.station_id)?.name || p.station_id}</td>
-                          <td className="py-3 px-4">{p.line}</td>
-                          <td className="py-3 px-4">{p.shift}</td>
-                          <td className="py-3 px-4 text-center">
-                            <button
-                              onClick={() => handleDeletePositionClick(p.code)}
-                              className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors cursor-pointer"
-                              title="Eliminar Posición"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          </td>
-                        </tr>
-                      ))
-                    ) : (
-                      <tr>
-                        <td colSpan={5} className="py-10 text-center text-slate-405 italic">
-                          No hay posiciones configuradas en el layout.
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
         )}
       </div>
 
