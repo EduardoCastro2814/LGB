@@ -287,7 +287,7 @@ export default function ConfigCertificates({ certConfig, onSaveConfig }: ConfigC
             <span className="text-[10px] text-slate-400 font-bold">Lienzo Proporcional 1200x850</span>
           </div>
 
-          <div className="relative aspect-[1200/850] w-full rounded-3xl overflow-hidden border border-slate-250 dark:border-[#2d3b50] bg-slate-950 text-white shadow-2xl select-none">
+          <div className="relative aspect-[1200/850] w-full rounded-3xl overflow-hidden border border-slate-250 dark:border-[#2d3b50] bg-[#f8fafc] text-slate-800 shadow-2xl select-none @container">
             
             {/* Fondo */}
             {certConfig.background ? (
@@ -298,17 +298,70 @@ export default function ConfigCertificates({ certConfig, onSaveConfig }: ConfigC
                 className="absolute inset-0 w-full h-full object-cover pointer-events-none" 
               />
             ) : (
-              // Fondo de contingencia por defecto
-              <div className="absolute inset-0 bg-[#0f172a] pointer-events-none">
-                <div className="absolute inset-8 border border-amber-600/30" />
-                <div className="absolute inset-10 border border-amber-500/10" />
-              </div>
-            )}
+              // Fondo Corporativo Flex Recognition por defecto
+              <div className="absolute inset-0 bg-[#f8fafc] pointer-events-none">
+                {/* Triángulo superior izquierdo */}
+                <div 
+                  className="absolute top-0 left-0 w-[28%] h-[28%] bg-gradient-to-br from-[#0090e1] to-[#005ea2]" 
+                  style={{ clipPath: 'polygon(0 0, 100% 0, 0 100%)' }}
+                />
 
-            {/* Elemento de Cabecera Fija */}
-            {!certConfig.background && (
-              <div className="absolute top-[18%] left-0 w-full text-center text-slate-400 font-bold uppercase tracking-widest text-[1.4vw] leading-none pointer-events-none">
-                LEAN ACADEMY - PHILO B29 SITE
+                {/* Sello Lean Enterprise */}
+                <div className="absolute top-[4%] left-[4%] w-[10%] aspect-square rounded-full border border-dashed border-white/80 flex flex-col items-center justify-center text-white">
+                  <div className="absolute inset-[4%] rounded-full border border-white/90" />
+                  <span className="text-[0.6cqw] font-extrabold uppercase tracking-wide opacity-90 mt-[10%]">Flex Lean</span>
+                  <span className="text-[1.8cqw] font-black leading-none my-[4%]">LGB</span>
+                  <span className="text-[0.55cqw] font-bold uppercase tracking-wide opacity-90">Enterprise</span>
+                </div>
+
+                {/* Elementos Estáticos de Cabecera */}
+                <div className="absolute top-[17.5%] left-0 w-full text-center text-[#007fc4] font-black uppercase tracking-[0.4em] text-[4.6cqw] leading-none pointer-events-none">
+                  RECOGNITION
+                </div>
+                <div className="absolute top-[24%] left-0 w-full text-center text-slate-500 font-bold uppercase text-[1.5cqw] leading-none pointer-events-none">
+                  Lean Academy Certification Program
+                </div>
+
+                {/* Etiqueta Awarded To */}
+                <div className="absolute top-[31.5%] left-0 w-full text-center text-slate-400 font-semibold italic text-[1.4cqw] leading-none pointer-events-none">
+                  Awarded to:
+                </div>
+
+                {/* Etiqueta Proficiency */}
+                <div className="absolute top-[52%] left-0 w-full text-center text-slate-400 font-semibold text-[1.35cqw] leading-none pointer-events-none">
+                  For successfully completing and demonstrating proficiency in:
+                </div>
+
+                {/* Código QR */}
+                <img 
+                  className="absolute bottom-[9%] left-[6%] w-[9%] aspect-square border border-slate-200 p-[0.3cqw] bg-white rounded-lg pointer-events-none"
+                  src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=Placeholder"
+                  alt="QR Placeholder" 
+                />
+
+                {/* Firmas */}
+                <div className="absolute bottom-[9%] right-[6%] flex gap-[3cqw] pointer-events-none">
+                  <div className="flex flex-col items-center w-[16cqw]">
+                    <div className="w-full border-b border-slate-300 h-[2.5cqw] relative flex items-end justify-center">
+                      <span className="font-serif italic text-[1.6cqw] text-[#005ea2] font-semibold leading-none pb-[0.2cqw]">Lean Academy</span>
+                    </div>
+                    <span className="text-[1cqw] font-extrabold text-slate-700 mt-[0.5cqw] leading-none">Ing. Luis Hernández</span>
+                    <span className="text-[0.8cqw] font-bold text-slate-400 uppercase tracking-wider mt-[0.2cqw]">Lean Academy Director</span>
+                  </div>
+
+                  <div className="flex flex-col items-center w-[16cqw]">
+                    <div className="w-full border-b border-slate-300 h-[2.5cqw] relative flex items-end justify-center">
+                      <span className="font-serif italic text-[1.6cqw] text-[#005ea2] font-semibold leading-none pb-[0.2cqw]">Philo B29</span>
+                    </div>
+                    <span className="text-[1cqw] font-extrabold text-slate-700 mt-[0.5cqw] leading-none">Dir. Alejandro Ruiz</span>
+                    <span className="text-[0.8cqw] font-bold text-slate-400 uppercase tracking-wider mt-[0.2cqw]">Plant Manager</span>
+                  </div>
+                </div>
+
+                {/* Barra inferior Flex */}
+                <div className="absolute bottom-0 left-0 w-full h-[6.5%] bg-gradient-to-r from-[#005ea2] to-[#0090e1] flex items-center justify-end px-[5%] box-border">
+                  <span className="text-[#ffffff] text-[2.2cqw] font-black italic tracking-tighter leading-none select-none">flex</span>
+                </div>
               </div>
             )}
 
@@ -320,25 +373,28 @@ export default function ConfigCertificates({ certConfig, onSaveConfig }: ConfigC
               const getDummyText = (k: string) => {
                 switch (k) {
                   case 'nombreEmpleado': return 'Carlos Pérez Morales';
-                  case 'numEmpleado': return 'Número de Empleado: 520478  |  Depto: BE';
+                  case 'numEmpleado': return 'Employee ID: 520478   |   Department: BE';
                   case 'nombreCurso': return 'LEAN BASICS 1';
-                  case 'fechaCompletado': return 'Fecha de Expedición: 22 de julio de 2026';
-                  case 'calificacion': return 'Calificación: 95% (Aprobado)';
-                  case 'folio': return 'Folio de Evidencia: LGB-LEA-620547';
+                  case 'fechaCompletado': return 'Score: 95%      •      Completion Date: 22 de julio de 2026      •      Status: Approved';
+                  case 'calificacion': return ''; // Unido al de arriba o vacío
+                  case 'folio': return 'LGB-LEA-620547';
                   default: return k;
                 }
               };
+
+              const txt = getDummyText(key);
+              if (!txt) return null;
 
               const style: React.CSSProperties = {
                 position: 'absolute',
                 left: `${pos.x}%`,
                 top: `${pos.y}%`,
                 transform: 'translate(-50%, -50%)',
-                fontSize: `${(pos.fontSize / 1200) * 100}vw`, // Escalar proporcionalmente al ancho del contenedor responsivo
+                fontSize: `${(pos.fontSize / 1200) * 100}cqw`, // Escalar proporcionalmente al ancho del contenedor responsivo
                 fontWeight: 'bold',
                 textAlign: 'center',
                 whiteSpace: 'nowrap',
-                color: key === 'nombreCurso' ? '#10b981' : (key === 'folio' ? '#f59e0b' : (certConfig.textColor || '#ffffff')),
+                color: key === 'nombreCurso' ? '#0284c7' : (key === 'folio' ? '#64748b' : (certConfig.textColor || '#0f172a')),
                 fontFamily: (key === 'nombreEmpleado' || key === 'nombreCurso') ? 'Georgia, serif' : 'sans-serif',
                 transition: 'all 0.1s ease',
               };
@@ -355,7 +411,7 @@ export default function ConfigCertificates({ certConfig, onSaveConfig }: ConfigC
                       : 'border-transparent'
                   }`}
                 >
-                  {getDummyText(key)}
+                  {txt}
                 </div>
               );
             })}
