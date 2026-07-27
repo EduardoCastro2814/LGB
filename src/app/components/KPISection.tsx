@@ -1,15 +1,21 @@
 'use client';
 
 import React from 'react';
-import { Users, CheckCircle2, Sparkles, Clock, Percent, ClipboardList } from 'lucide-react';
+import { Users, CheckCircle2, Sparkles, Clock, Percent, ClipboardList, Award } from 'lucide-react';
 import { KPIStats, TipoPersonal } from '../types';
 
 interface KPISectionProps {
   stats: KPIStats;
   selectedTipoPersonal: TipoPersonal | 'Todos';
+  linePulseStats?: {
+    target: number;
+    present: number;
+    certified: number;
+    percentage: number;
+  };
 }
 
-export default function KPISection({ stats, selectedTipoPersonal }: KPISectionProps) {
+export default function KPISection({ stats, selectedTipoPersonal, linePulseStats }: KPISectionProps) {
   const { totalHeadcount, certifiedCount, potentialCount, pendingCount, globalPercentage } = stats;
 
   const kpiItems = [
@@ -67,7 +73,7 @@ export default function KPISection({ stats, selectedTipoPersonal }: KPISectionPr
 
   return (
     <section 
-      className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6 animate-fade-in" 
+      className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 xl:grid-cols-7 gap-4 mb-6 animate-fade-in" 
       style={{ animationDelay: '0.1s' }}
     >
       {/* Primeros 5 KPIs tradicionales */}
@@ -113,9 +119,45 @@ export default function KPISection({ stats, selectedTipoPersonal }: KPISectionPr
         );
       })}
 
+      {/* NUEVO KPI: Cobertura Calificada LinePulse */}
+      {linePulseStats && (
+        <div 
+          className="glass-panel rounded-2xl p-4 flex flex-col justify-between h-[155px] bg-white dark:bg-[#1e293b] border-slate-200 dark:border-[#334155] border-l-4 border-l-emerald-500 dark:border-l-emerald-500"
+        >
+          <div className="flex justify-between items-start">
+            <div>
+              <span className="text-[10px] font-bold text-slate-400 dark:text-[#94a3b8] uppercase tracking-wider">
+                Cobertura Calificada
+              </span>
+              <div className="text-2xl font-extrabold text-slate-800 dark:text-[#f8fafc] mt-1">
+                {linePulseStats.percentage}%
+              </div>
+            </div>
+            <div className="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
+              <Award className="w-4.5 h-4.5" />
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-0.5 text-[10px] font-bold text-slate-500 dark:text-[#cbd5e1] mt-2">
+            <div className="flex justify-between border-b border-slate-100 dark:border-slate-800/40 pb-0.5">
+              <span>Plantilla (Layout):</span>
+              <span className="text-slate-800 dark:text-[#f8fafc]">{linePulseStats.target}</span>
+            </div>
+            <div className="flex justify-between border-b border-slate-100 dark:border-slate-800/40 py-0.5">
+              <span>Presentes:</span>
+              <span className="text-slate-800 dark:text-[#f8fafc]">{linePulseStats.present}</span>
+            </div>
+            <div className="flex justify-between pt-0.5">
+              <span>Certificados:</span>
+              <span className="text-emerald-600 dark:text-emerald-450">{linePulseStats.certified}</span>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* 6. NUEVA TARJETA KPI: Resumen Filtrado (Cambio 4) */}
       <div 
-        className="glass-panel rounded-2xl p-4 flex flex-col justify-between h-[155px] bg-white dark:bg-[#1e293b] border-slate-200 dark:border-[#334155] lg:col-span-1 border-l-4 border-l-emerald-500 dark:border-l-emerald-500"
+        className="glass-panel rounded-2xl p-4 flex flex-col justify-between h-[155px] bg-white dark:bg-[#1e293b] border-slate-200 dark:border-[#334155] border-l-4 border-l-emerald-500 dark:border-l-emerald-500"
       >
         <div className="flex justify-between items-start">
           <div>
