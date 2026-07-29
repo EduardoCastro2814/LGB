@@ -340,7 +340,6 @@ export default function DashboardPage() {
 
   const [hcData, setHcData] = useState<any[]>([]);
   const [reportData, setReportData] = useState<any[]>([]);
-  const [darkMode, setDarkMode] = useState<boolean>(true);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isPreloaded, setIsPreloaded] = useState<boolean>(false);
   const [apiError, setApiError] = useState<string | null>(null);
@@ -382,14 +381,10 @@ export default function DashboardPage() {
   // Drill Down de Departamento (Modal)
   const [selectedDrillDownDept, setSelectedDrillDownDept] = useState<string | null>(null);
 
-  // Manejar cambio de tema (Claro/Oscuro)
+  // Forzar tema claro corporativo
   useEffect(() => {
-    if (darkMode) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  }, [darkMode]);
+    document.documentElement.classList.remove('dark');
+  }, []);
 
   // Cargar sesión y base de datos local al iniciar la aplicación
   useEffect(() => {
@@ -1058,7 +1053,7 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row bg-[#f8fafc] dark:bg-[#0b1324] text-slate-800 dark:text-[#f8fafc] transition-colors duration-300">
+    <div className="min-h-screen flex flex-col md:flex-row bg-[#f8fafc] text-slate-800 transition-colors duration-300">
       
       {/* Barra lateral */}
       <Sidebar
@@ -1070,8 +1065,6 @@ export default function DashboardPage() {
           if (currentRole !== 'Admin' && view !== 'academia') return;
           setCurrentView(view);
         }}
-        darkMode={darkMode}
-        onDarkModeToggle={() => setDarkMode(!darkMode)}
         onLogout={handleLogout}
       />
 
