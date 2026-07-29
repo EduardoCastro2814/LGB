@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <defs>
+    <linearGradient id="medalGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#34d399" />
+      <stop offset="100%" stop-color="#059669" />
+    </linearGradient>
+  </defs>
+  <circle cx="12" cy="8" r="7" stroke="url(#medalGrad)" fill="none" />
+  <polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88" stroke="url(#medalGrad)" fill="none" />
+</svg>
