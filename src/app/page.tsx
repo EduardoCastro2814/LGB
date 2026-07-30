@@ -310,13 +310,13 @@ const defaultExams: Exam[] = [
 
 const defaultCertConfig: CertificateConfig = {
   background: '',
-  textColor: '#ffffff',
+  textColor: '#0f172a',
   positions: {
-    nombreEmpleado: { x: 50, y: 34, fontSize: 42, visible: true },
-    numEmpleado: { x: 50, y: 42, fontSize: 18, visible: true },
-    nombreCurso: { x: 50, y: 56, fontSize: 36, visible: true },
-    fechaCompletado: { x: 30, y: 70, fontSize: 18, visible: true },
-    calificacion: { x: 70, y: 70, fontSize: 18, visible: true },
+    nombreEmpleado: { x: 50, y: 36, fontSize: 42, visible: true },
+    numEmpleado: { x: 50, y: 44, fontSize: 18, visible: false },
+    nombreCurso: { x: 50, y: 54, fontSize: 36, visible: true },
+    fechaCompletado: { x: 50, y: 70, fontSize: 18, visible: true },
+    calificacion: { x: 70, y: 70, fontSize: 18, visible: false },
     folio: { x: 50, y: 82, fontSize: 14, visible: true },
   },
   templateName: "Plantilla Estándar",

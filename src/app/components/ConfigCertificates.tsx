@@ -46,11 +46,9 @@ URL: ${activeUrl ? activeUrl.substring(0, 80) + '...' : 'N/A'}`);
   // Claves y etiquetas amigables
   const labelsMap: Record<string, string> = {
     nombreEmpleado: 'Nombre de Colaborador',
-    numEmpleado: 'Detalles del Empleado (ID/Depto)',
     nombreCurso: 'Nombre de la Materia',
     fechaCompletado: 'Fecha de Expedición',
-    calificacion: 'Calificación Obtenida',
-    folio: 'Folio de Evidencia',
+    folio: 'ID de Evidencia',
   };
 
   const activePosition: TextPosition = certConfig.positions[activeLabel as keyof typeof certConfig.positions];
@@ -129,17 +127,17 @@ URL: ${activeUrl ? activeUrl.substring(0, 80) + '...' : 'N/A'}`);
   const handleResetLayout = () => {
     if (confirm('¿Restablecer todas las coordenadas y tamaños de texto a los valores de fábrica?')) {
       const defaultPositions = {
-        nombreEmpleado: { x: 50, y: 34, fontSize: 42, visible: true },
-        numEmpleado: { x: 50, y: 42, fontSize: 18, visible: true },
-        nombreCurso: { x: 50, y: 56, fontSize: 36, visible: true },
-        fechaCompletado: { x: 30, y: 70, fontSize: 18, visible: true },
-        calificacion: { x: 70, y: 70, fontSize: 18, visible: true },
-        folio: { x: 50, y: 82, fontSize: 14, visible: true },
+        nombreEmpleado: { x: 50, y: 36, fontSize: 42, visible: true },
+        numEmpleado: { x: 50, y: 44, fontSize: 18, visible: false },
+        nombreCurso: { x: 50, y: 54, fontSize: 36, visible: true },
+        fechaCompletado: { x: 50, y: 70, fontSize: 18, visible: true },
+        calificacion: { x: 70, y: 70, fontSize: 18, visible: false },
+        folio: { x: 20, y: 82, fontSize: 14, visible: true },
       };
       
       onSaveConfig({
         background: certConfig.background,
-        textColor: '#ffffff',
+        textColor: '#0f172a',
         positions: defaultPositions,
       });
     }
@@ -448,12 +446,7 @@ URL: ${activeUrl ? activeUrl.substring(0, 80) + '...' : 'N/A'}`);
                   For successfully completing and demonstrating proficiency in:
                 </div>
 
-                {/* Código QR */}
-                <img 
-                  className="absolute bottom-[9%] left-[6%] w-[9%] aspect-square border border-slate-200 p-[0.3cqw] bg-white rounded-lg pointer-events-none"
-                  src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=Placeholder"
-                  alt="QR Placeholder" 
-                />
+
 
                 {/* Firmas */}
                 <div className="absolute bottom-[9%] right-[6%] flex gap-[3cqw] pointer-events-none">
@@ -484,16 +477,15 @@ URL: ${activeUrl ? activeUrl.substring(0, 80) + '...' : 'N/A'}`);
             {/* TEXTOS DINÁMICOS SOBREIMPRESOS EN VIVO */}
             {Object.entries(certConfig.positions).map(([key, pos]) => {
               if (!pos.visible) return null;
-
+              if (key === 'numEmpleado' || key === 'calificacion') return null; // Omitir completamente
+ 
               // Obtener textos dummy para simular el diploma en vivo
               const getDummyText = (k: string) => {
                 switch (k) {
                   case 'nombreEmpleado': return 'Carlos Pérez Morales';
-                  case 'numEmpleado': return 'Employee ID: 520478   |   Department: BE';
                   case 'nombreCurso': return 'LEAN BASICS 1';
                   case 'fechaCompletado': return 'Completion Date: 22 de julio de 2026';
-                  case 'calificacion': return 'Score: 95%  |  Status: Approved';
-                  case 'folio': return 'Evidence ID: LGB-LEA-620547';
+                  case 'folio': return 'ID: LGB-LEA-620547';
                   default: return k;
                 }
               };

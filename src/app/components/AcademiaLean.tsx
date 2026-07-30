@@ -416,14 +416,6 @@ URL: ${activeUrl ? activeUrl.substring(0, 80) + '...' : 'N/A'}`);
       ctx.fillText(user.Nombre, nEmp.x, nEmp.y);
     }
 
-    // C. Detalles de Empleado
-    const numEmp = getCoords('numEmpleado', 50, 42, 18);
-    if (numEmp.visible) {
-      ctx.fillStyle = '#475569';
-      ctx.font = `bold ${numEmp.fontSize}px sans-serif`;
-      ctx.fillText(`Employee ID: ${user.ID}   |   Department: ${user.Departamento}`, numEmp.x, numEmp.y);
-    }
-
     // D. Texto de Acreditación Fijo (solo si no es personalizado)
     if (!isCustom) {
       ctx.fillStyle = '#64748b';
@@ -447,21 +439,13 @@ URL: ${activeUrl ? activeUrl.substring(0, 80) + '...' : 'N/A'}`);
       ctx.fillText(`Completion Date: ${prog.completionDate}`, fComp.x, fComp.y);
     }
 
-    // G. Calificación
-    const cal = getCoords('calificacion', 70, 70, 18);
-    if (cal.visible) {
-      ctx.fillStyle = '#475569';
-      ctx.font = `bold ${cal.fontSize}px sans-serif`;
-      ctx.fillText(`Score: ${prog.examScore}%  |  Status: Approved`, cal.x, cal.y);
-    }
-
     // H. Folio
     const fol = getCoords('folio', 50, 82, 14);
     if (fol.visible) {
       ctx.textAlign = 'center';
       ctx.fillStyle = '#64748b';
       ctx.font = `bold ${fol.fontSize}px Courier New, monospace`;
-      ctx.fillText(`Evidence ID: ${prog.certificateFolio}`, fol.x, fol.y);
+      ctx.fillText(`ID: ${prog.certificateFolio}`, fol.x, fol.y);
     }
 
     // I. Firmas Digitales (solo si no es personalizado)
@@ -516,16 +500,8 @@ URL: ${activeUrl ? activeUrl.substring(0, 80) + '...' : 'N/A'}`);
       ctx.fillText('flex', 1140, 830);
     }
 
-    // K. QR Code de validación cargado dinámicamente
-    const qrImg = new Image();
-    qrImg.crossOrigin = 'anonymous';
-    qrImg.onload = () => {
-      ctx.drawImage(qrImg, 80, 600, 110, 110);
-      triggerDownload(canvasRef.current!, course.name);
-    };
-    qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(
-      `Folio: ${prog.certificateFolio}\nColaborador: ${user.Nombre} (${user.ID})\nCurso: ${course.name}\nFecha: ${prog.completionDate}\nEstatus: Certificado`
-    )}`;
+    // Descarga directa sin QR
+    triggerDownload(canvasRef.current!, course.name);
   };
 
   // Imprimir Certificado en PDF
@@ -567,17 +543,11 @@ URL: ${activeUrl ? activeUrl.substring(0, 80) + '...' : 'N/A'}`);
           <div class="certificate-container" style="${certificateContainerStyle}">
             ${p.nombreEmpleado?.visible !== false ? `<div class="dynamic-text employee-name" style="left: ${p.nombreEmpleado?.x || 50}%; top: ${p.nombreEmpleado?.y || 34}%; font-size: ${((p.nombreEmpleado?.fontSize || 42) / 1200) * 297}mm; color: ${certConfig.textColor || '#0f172a'}; font-family: Georgia, serif;">${user.Nombre}</div>` : ''}
             
-            ${p.numEmpleado?.visible !== false ? `<div class="dynamic-text employee-details" style="left: ${p.numEmpleado?.x || 50}%; top: ${p.numEmpleado?.y || 42}%; font-size: ${((p.numEmpleado?.fontSize || 18) / 1200) * 297}mm; color: #475569;">Employee ID: ${user.ID} &nbsp;|&nbsp; Department: ${user.Departamento}</div>` : ''}
-            
             ${p.nombreCurso?.visible !== false ? `<div class="dynamic-text course-name" style="left: ${p.nombreCurso?.x || 50}%; top: ${p.nombreCurso?.y || 56}%; font-size: ${((p.nombreCurso?.fontSize || 36) / 1200) * 297}mm; color: #0284c7; font-family: Georgia, serif; text-transform: uppercase;">${course.name}</div>` : ''}
             
             ${p.fechaCompletado?.visible !== false ? `<div class="dynamic-text completion-date" style="left: ${p.fechaCompletado?.x || 30}%; top: ${p.fechaCompletado?.y || 70}%; font-size: ${((p.fechaCompletado?.fontSize || 18) / 1200) * 297}mm; color: #475569;">Completion Date: ${prog.completionDate}</div>` : ''}
             
-            ${p.calificacion?.visible !== false ? `<div class="dynamic-text grade-text" style="left: ${p.calificacion?.x || 70}%; top: ${p.calificacion?.y || 70}%; font-size: ${((p.calificacion?.fontSize || 18) / 1200) * 297}mm; color: #475569;">Score: ${prog.examScore}%  |  Status: Approved</div>` : ''}
-            
-            ${p.folio?.visible !== false ? `<div class="dynamic-text evidence-id" style="left: ${p.folio?.x || 50}%; top: ${p.folio?.y || 82}%; font-size: ${((p.folio?.fontSize || 14) / 1200) * 297}mm; color: #64748b; font-family: monospace;">Evidence ID: ${prog.certificateFolio}</div>` : ''}
-
-            <img class="qr-code-custom" src="${qrUrl}" alt="Validation QR" />
+            ${p.folio?.visible !== false ? `<div class="dynamic-text evidence-id" style="left: ${p.folio?.x || 50}%; top: ${p.folio?.y || 82}%; font-size: ${((p.folio?.fontSize || 14) / 1200) * 297}mm; color: #64748b; font-family: monospace;">ID: ${prog.certificateFolio}</div>` : ''}
           </div>
         `
       : `
@@ -596,25 +566,18 @@ URL: ${activeUrl ? activeUrl.substring(0, 80) + '...' : 'N/A'}`);
               
               <div class="awarded-to">Awarded to:</div>
               <h2 class="employee-name" style="font-size: ${((p.nombreEmpleado?.fontSize || 42) / 1200) * 297}mm; color: ${certConfig.textColor || '#0f172a'};">${user.Nombre}</h2>
-              <div class="employee-details" style="font-size: ${((p.numEmpleado?.fontSize || 18) / 1200) * 297}mm;">Employee ID: ${user.ID} &nbsp;|&nbsp; Department: ${user.Departamento}</div>
               
               <div class="proficiency-text">For successfully completing and demonstrating proficiency in:</div>
               <h3 class="course-name" style="font-size: ${((p.nombreCurso?.fontSize || 36) / 1200) * 297}mm;">${course.name}</h3>
               
-              <div class="stats-row" style="font-size: ${((p.calificacion?.fontSize || 18) / 1200) * 297}mm;">
-                <span>Score: ${prog.examScore}%</span>
-                <span class="stats-dot">•</span>
+              <div class="stats-row" style="font-size: ${((p.fechaCompletado?.fontSize || 18) / 1200) * 297}mm;">
                 <span>Completion Date: ${prog.completionDate}</span>
-                <span class="stats-dot">•</span>
-                <span>Status: Approved</span>
               </div>
             </div>
             
             <div class="bottom-row">
-              <img class="qr-code" src="${qrUrl}" alt="Validation QR" />
-              
               <div class="evidence-id-container" style="font-size: ${((p.folio?.fontSize || 14) / 1200) * 297}mm;">
-                <span>Evidence ID:</span>
+                <span>ID:</span>
                 <span>${prog.certificateFolio}</span>
               </div>
 
@@ -1781,22 +1744,21 @@ URL: ${activeUrl ? activeUrl.substring(0, 80) + '...' : 'N/A'}`);
                 {/* TEXTOS DINÁMICOS SOBREIMPRESOS EN VIVO O SEGÚN POSICIONES */}
                 {Object.entries(certConfig.positions || {}).map(([key, pos]) => {
                   if (!pos.visible) return null;
+                  if (key === 'numEmpleado' || key === 'calificacion') return null;
 
                   const getText = (k: string) => {
                     switch (k) {
                       case 'nombreEmpleado': return user.Nombre;
-                      case 'numEmpleado': return `Employee ID: ${user.ID}   |   Department: ${user.Departamento}`;
                       case 'nombreCurso': return selectedCertCourse.name.toUpperCase();
                       case 'fechaCompletado': return `Completion Date: ${progress[selectedCertCourse.id]?.completionDate || ''}`;
-                      case 'calificacion': return `Score: ${progress[selectedCertCourse.id]?.examScore || 0}%  |  Status: Approved`;
-                      case 'folio': return `Evidence ID: ${progress[selectedCertCourse.id]?.certificateFolio || ''}`;
+                      case 'folio': return `ID: ${progress[selectedCertCourse.id]?.certificateFolio || ''}`;
                       default: return '';
                     }
                   };
-
+ 
                   const txt = getText(key);
                   if (!txt) return null;
-
+ 
                   const style: React.CSSProperties = {
                     position: 'absolute',
                     left: `${pos.x}%`,
@@ -1809,29 +1771,20 @@ URL: ${activeUrl ? activeUrl.substring(0, 80) + '...' : 'N/A'}`);
                     color: key === 'nombreCurso' ? '#0284c7' : (key === 'folio' ? '#64748b' : (certConfig.textColor || '#0f172a')),
                     fontFamily: (key === 'nombreEmpleado' || key === 'nombreCurso') ? 'Georgia, serif' : 'sans-serif',
                   };
-
+ 
                   return (
                     <div key={key} style={style} className="pointer-events-none rounded px-2.5 py-0.5 border border-transparent">
                       {txt}
                     </div>
                   );
                 })}
-
-                {/* Fila inferior con firmas y QR (siempre visibles, pero ajustándose a si es personalizado) */}
+ 
+                {/* Fila inferior con firmas (siempre visibles, pero ajustándose a si es personalizado) */}
                 <div className="absolute bottom-[9%] left-0 w-full px-[6%] box-border flex items-end justify-between pointer-events-none">
-                  {/* Código QR */}
-                  <img 
-                    className="w-[9%] aspect-square border border-slate-200 p-[0.3cqw] bg-white rounded-lg pointer-events-auto"
-                    src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(
-                      `Folio: ${progress[selectedCertCourse.id]?.certificateFolio}\nColaborador: ${user.Nombre} (${user.ID})\nCurso: ${selectedCertCourse.name}\nFecha: ${progress[selectedCertCourse.id]?.completionDate}\nEstatus: Certificado`
-                    )}`}
-                    alt="QR" 
-                  />
-
-                  {/* Evidence Folio */}
+                  {/* ID */}
                   {!isCustom && (
                     <div className="flex flex-col items-center font-mono text-[0.9cqw] text-slate-400 font-bold">
-                      <span className="uppercase text-[0.8cqw] tracking-wider font-sans font-semibold text-slate-400/80">Evidence ID</span>
+                      <span className="uppercase text-[0.8cqw] tracking-wider font-sans font-semibold text-slate-400/80">ID</span>
                       <span className="mt-[0.2cqw]">{progress[selectedCertCourse.id]?.certificateFolio}</span>
                     </div>
                   )}
