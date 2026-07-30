@@ -106,6 +106,27 @@ export default function AcademiaLean({
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
+  const isCustom = !!certConfig.background && certConfig.useCustomTemplate !== false;
+
+  React.useEffect(() => {
+    if (showCertModal && selectedCertCourse) {
+      const activeId = isCustom ? "custom-template" : "corporate-standard";
+      const activeName = isCustom ? (certConfig.templateName || "Personalizada") : "Plantilla Corporativa Estándar";
+      const activeUrl = isCustom ? (certConfig.templateUrl || "Base64") : "Interno";
+
+      console.log(`[LGB TEMPLATE LOG] Modal de Certificado (Vista Previa Alumno):
+Template Activa:
+ID: ${activeId}
+Nombre: ${activeName}
+URL: ${activeUrl ? activeUrl.substring(0, 80) + '...' : 'N/A'}
+
+Template usada para render:
+ID: ${activeId}
+Nombre: ${activeName}
+URL: ${activeUrl ? activeUrl.substring(0, 80) + '...' : 'N/A'}`);
+    }
+  }, [showCertModal, selectedCertCourse, isCustom, certConfig]);
+
   // Determinar si todos los cursos requeridos están aprobados
   const requiredCourseIds = ['lean-basics-1', '5s-1', '5-whys', '7-ways', 'sga-guide'];
   const allCoursesCompleted = useMemo(() => {
@@ -265,15 +286,23 @@ export default function AcademiaLean({
     canvas.width = width;
     canvas.height = height;
 
-    const isCustom = !!certConfig.background && certConfig.useCustomTemplate !== false;
-
     // Loguear plantilla utilizada para generación
-    const activeId = isCustom ? "custom-template" : "default-template";
+    const activeId = isCustom ? "custom-template" : "corporate-standard";
     const activeName = isCustom ? (certConfig.templateName || "Personalizada") : "Plantilla Corporativa Estándar";
     const activeUrl = isCustom ? (certConfig.templateUrl || "Base64") : "Interno";
     const logData = { id: activeId, name: activeName, url: activeUrl };
     localStorage.setItem('lgb_generation_log', JSON.stringify(logData));
-    console.log("Plantilla utilizada para generación:", logData);
+    
+    console.log(`[LGB TEMPLATE LOG] Generación PNG (Descarga):
+Template Activa:
+ID: ${activeId}
+Nombre: ${activeName}
+URL: ${activeUrl ? activeUrl.substring(0, 80) + '...' : 'N/A'}
+
+Template usada para render:
+ID: ${activeId}
+Nombre: ${activeName}
+URL: ${activeUrl ? activeUrl.substring(0, 80) + '...' : 'N/A'}`);
 
     const runRender = () => {
       drawDynamicText(ctx, course, prog);
@@ -347,7 +376,7 @@ export default function AcademiaLean({
     const width = 1200;
     const height = 850;
 
-    const isCustom = !!certConfig.background && certConfig.useCustomTemplate !== false;
+    // Utiliza isCustom del componente
 
     // Helper para posiciones relativas en porcentaje
     const p = certConfig.positions || {};
@@ -509,15 +538,24 @@ export default function AcademiaLean({
     )}`;
 
     const p = certConfig.positions || {};
-    const isCustom = !!certConfig.background && certConfig.useCustomTemplate !== false;
 
     // Loguear plantilla utilizada para generación
-    const activeId = isCustom ? "custom-template" : "default-template";
+    const activeId = isCustom ? "custom-template" : "corporate-standard";
     const activeName = isCustom ? (certConfig.templateName || "Personalizada") : "Plantilla Corporativa Estándar";
     const activeUrl = isCustom ? (certConfig.templateUrl || "Base64") : "Interno";
     const logData = { id: activeId, name: activeName, url: activeUrl };
     localStorage.setItem('lgb_generation_log', JSON.stringify(logData));
-    console.log("Plantilla utilizada para generación:", logData);
+    
+    console.log(`[LGB TEMPLATE LOG] Generación PDF (Impresión):
+Template Activa:
+ID: ${activeId}
+Nombre: ${activeName}
+URL: ${activeUrl ? activeUrl.substring(0, 80) + '...' : 'N/A'}
+
+Template usada para render:
+ID: ${activeId}
+Nombre: ${activeName}
+URL: ${activeUrl ? activeUrl.substring(0, 80) + '...' : 'N/A'}`);
 
     const certificateContainerStyle = isCustom
       ? `background-image: url('${certConfig.background}'); background-size: 100% 100%; background-repeat: no-repeat;`
@@ -1696,60 +1734,94 @@ export default function AcademiaLean({
                 id="printable-certificate-element"
                 className="w-full min-w-[700px] aspect-[297/210] relative bg-[#f8fafc] rounded-2xl overflow-hidden border border-slate-200/60 dark:border-slate-800/40 shadow-lg select-none @container"
               >
-                {/* Triángulo superior izquierdo */}
-                <div 
-                  className="absolute top-0 left-0 w-[28%] h-[28%] bg-gradient-to-br from-[#0090e1] to-[#005ea2]" 
-                  style={{ clipPath: 'polygon(0 0, 100% 0, 0 100%)' }}
-                />
+                {/* Fondo */}
+                {isCustom && certConfig.background ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img 
+                    src={certConfig.background} 
+                    alt="Fondo Certificado" 
+                    className="absolute inset-0 w-full h-full object-cover pointer-events-none" 
+                  />
+                ) : (
+                  <>
+                    {/* Triángulo superior izquierdo */}
+                    <div 
+                      className="absolute top-0 left-0 w-[28%] h-[28%] bg-gradient-to-br from-[#0090e1] to-[#005ea2]" 
+                      style={{ clipPath: 'polygon(0 0, 100% 0, 0 100%)' }}
+                    />
 
-                {/* Sello Lean Enterprise */}
-                <div className="absolute top-[4%] left-[4%] w-[10%] aspect-square rounded-full border border-dashed border-white/80 flex flex-col items-center justify-center text-white z-10">
-                  <div className="absolute inset-[4%] rounded-full border border-white/90" />
-                  <span className="text-[0.6cqw] font-extrabold uppercase tracking-wide opacity-90 mt-[10%]">Flex Lean</span>
-                  <span className="text-[1.8cqw] font-black leading-none my-[4%]">LGB</span>
-                  <span className="text-[0.55cqw] font-bold uppercase tracking-wide opacity-90">Enterprise</span>
-                </div>
+                    {/* Sello Lean Enterprise */}
+                    <div className="absolute top-[4%] left-[4%] w-[10%] aspect-square rounded-full border border-dashed border-white/80 flex flex-col items-center justify-center text-white z-10">
+                      <div className="absolute inset-[4%] rounded-full border border-white/90" />
+                      <span className="text-[0.6cqw] font-extrabold uppercase tracking-wide opacity-90 mt-[10%]">Flex Lean</span>
+                      <span className="text-[1.8cqw] font-black leading-none my-[4%]">LGB</span>
+                      <span className="text-[0.55cqw] font-bold uppercase tracking-wide opacity-90">Enterprise</span>
+                    </div>
 
-                {/* Contenido principal */}
-                <div className="absolute inset-0 flex flex-col items-center justify-center text-center pt-[8%] pb-[7%] px-[5%] box-border">
-                  <h1 className="text-[4.6cqw] font-black tracking-[0.4em] text-[#007fc4] leading-none uppercase m-0">
-                    RECOGNITION
-                  </h1>
-                  <p className="text-[1.5cqw] font-bold text-slate-500 uppercase mt-[1%] mb-[3%]">
-                    Lean Academy Certification Program
-                  </p>
+                    {/* Elementos Estáticos de Cabecera */}
+                    <div className="absolute top-[17.5%] left-0 w-full text-center text-[#007fc4] font-black uppercase tracking-[0.4em] text-[4.6cqw] leading-none pointer-events-none">
+                      RECOGNITION
+                    </div>
+                    <div className="absolute top-[24%] left-0 w-full text-center text-slate-500 font-bold uppercase text-[1.5cqw] leading-none pointer-events-none">
+                      Lean Academy Certification Program
+                    </div>
 
-                  <div className="text-[1.4cqw] text-slate-400 font-semibold italic mb-[0.5%]">
-                    Awarded to:
-                  </div>
-                  <h2 className="text-[3.2cqw] font-black text-slate-850 m-0 font-serif leading-none">
-                    {user.Nombre}
-                  </h2>
-                  <div className="text-[1.2cqw] text-slate-500 font-bold mt-[1%] mb-[3%]">
-                    Employee ID: {user.ID} &nbsp;|&nbsp; Department: {user.Departamento}
-                  </div>
+                    {/* Etiqueta Awarded To */}
+                    <div className="absolute top-[31.5%] left-0 w-full text-center text-slate-400 font-semibold italic text-[1.4cqw] leading-none pointer-events-none">
+                      Awarded to:
+                    </div>
 
-                  <div className="text-[1.35cqw] text-slate-400 font-semibold mb-[0.8%]">
-                    For successfully completing and demonstrating proficiency in:
-                  </div>
-                  <h3 className="text-[2.2cqw] font-extrabold text-[#0284c7] m-0 font-serif leading-none uppercase">
-                    {selectedCertCourse.name}
-                  </h3>
+                    {/* Etiqueta Proficiency */}
+                    <div className="absolute top-[52%] left-0 w-full text-center text-slate-400 font-semibold text-[1.35cqw] leading-none pointer-events-none">
+                      For successfully completing and demonstrating proficiency in:
+                    </div>
+                  </>
+                )}
 
-                  <div className="flex gap-[2cqw] text-[1.2cqw] text-slate-500 font-bold mt-[3%] mb-[2%]">
-                    <span>Score: {progress[selectedCertCourse.id]?.examScore}%</span>
-                    <span className="text-[#007fc4]">•</span>
-                    <span>Completion Date: {progress[selectedCertCourse.id]?.completionDate}</span>
-                    <span className="text-[#007fc4]">•</span>
-                    <span>Status: Approved</span>
-                  </div>
-                </div>
+                {/* TEXTOS DINÁMICOS SOBREIMPRESOS EN VIVO O SEGÚN POSICIONES */}
+                {Object.entries(certConfig.positions || {}).map(([key, pos]) => {
+                  if (!pos.visible) return null;
 
-                {/* Fila inferior con firmas y QR */}
-                <div className="absolute bottom-[9%] left-0 w-full px-[6%] box-border flex items-end justify-between">
+                  const getText = (k: string) => {
+                    switch (k) {
+                      case 'nombreEmpleado': return user.Nombre;
+                      case 'numEmpleado': return `Employee ID: ${user.ID}   |   Department: ${user.Departamento}`;
+                      case 'nombreCurso': return selectedCertCourse.name.toUpperCase();
+                      case 'fechaCompletado': return `Completion Date: ${progress[selectedCertCourse.id]?.completionDate || ''}`;
+                      case 'calificacion': return `Score: ${progress[selectedCertCourse.id]?.examScore || 0}%  |  Status: Approved`;
+                      case 'folio': return `Evidence ID: ${progress[selectedCertCourse.id]?.certificateFolio || ''}`;
+                      default: return '';
+                    }
+                  };
+
+                  const txt = getText(key);
+                  if (!txt) return null;
+
+                  const style: React.CSSProperties = {
+                    position: 'absolute',
+                    left: `${pos.x}%`,
+                    top: `${pos.y}%`,
+                    transform: 'translate(-50%, -50%)',
+                    fontSize: `${(pos.fontSize / 1200) * 100}cqw`,
+                    fontWeight: 'bold',
+                    textAlign: 'center',
+                    whiteSpace: 'nowrap',
+                    color: key === 'nombreCurso' ? '#0284c7' : (key === 'folio' ? '#64748b' : (certConfig.textColor || '#0f172a')),
+                    fontFamily: (key === 'nombreEmpleado' || key === 'nombreCurso') ? 'Georgia, serif' : 'sans-serif',
+                  };
+
+                  return (
+                    <div key={key} style={style} className="pointer-events-none rounded px-2.5 py-0.5 border border-transparent">
+                      {txt}
+                    </div>
+                  );
+                })}
+
+                {/* Fila inferior con firmas y QR (siempre visibles, pero ajustándose a si es personalizado) */}
+                <div className="absolute bottom-[9%] left-0 w-full px-[6%] box-border flex items-end justify-between pointer-events-none">
                   {/* Código QR */}
                   <img 
-                    className="w-[9%] aspect-square border border-slate-200 p-[0.3cqw] bg-white rounded-lg"
+                    className="w-[9%] aspect-square border border-slate-200 p-[0.3cqw] bg-white rounded-lg pointer-events-auto"
                     src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(
                       `Folio: ${progress[selectedCertCourse.id]?.certificateFolio}\nColaborador: ${user.Nombre} (${user.ID})\nCurso: ${selectedCertCourse.name}\nFecha: ${progress[selectedCertCourse.id]?.completionDate}\nEstatus: Certificado`
                     )}`}
@@ -1757,35 +1829,41 @@ export default function AcademiaLean({
                   />
 
                   {/* Evidence Folio */}
-                  <div className="flex flex-col items-center font-mono text-[0.9cqw] text-slate-400 font-bold">
-                    <span className="uppercase text-[0.8cqw] tracking-wider font-sans font-semibold text-slate-400/80">Evidence ID</span>
-                    <span className="mt-[0.2cqw]">{progress[selectedCertCourse.id]?.certificateFolio}</span>
-                  </div>
+                  {!isCustom && (
+                    <div className="flex flex-col items-center font-mono text-[0.9cqw] text-slate-400 font-bold">
+                      <span className="uppercase text-[0.8cqw] tracking-wider font-sans font-semibold text-slate-400/80">Evidence ID</span>
+                      <span className="mt-[0.2cqw]">{progress[selectedCertCourse.id]?.certificateFolio}</span>
+                    </div>
+                  )}
 
                   {/* Firmas */}
-                  <div className="flex gap-[3cqw]">
-                    <div className="flex flex-col items-center w-[16cqw]">
-                      <div className="w-full border-b border-slate-300 h-[2.5cqw] relative flex items-end justify-center">
-                        <span className="font-serif italic text-[1.6cqw] text-[#005ea2] font-semibold leading-none pb-[0.2cqw]">Lean Academy</span>
+                  {!isCustom && (
+                    <div className="flex gap-[3cqw]">
+                      <div className="flex flex-col items-center w-[16cqw]">
+                        <div className="w-full border-b border-slate-300 h-[2.5cqw] relative flex items-end justify-center">
+                          <span className="font-serif italic text-[1.6cqw] text-[#005ea2] font-semibold leading-none pb-[0.2cqw]">Lean Academy</span>
+                        </div>
+                        <span className="text-[1cqw] font-extrabold text-slate-700 mt-[0.5cqw] leading-none">Ing. Luis Hernández</span>
+                        <span className="text-[0.8cqw] font-bold text-slate-400 uppercase tracking-wider mt-[0.2cqw]">Lean Academy Director</span>
                       </div>
-                      <span className="text-[1cqw] font-extrabold text-slate-700 mt-[0.5cqw] leading-none">Ing. Luis Hernández</span>
-                      <span className="text-[0.8cqw] font-bold text-slate-400 uppercase tracking-wider mt-[0.2cqw]">Lean Academy Director</span>
-                    </div>
 
-                    <div className="flex flex-col items-center w-[16cqw]">
-                      <div className="w-full border-b border-slate-300 h-[2.5cqw] relative flex items-end justify-center">
-                        <span className="font-serif italic text-[1.6cqw] text-[#005ea2] font-semibold leading-none pb-[0.2cqw]">Philo B29</span>
+                      <div className="flex flex-col items-center w-[16cqw]">
+                        <div className="w-full border-b border-slate-300 h-[2.5cqw] relative flex items-end justify-center">
+                          <span className="font-serif italic text-[1.6cqw] text-[#005ea2] font-semibold leading-none pb-[0.2cqw]">Philo B29</span>
+                        </div>
+                        <span className="text-[1cqw] font-extrabold text-slate-700 mt-[0.5cqw] leading-none">Dir. Alejandro Ruiz</span>
+                        <span className="text-[0.8cqw] font-bold text-slate-400 uppercase tracking-wider mt-[0.2cqw]">Plant Manager</span>
                       </div>
-                      <span className="text-[1cqw] font-extrabold text-slate-700 mt-[0.5cqw] leading-none">Dir. Alejandro Ruiz</span>
-                      <span className="text-[0.8cqw] font-bold text-slate-400 uppercase tracking-wider mt-[0.2cqw]">Plant Manager</span>
                     </div>
-                  </div>
+                  )}
                 </div>
 
                 {/* Barra inferior Flex */}
-                <div className="absolute bottom-0 left-0 w-full h-[6.5%] bg-gradient-to-r from-[#005ea2] to-[#0090e1] flex items-center justify-end px-[5%] box-border">
-                  <span className="text-[#ffffff] text-[2.2cqw] font-black italic tracking-tighter leading-none select-none">flex</span>
-                </div>
+                {!isCustom && (
+                  <div className="absolute bottom-0 left-0 w-full h-[6.5%] bg-gradient-to-r from-[#005ea2] to-[#0090e1] flex items-center justify-end px-[5%] box-border">
+                    <span className="text-[#ffffff] text-[2.2cqw] font-black italic tracking-tighter leading-none select-none">flex</span>
+                  </div>
+                )}
               </div>
 
               {/* Canvas oculto para descarga PNG */}

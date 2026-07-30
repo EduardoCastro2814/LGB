@@ -25,6 +25,24 @@ export default function ConfigCertificates({ certConfig, onSaveConfig }: ConfigC
     }
   }, []);
 
+  React.useEffect(() => {
+    const isCustom = !!certConfig.background && certConfig.useCustomTemplate !== false;
+    const activeId = isCustom ? "custom-template" : "corporate-standard";
+    const activeName = isCustom ? (certConfig.templateName || "Personalizada") : "Plantilla Corporativa Estándar";
+    const activeUrl = isCustom ? (certConfig.templateUrl || "Base64") : "Interno";
+
+    console.log(`[LGB TEMPLATE LOG] Vista Previa (Admin Config):
+Template Activa:
+ID: ${activeId}
+Nombre: ${activeName}
+URL: ${activeUrl ? activeUrl.substring(0, 80) + '...' : 'N/A'}
+
+Template usada para render:
+ID: ${activeId}
+Nombre: ${activeName}
+URL: ${activeUrl ? activeUrl.substring(0, 80) + '...' : 'N/A'}`);
+  }, [certConfig]);
+
   // Claves y etiquetas amigables
   const labelsMap: Record<string, string> = {
     nombreEmpleado: 'Nombre de Colaborador',
