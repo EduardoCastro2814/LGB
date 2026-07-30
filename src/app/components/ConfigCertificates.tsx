@@ -12,6 +12,18 @@ interface ConfigCertificatesProps {
 export default function ConfigCertificates({ certConfig, onSaveConfig }: ConfigCertificatesProps) {
   const [activeLabel, setActiveLabel] = useState<string>('nombreEmpleado');
   const [dragActive, setDragActive] = useState(false);
+  const [generationLog, setGenerationLog] = useState<{ id: string; name: string; url: string } | null>(null);
+
+  React.useEffect(() => {
+    const raw = localStorage.getItem('lgb_generation_log');
+    if (raw) {
+      try {
+        setGenerationLog(JSON.parse(raw));
+      } catch (err) {
+        console.error(err);
+      }
+    }
+  }, []);
 
   // Claves y etiquetas amigables
   const labelsMap: Record<string, string> = {
@@ -54,9 +66,14 @@ export default function ConfigCertificates({ certConfig, onSaveConfig }: ConfigC
     const reader = new FileReader();
     reader.onload = (e) => {
       if (e.target?.result) {
+        const base64 = e.target.result as string;
         onSaveConfig({
           ...certConfig,
-          background: e.target.result as string,
+          background: base64,
+          templateName: file.name,
+          templateUploadDate: new Date().toLocaleString('es-MX'),
+          templateUrl: base64,
+          useCustomTemplate: true, // Se activa automáticamente al cargar
         });
       }
     };
@@ -79,10 +96,14 @@ export default function ConfigCertificates({ certConfig, onSaveConfig }: ConfigC
   };
 
   const handleRemoveBackground = () => {
-    if (confirm('¿Está seguro de eliminar el fondo personalizado? Se restablecerá la plantilla oscura corporativa estándar.')) {
+    if (confirm('¿Está seguro de eliminar la plantilla personalizada? Se restablecerá la plantilla estándar predeterminada.')) {
       onSaveConfig({
         ...certConfig,
         background: '',
+        templateName: undefined,
+        templateUploadDate: undefined,
+        templateUrl: undefined,
+        useCustomTemplate: false, // Regresa a la plantilla por defecto
       });
     }
   };
@@ -114,65 +135,142 @@ export default function ConfigCertificates({ certConfig, onSaveConfig }: ConfigC
         
         {/* Panel Lateral: Sliders y Carga de Archivos */}
         <div className="space-y-6">
-          
-          {/* Carga del Fondo */}
-          <div className="glass-panel rounded-2.5xl p-5 bg-white dark:bg-[#1e293b] border-slate-200 dark:border-[#334155] space-y-4">
-            <h4 className="text-xs font-extrabold text-slate-800 dark:text-white uppercase tracking-wider">
-              Plantilla de Fondo (.PNG / .JPG)
+          {/* Administración de Plantillas */}
+          <div className="glass-panel rounded-2.5xl p-5 bg-white border border-slate-200 space-y-4">
+            <h4 className="text-xs font-extrabold text-slate-800 uppercase tracking-wider">
+              Plantilla Activa del Sistema
             </h4>
 
-            {certConfig.background ? (
-              <div className="space-y-3">
-                <div className="relative aspect-[16/9] w-full rounded-2xl overflow-hidden border border-slate-200 dark:border-[#334155]">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={certConfig.background} alt="Fondo Certificado" className="w-full h-full object-cover" />
-                  <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
-                    <span className="text-[10px] font-bold text-white uppercase bg-emerald-500/80 px-2.5 py-1 rounded-md">Template Activo</span>
+            {/* Ficha de Plantilla Activa */}
+            <div className="p-3.5 bg-emerald-500/5 border border-emerald-500/20 rounded-xl space-y-2 text-xs font-semibold text-slate-700">
+              <div className="flex items-center gap-1.5 text-emerald-600 font-extrabold mb-1">
+                <CheckCircle2 className="w-4 h-4 flex-shrink-0" />
+                <span className="uppercase text-[10px] tracking-wider">Activa Actualmente</span>
+              </div>
+              <div className="grid grid-cols-3 gap-1">
+                <span className="text-slate-400 font-bold">Nombre:</span>
+                <span className="col-span-2 font-bold text-slate-800 truncate" title={certConfig.useCustomTemplate && certConfig.background ? (certConfig.templateName || "Personalizada") : "Plantilla Corporativa Estándar"}>
+                  {certConfig.useCustomTemplate && certConfig.background ? (certConfig.templateName || "Personalizada") : "Plantilla Corporativa Estándar"}
+                </span>
+              </div>
+              <div className="grid grid-cols-3 gap-1">
+                <span className="text-slate-400 font-bold">Cargada:</span>
+                <span className="col-span-2 text-slate-655">
+                  {certConfig.useCustomTemplate && certConfig.background ? (certConfig.templateUploadDate || "N/A") : "De fábrica"}
+                </span>
+              </div>
+              <div className="grid grid-cols-3 gap-1">
+                <span className="text-slate-400 font-bold">URL:</span>
+                <span className="col-span-2 font-mono text-[10px] text-slate-500 truncate" title={certConfig.useCustomTemplate && certConfig.background ? (certConfig.templateUrl || "Base64") : "Interno"}>
+                  {certConfig.useCustomTemplate && certConfig.background ? (certConfig.templateUrl || "Base64") : "Interno"}
+                </span>
+              </div>
+            </div>
+
+            {/* Opciones disponibles */}
+            <div className="space-y-3 pt-2">
+              <h5 className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">
+                Seleccionar Plantilla
+              </h5>
+
+              {/* Opción 1: Predeterminada */}
+              <div className={`p-3 rounded-xl border flex items-center justify-between gap-3 transition-all ${
+                !(certConfig.useCustomTemplate && certConfig.background)
+                  ? 'border-emerald-500 bg-emerald-500/5'
+                  : 'border-slate-200 bg-slate-50/50 hover:bg-slate-100'
+              }`}>
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs font-bold text-slate-800">Plantilla Estándar</p>
+                  <p className="text-[10px] text-slate-400 font-medium leading-tight">Diseño corporativo geométrico de fábrica</p>
+                </div>
+                {certConfig.useCustomTemplate && certConfig.background ? (
+                  <button
+                    type="button"
+                    onClick={() => onSaveConfig({ ...certConfig, useCustomTemplate: false })}
+                    className="py-1 px-2.5 rounded-lg text-[10px] font-bold bg-white border border-slate-200 text-slate-700 hover:bg-slate-550 transition-colors cursor-pointer shadow-sm flex-shrink-0"
+                  >
+                    Establecer como Activa
+                  </button>
+                ) : (
+                  <span className="text-[10px] font-bold text-emerald-600 uppercase bg-emerald-100 px-2 py-0.5 rounded-md flex-shrink-0">Activo</span>
+                )}
+              </div>
+
+              {/* Opción 2: Personalizada */}
+              {certConfig.background ? (
+                <div className={`p-3 rounded-xl border space-y-2.5 transition-all ${
+                  (certConfig.useCustomTemplate && certConfig.background)
+                    ? 'border-emerald-500 bg-emerald-500/5'
+                    : 'border-slate-200 bg-slate-50/50 hover:bg-slate-100'
+                }`}>
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs font-bold text-slate-800 truncate" title={certConfig.templateName || "Personalizada"}>
+                        {certConfig.templateName || "Personalizada"}
+                      </p>
+                      <p className="text-[10px] text-slate-400 font-medium leading-tight">{certConfig.templateUploadDate || "Fecha de carga"}</p>
+                    </div>
+                    <div className="flex items-center gap-1.5 flex-shrink-0">
+                      {!(certConfig.useCustomTemplate && certConfig.background) ? (
+                        <button
+                          type="button"
+                          onClick={() => onSaveConfig({ ...certConfig, useCustomTemplate: true })}
+                          className="py-1 px-2.5 rounded-lg text-[10px] font-bold bg-white border border-slate-200 text-slate-700 hover:bg-slate-550 transition-colors cursor-pointer shadow-sm"
+                        >
+                          Establecer como Activa
+                        </button>
+                      ) : (
+                        <span className="text-[10px] font-bold text-emerald-600 uppercase bg-emerald-100 px-2 py-0.5 rounded-md">Activo</span>
+                      )}
+                      <button
+                        type="button"
+                        onClick={handleRemoveBackground}
+                        className="p-1 rounded-lg text-red-500 hover:bg-red-50 transition-colors cursor-pointer"
+                        title="Eliminar Plantilla"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                  <div className="relative aspect-[16/9] w-full rounded-lg overflow-hidden border border-slate-200">
+                    <img src={certConfig.background} alt="Fondo Certificado" className="w-full h-full object-cover" />
                   </div>
                 </div>
-                <button
-                  type="button"
-                  onClick={handleRemoveBackground}
-                  className="w-full flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl text-xs font-bold bg-red-500/10 text-red-500 hover:bg-red-500/20 transition-all border border-red-500/15 cursor-pointer"
+              ) : (
+                /* Drag and drop zone */
+                <div
+                  onDragEnter={handleDrag}
+                  onDragOver={handleDrag}
+                  onDragLeave={handleDrag}
+                  onDrop={handleDrop}
+                  className={`relative border-2 border-dashed rounded-xl p-4 flex flex-col items-center justify-center text-center cursor-pointer transition-all ${
+                    dragActive
+                      ? 'border-emerald-500 bg-emerald-500/5'
+                      : 'border-slate-200 bg-slate-50/50 hover:bg-slate-100'
+                  }`}
                 >
-                  <Trash2 className="w-3.5 h-3.5" />
-                  <span>Eliminar Fondo</span>
-                </button>
-              </div>
-            ) : (
-              <div
-                onDragEnter={handleDrag}
-                onDragOver={handleDrag}
-                onDragLeave={handleDrag}
-                onDrop={handleDrop}
-                className={`relative border-2 border-dashed rounded-2xl p-5 flex flex-col items-center justify-center text-center cursor-pointer transition-all ${
-                  dragActive
-                    ? 'border-emerald-500 bg-emerald-500/5'
-                    : 'border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 hover:bg-slate-50 dark:hover:bg-slate-900'
-                }`}
-              >
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleFileChange}
-                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                />
-                <UploadCloud className="w-8 h-8 text-slate-400 dark:text-slate-500 mb-2" />
-                <h5 className="text-xs font-bold text-slate-700 dark:text-slate-350">Subir Fondo de Certificado</h5>
-                <p className="text-[9px] text-slate-400 mt-1 max-w-[200px]">Arrastra una imagen de fondo corporativo o haz clic aquí</p>
-              </div>
-            )}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileChange}
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                  />
+                  <UploadCloud className="w-6 h-6 text-slate-400 mb-1.5" />
+                  <h5 className="text-[11px] font-bold text-slate-700">Subir Nueva Plantilla</h5>
+                  <p className="text-[9px] text-slate-400 mt-0.5">Arrastra una imagen de fondo o haz clic aquí (reemplazará la anterior)</p>
+                </div>
+              )}
+            </div>
           </div>
-
           {/* Ajuste de Posición del Texto */}
-          <div className="glass-panel rounded-2.5xl p-5 bg-white dark:bg-[#1e293b] border-slate-200 dark:border-[#334155] space-y-4">
-            <div className="flex justify-between items-center pb-2 border-b border-slate-100 dark:border-[#2d3a4f]">
-              <h4 className="text-xs font-extrabold text-slate-800 dark:text-white uppercase tracking-wider">
+          <div className="glass-panel rounded-2.5xl p-5 bg-white border border-slate-200 space-y-4">
+            <div className="flex justify-between items-center pb-2 border-b border-slate-100">
+              <h4 className="text-xs font-extrabold text-slate-800 uppercase tracking-wider">
                 Alineación de Textos
               </h4>
               <button 
                 onClick={handleResetLayout}
-                className="p-1 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-white transition-colors cursor-pointer" 
+                className="p-1 rounded-lg text-slate-400 hover:text-slate-600 transition-colors cursor-pointer" 
                 title="Resetear Diseño"
               >
                 <RotateCcw className="w-3.5 h-3.5" />
@@ -183,7 +281,7 @@ export default function ConfigCertificates({ certConfig, onSaveConfig }: ConfigC
             <div>
               <label className="block text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Campo a Editar</label>
               <select
-                className="block w-full px-3 py-2 bg-slate-50 dark:bg-[#273449] border border-slate-200 dark:border-[#334155] rounded-xl text-xs font-bold cursor-pointer"
+                className="block w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold cursor-pointer"
                 value={activeLabel}
                 onChange={(e) => setActiveLabel(e.target.value)}
               >
@@ -290,7 +388,7 @@ export default function ConfigCertificates({ certConfig, onSaveConfig }: ConfigC
           <div className="relative aspect-[1200/850] w-full rounded-3xl overflow-hidden border border-slate-250 dark:border-[#2d3b50] bg-[#f8fafc] text-slate-800 shadow-2xl select-none @container">
             
             {/* Fondo */}
-            {certConfig.background ? (
+            {certConfig.useCustomTemplate && certConfig.background ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img 
                 src={certConfig.background} 
@@ -375,9 +473,9 @@ export default function ConfigCertificates({ certConfig, onSaveConfig }: ConfigC
                   case 'nombreEmpleado': return 'Carlos Pérez Morales';
                   case 'numEmpleado': return 'Employee ID: 520478   |   Department: BE';
                   case 'nombreCurso': return 'LEAN BASICS 1';
-                  case 'fechaCompletado': return 'Score: 95%      •      Completion Date: 22 de julio de 2026      •      Status: Approved';
-                  case 'calificacion': return ''; // Unido al de arriba o vacío
-                  case 'folio': return 'LGB-LEA-620547';
+                  case 'fechaCompletado': return 'Completion Date: 22 de julio de 2026';
+                  case 'calificacion': return 'Score: 95%  |  Status: Approved';
+                  case 'folio': return 'Evidence ID: LGB-LEA-620547';
                   default: return k;
                 }
               };

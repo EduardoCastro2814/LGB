@@ -318,7 +318,11 @@ const defaultCertConfig: CertificateConfig = {
     fechaCompletado: { x: 30, y: 70, fontSize: 18, visible: true },
     calificacion: { x: 70, y: 70, fontSize: 18, visible: true },
     folio: { x: 50, y: 82, fontSize: 14, visible: true },
-  }
+  },
+  templateName: "Plantilla Estándar",
+  templateUploadDate: "De fábrica",
+  templateUrl: "Interno",
+  useCustomTemplate: false,
 };
 
 function normalizeStringForSearch(str: string | null | undefined): string {

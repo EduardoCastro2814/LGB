@@ -134,5 +134,9 @@ export interface CertificateConfig {
     calificacion: TextPosition;
     folio: TextPosition;
   };
+  templateName?: string;
+  templateUploadDate?: string;
+  templateUrl?: string;
+  useCustomTemplate?: boolean;
 }
 

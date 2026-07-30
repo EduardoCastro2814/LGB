@@ -265,56 +265,78 @@ export default function AcademiaLean({
     canvas.width = width;
     canvas.height = height;
 
-    // 1. Fondo Blanco/Gris Claro
-    ctx.fillStyle = '#f8fafc';
-    ctx.fillRect(0, 0, width, height);
+    const isCustom = !!certConfig.background && certConfig.useCustomTemplate !== false;
 
-    // 2. Triángulo azul superior izquierdo
-    const topGrad = ctx.createLinearGradient(0, 0, 300, 300);
-    topGrad.addColorStop(0, '#0090e1');
-    topGrad.addColorStop(1, '#005ea2');
-    ctx.fillStyle = topGrad;
-    ctx.beginPath();
-    ctx.moveTo(0, 0);
-    ctx.lineTo(360, 0);
-    ctx.lineTo(0, 360);
-    ctx.closePath();
-    ctx.fill();
+    // Loguear plantilla utilizada para generación
+    const activeId = isCustom ? "custom-template" : "default-template";
+    const activeName = isCustom ? (certConfig.templateName || "Personalizada") : "Plantilla Corporativa Estándar";
+    const activeUrl = isCustom ? (certConfig.templateUrl || "Base64") : "Interno";
+    const logData = { id: activeId, name: activeName, url: activeUrl };
+    localStorage.setItem('lgb_generation_log', JSON.stringify(logData));
+    console.log("Plantilla utilizada para generación:", logData);
 
-    // 3. Sello circular de Lean Enterprise
-    const centerX = 110;
-    const centerY = 110;
-    const radius = 62;
-    
-    // Outer dashed circle
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.85)';
-    ctx.lineWidth = 3;
-    ctx.setLineDash([6, 6]);
-    ctx.beginPath();
-    ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
-    ctx.stroke();
-    ctx.setLineDash([]); // Reset dash
+    const runRender = () => {
+      drawDynamicText(ctx, course, prog);
+    };
 
-    // Inner solid circle
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.9)';
-    ctx.lineWidth = 1.5;
-    ctx.beginPath();
-    ctx.arc(centerX, centerY, radius - 8, 0, Math.PI * 2);
-    ctx.stroke();
+    if (isCustom) {
+      // Cargar fondo personalizado de forma asíncrona
+      const bgImg = new Image();
+      bgImg.onload = () => {
+        ctx.drawImage(bgImg, 0, 0, width, height);
+        runRender();
+      };
+      bgImg.src = certConfig.background;
+    } else {
+      // 1. Fondo Blanco/Gris Claro
+      ctx.fillStyle = '#f8fafc';
+      ctx.fillRect(0, 0, width, height);
 
-    // Seal text
-    ctx.fillStyle = '#ffffff';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.font = 'bold 9px sans-serif';
-    ctx.fillText('FLEX LEAN', centerX, centerY - 22);
-    ctx.font = 'black 22px sans-serif';
-    ctx.fillText('LGB', centerX, centerY);
-    ctx.font = 'bold 8px sans-serif';
-    ctx.fillText('ENTERPRISE', centerX, centerY + 22);
+      // 2. Triángulo azul superior izquierdo
+      const topGrad = ctx.createLinearGradient(0, 0, 300, 300);
+      topGrad.addColorStop(0, '#0090e1');
+      topGrad.addColorStop(1, '#005ea2');
+      ctx.fillStyle = topGrad;
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.lineTo(360, 0);
+      ctx.lineTo(0, 360);
+      ctx.closePath();
+      ctx.fill();
 
-    // 4. Dibujar Textos
-    drawDynamicText(ctx, course, prog);
+      // 3. Sello circular de Lean Enterprise
+      const centerX = 110;
+      const centerY = 110;
+      const radius = 62;
+      
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.85)';
+      ctx.lineWidth = 3;
+      ctx.setLineDash([6, 6]);
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.setLineDash([]); // Reset dash
+
+      // Inner solid circle
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.9)';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, radius - 8, 0, Math.PI * 2);
+      ctx.stroke();
+
+      // Seal text
+      ctx.fillStyle = '#ffffff';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.font = 'bold 9px sans-serif';
+      ctx.fillText('FLEX LEAN', centerX, centerY - 22);
+      ctx.font = 'black 22px sans-serif';
+      ctx.fillText('LGB', centerX, centerY);
+      ctx.font = 'bold 8px sans-serif';
+      ctx.fillText('ENTERPRISE', centerX, centerY + 22);
+
+      runRender();
+    }
   };
 
   const drawDynamicText = (
@@ -324,6 +346,8 @@ export default function AcademiaLean({
   ) => {
     const width = 1200;
     const height = 850;
+
+    const isCustom = !!certConfig.background && certConfig.useCustomTemplate !== false;
 
     // Helper para posiciones relativas en porcentaje
     const p = certConfig.positions || {};
@@ -340,21 +364,23 @@ export default function AcademiaLean({
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
 
-    // A. Títulos fijos estilo Flex Recognition
-    ctx.fillStyle = '#007fc4';
-    ctx.font = 'black 64px sans-serif';
-    ctx.fillText('RECOGNITION', 600, 150);
+    // A. Títulos fijos estilo Flex Recognition (solo si no es personalizado)
+    if (!isCustom) {
+      ctx.fillStyle = '#007fc4';
+      ctx.font = 'black 64px sans-serif';
+      ctx.fillText('RECOGNITION', 600, 150);
 
-    ctx.fillStyle = '#475569';
-    ctx.font = 'bold 20px sans-serif';
-    ctx.fillText('Lean Academy Certification Program', 600, 205);
+      ctx.fillStyle = '#475569';
+      ctx.font = 'bold 20px sans-serif';
+      ctx.fillText('Lean Academy Certification Program', 600, 205);
 
-    ctx.fillStyle = '#64748b';
-    ctx.font = 'italic 18px sans-serif';
-    ctx.fillText('Awarded to:', 600, 265);
+      ctx.fillStyle = '#64748b';
+      ctx.font = 'italic 18px sans-serif';
+      ctx.fillText('Awarded to:', 600, 265);
+    }
 
     // B. Nombre del Empleado
-    const nEmp = getCoords('nombreEmpleado', 50, 37.5, 44);
+    const nEmp = getCoords('nombreEmpleado', 50, 34, 42);
     if (nEmp.visible) {
       ctx.fillStyle = certConfig.textColor || '#0f172a';
       ctx.font = `bold ${nEmp.fontSize}px Georgia, serif`;
@@ -362,36 +388,46 @@ export default function AcademiaLean({
     }
 
     // C. Detalles de Empleado
-    const numEmp = getCoords('numEmpleado', 50, 44, 16);
+    const numEmp = getCoords('numEmpleado', 50, 42, 18);
     if (numEmp.visible) {
       ctx.fillStyle = '#475569';
       ctx.font = `bold ${numEmp.fontSize}px sans-serif`;
       ctx.fillText(`Employee ID: ${user.ID}   |   Department: ${user.Departamento}`, numEmp.x, numEmp.y);
     }
 
-    // D. Texto de Acreditación Fijo
-    ctx.fillStyle = '#64748b';
-    ctx.font = 'normal 18px sans-serif';
-    ctx.fillText('For successfully completing and demonstrating proficiency in:', 600, 440);
+    // D. Texto de Acreditación Fijo (solo si no es personalizado)
+    if (!isCustom) {
+      ctx.fillStyle = '#64748b';
+      ctx.font = 'normal 18px sans-serif';
+      ctx.fillText('For successfully completing and demonstrating proficiency in:', 600, 440);
+    }
 
     // E. Nombre del Curso
-    const nCur = getCoords('nombreCurso', 50, 58.8, 32);
+    const nCur = getCoords('nombreCurso', 50, 56, 36);
     if (nCur.visible) {
       ctx.fillStyle = '#0284c7';
       ctx.font = `bold ${nCur.fontSize}px Georgia, serif`;
       ctx.fillText(course.name.toUpperCase(), nCur.x, nCur.y);
     }
 
-    // F. Fila de Calificación e Info
-    const cal = getCoords('calificacion', 50, 65.5, 16);
+    // F. Fecha de Completado
+    const fComp = getCoords('fechaCompletado', 30, 70, 18);
+    if (fComp.visible) {
+      ctx.fillStyle = '#475569';
+      ctx.font = `bold ${fComp.fontSize}px sans-serif`;
+      ctx.fillText(`Completion Date: ${prog.completionDate}`, fComp.x, fComp.y);
+    }
+
+    // G. Calificación
+    const cal = getCoords('calificacion', 70, 70, 18);
     if (cal.visible) {
       ctx.fillStyle = '#475569';
       ctx.font = `bold ${cal.fontSize}px sans-serif`;
-      ctx.fillText(`Score: ${prog.examScore}%      •      Completion Date: ${prog.completionDate}      •      Status: Approved`, cal.x, cal.y);
+      ctx.fillText(`Score: ${prog.examScore}%  |  Status: Approved`, cal.x, cal.y);
     }
 
-    // G. Folio / Evidence ID
-    const fol = getCoords('folio', 26.6, 80, 13);
+    // H. Folio
+    const fol = getCoords('folio', 50, 82, 14);
     if (fol.visible) {
       ctx.textAlign = 'center';
       ctx.fillStyle = '#64748b';
@@ -399,55 +435,59 @@ export default function AcademiaLean({
       ctx.fillText(`Evidence ID: ${prog.certificateFolio}`, fol.x, fol.y);
     }
 
-    // H. Firmas Digitales
-    ctx.strokeStyle = '#94a3b8';
-    ctx.lineWidth = 1.5;
-    ctx.beginPath();
-    ctx.moveTo(680, 680);
-    ctx.lineTo(880, 680);
-    ctx.stroke();
+    // I. Firmas Digitales (solo si no es personalizado)
+    if (!isCustom) {
+      ctx.strokeStyle = '#94a3b8';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(680, 680);
+      ctx.lineTo(880, 680);
+      ctx.stroke();
 
-    ctx.fillStyle = '#005ea2';
-    ctx.font = 'italic 24px Georgia, serif';
-    ctx.fillText('Lean Academy', 780, 665);
+      ctx.fillStyle = '#005ea2';
+      ctx.font = 'italic 24px Georgia, serif';
+      ctx.fillText('Lean Academy', 780, 665);
 
-    ctx.fillStyle = '#334155';
-    ctx.font = 'bold 14px sans-serif';
-    ctx.fillText('Ing. Luis Hernández', 780, 700);
-    ctx.fillStyle = '#64748b';
-    ctx.font = 'bold 12px sans-serif';
-    ctx.fillText('Lean Academy Director', 780, 720);
+      ctx.fillStyle = '#334155';
+      ctx.font = 'bold 14px sans-serif';
+      ctx.fillText('Ing. Luis Hernández', 780, 700);
+      ctx.fillStyle = '#64748b';
+      ctx.font = 'bold 12px sans-serif';
+      ctx.fillText('Lean Academy Director', 780, 720);
 
-    ctx.strokeStyle = '#94a3b8';
-    ctx.beginPath();
-    ctx.moveTo(930, 680);
-    ctx.lineTo(1130, 680);
-    ctx.stroke();
+      ctx.strokeStyle = '#94a3b8';
+      ctx.beginPath();
+      ctx.moveTo(930, 680);
+      ctx.lineTo(1130, 680);
+      ctx.stroke();
 
-    ctx.fillStyle = '#005ea2';
-    ctx.font = 'italic 24px Georgia, serif';
-    ctx.fillText('Philo B29', 1030, 665);
+      ctx.fillStyle = '#005ea2';
+      ctx.font = 'italic 24px Georgia, serif';
+      ctx.fillText('Philo B29', 1030, 665);
 
-    ctx.fillStyle = '#334155';
-    ctx.font = 'bold 14px sans-serif';
-    ctx.fillText('Dir. Alejandro Ruiz', 1030, 700);
-    ctx.fillStyle = '#64748b';
-    ctx.font = 'bold 12px sans-serif';
-    ctx.fillText('Plant Manager', 1030, 720);
+      ctx.fillStyle = '#334155';
+      ctx.font = 'bold 14px sans-serif';
+      ctx.fillText('Dir. Alejandro Ruiz', 1030, 700);
+      ctx.fillStyle = '#64748b';
+      ctx.font = 'bold 12px sans-serif';
+      ctx.fillText('Plant Manager', 1030, 720);
+    }
 
-    // I. Barra inferior con degradado y logo
-    const footerGrad = ctx.createLinearGradient(0, 790, 1200, 790);
-    footerGrad.addColorStop(0, '#005ea2');
-    footerGrad.addColorStop(1, '#0090e1');
-    ctx.fillStyle = footerGrad;
-    ctx.fillRect(0, 795, width, 55);
+    // J. Barra inferior con degradado y logo (solo si no es personalizado)
+    if (!isCustom) {
+      const footerGrad = ctx.createLinearGradient(0, 790, 1200, 790);
+      footerGrad.addColorStop(0, '#005ea2');
+      footerGrad.addColorStop(1, '#0090e1');
+      ctx.fillStyle = footerGrad;
+      ctx.fillRect(0, 795, width, 55);
 
-    ctx.fillStyle = '#ffffff';
-    ctx.font = 'bold italic 28px sans-serif';
-    ctx.textAlign = 'right';
-    ctx.fillText('flex', 1140, 830);
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold italic 28px sans-serif';
+      ctx.textAlign = 'right';
+      ctx.fillText('flex', 1140, 830);
+    }
 
-    // J. QR Code de validación cargado dinámicamente
+    // K. QR Code de validación cargado dinámicamente
     const qrImg = new Image();
     qrImg.crossOrigin = 'anonymous';
     qrImg.onload = () => {
@@ -467,6 +507,103 @@ export default function AcademiaLean({
     const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(
       `Folio: ${prog.certificateFolio}\nColaborador: ${user.Nombre} (${user.ID})\nCurso: ${course.name}\nFecha: ${prog.completionDate}\nEstatus: Certificado`
     )}`;
+
+    const p = certConfig.positions || {};
+    const isCustom = !!certConfig.background && certConfig.useCustomTemplate !== false;
+
+    // Loguear plantilla utilizada para generación
+    const activeId = isCustom ? "custom-template" : "default-template";
+    const activeName = isCustom ? (certConfig.templateName || "Personalizada") : "Plantilla Corporativa Estándar";
+    const activeUrl = isCustom ? (certConfig.templateUrl || "Base64") : "Interno";
+    const logData = { id: activeId, name: activeName, url: activeUrl };
+    localStorage.setItem('lgb_generation_log', JSON.stringify(logData));
+    console.log("Plantilla utilizada para generación:", logData);
+
+    const certificateContainerStyle = isCustom
+      ? `background-image: url('${certConfig.background}'); background-size: 100% 100%; background-repeat: no-repeat;`
+      : `background-color: #f8fafc;`;
+
+    // Renderizar cuerpo del certificado en base a si es personalizado o estándar
+    const certificateBody = isCustom
+      ? `
+          <div class="certificate-container" style="${certificateContainerStyle}">
+            ${p.nombreEmpleado?.visible !== false ? `<div class="dynamic-text employee-name" style="left: ${p.nombreEmpleado?.x || 50}%; top: ${p.nombreEmpleado?.y || 34}%; font-size: ${((p.nombreEmpleado?.fontSize || 42) / 1200) * 297}mm; color: ${certConfig.textColor || '#0f172a'}; font-family: Georgia, serif;">${user.Nombre}</div>` : ''}
+            
+            ${p.numEmpleado?.visible !== false ? `<div class="dynamic-text employee-details" style="left: ${p.numEmpleado?.x || 50}%; top: ${p.numEmpleado?.y || 42}%; font-size: ${((p.numEmpleado?.fontSize || 18) / 1200) * 297}mm; color: #475569;">Employee ID: ${user.ID} &nbsp;|&nbsp; Department: ${user.Departamento}</div>` : ''}
+            
+            ${p.nombreCurso?.visible !== false ? `<div class="dynamic-text course-name" style="left: ${p.nombreCurso?.x || 50}%; top: ${p.nombreCurso?.y || 56}%; font-size: ${((p.nombreCurso?.fontSize || 36) / 1200) * 297}mm; color: #0284c7; font-family: Georgia, serif; text-transform: uppercase;">${course.name}</div>` : ''}
+            
+            ${p.fechaCompletado?.visible !== false ? `<div class="dynamic-text completion-date" style="left: ${p.fechaCompletado?.x || 30}%; top: ${p.fechaCompletado?.y || 70}%; font-size: ${((p.fechaCompletado?.fontSize || 18) / 1200) * 297}mm; color: #475569;">Completion Date: ${prog.completionDate}</div>` : ''}
+            
+            ${p.calificacion?.visible !== false ? `<div class="dynamic-text grade-text" style="left: ${p.calificacion?.x || 70}%; top: ${p.calificacion?.y || 70}%; font-size: ${((p.calificacion?.fontSize || 18) / 1200) * 297}mm; color: #475569;">Score: ${prog.examScore}%  |  Status: Approved</div>` : ''}
+            
+            ${p.folio?.visible !== false ? `<div class="dynamic-text evidence-id" style="left: ${p.folio?.x || 50}%; top: ${p.folio?.y || 82}%; font-size: ${((p.folio?.fontSize || 14) / 1200) * 297}mm; color: #64748b; font-family: monospace;">Evidence ID: ${prog.certificateFolio}</div>` : ''}
+
+            <img class="qr-code-custom" src="${qrUrl}" alt="Validation QR" />
+          </div>
+        `
+      : `
+          <div class="certificate-container" style="${certificateContainerStyle}">
+            <div class="corner-triangle"></div>
+            <div class="seal-container">
+              <div class="seal-outer-circle"></div>
+              <div class="seal-text-top">Flex Lean</div>
+              <div class="seal-center">LGB</div>
+              <div class="seal-text-bottom">Enterprise</div>
+            </div>
+            
+            <div class="cert-content">
+              <h1 class="title-recognition">RECOGNITION</h1>
+              <div class="subtitle">Lean Academy Certification Program</div>
+              
+              <div class="awarded-to">Awarded to:</div>
+              <h2 class="employee-name" style="font-size: ${((p.nombreEmpleado?.fontSize || 42) / 1200) * 297}mm; color: ${certConfig.textColor || '#0f172a'};">${user.Nombre}</h2>
+              <div class="employee-details" style="font-size: ${((p.numEmpleado?.fontSize || 18) / 1200) * 297}mm;">Employee ID: ${user.ID} &nbsp;|&nbsp; Department: ${user.Departamento}</div>
+              
+              <div class="proficiency-text">For successfully completing and demonstrating proficiency in:</div>
+              <h3 class="course-name" style="font-size: ${((p.nombreCurso?.fontSize || 36) / 1200) * 297}mm;">${course.name}</h3>
+              
+              <div class="stats-row" style="font-size: ${((p.calificacion?.fontSize || 18) / 1200) * 297}mm;">
+                <span>Score: ${prog.examScore}%</span>
+                <span class="stats-dot">•</span>
+                <span>Completion Date: ${prog.completionDate}</span>
+                <span class="stats-dot">•</span>
+                <span>Status: Approved</span>
+              </div>
+            </div>
+            
+            <div class="bottom-row">
+              <img class="qr-code" src="${qrUrl}" alt="Validation QR" />
+              
+              <div class="evidence-id-container" style="font-size: ${((p.folio?.fontSize || 14) / 1200) * 297}mm;">
+                <span>Evidence ID:</span>
+                <span>${prog.certificateFolio}</span>
+              </div>
+
+              <div style="display: flex; gap: 15mm;">
+                <div class="signature-block">
+                  <div class="signature-line">
+                    <span class="signature-svg">Lean Academy</span>
+                  </div>
+                  <span class="signature-name">Ing. Luis Hernández</span>
+                  <span class="signature-title">Lean Academy Director</span>
+                </div>
+                
+                <div class="signature-block">
+                  <div class="signature-line">
+                    <span class="signature-svg">Philo B29</span>
+                  </div>
+                  <span class="signature-name">Dir. Alejandro Ruiz</span>
+                  <span class="signature-title">Plant Manager</span>
+                </div>
+              </div>
+            </div>
+            
+            <div class="footer-bar">
+              <span class="flex-logo">flex</span>
+            </div>
+          </div>
+        `;
 
     const printHtml = `
       <html>
@@ -489,9 +626,27 @@ export default function AcademiaLean({
               width: 297mm;
               height: 210mm;
               position: relative;
-              background-color: #f8fafc;
               box-sizing: border-box;
               overflow: hidden;
+            }
+            
+            /* Clases para posicionamiento dinámico */
+            .dynamic-text {
+              position: absolute;
+              transform: translate(-50%, -50%);
+              text-align: center;
+              white-space: nowrap;
+              font-weight: bold;
+            }
+            .qr-code-custom {
+              position: absolute;
+              bottom: 22mm;
+              left: 18mm;
+              width: 26mm;
+              height: 26mm;
+              border: 0.3mm solid #cbd5e1;
+              padding: 1mm;
+              background-color: #ffffff;
             }
             
             .corner-triangle {
@@ -583,14 +738,11 @@ export default function AcademiaLean({
               margin-bottom: 2mm;
             }
             .employee-name {
-              font-size: 10.5mm;
-              font-weight: 800;
-              color: #0f172a;
               margin: 0 0 1.5mm 0;
               font-family: Georgia, serif;
+              font-weight: 800;
             }
             .employee-details {
-              font-size: 3.8mm;
               color: #475569;
               font-weight: 700;
               margin-bottom: 8mm;
@@ -601,17 +753,14 @@ export default function AcademiaLean({
               margin-bottom: 2.5mm;
             }
             .course-name {
-              font-size: 7.8mm;
-              font-weight: 850;
-              color: #0284c7;
               margin: 0 0 5mm 0;
               font-family: Georgia, serif;
+              font-weight: 850;
               text-transform: uppercase;
             }
             .stats-row {
               display: flex;
               gap: 6mm;
-              font-size: 3.8mm;
               color: #475569;
               font-weight: 700;
               margin-bottom: 10mm;
@@ -679,7 +828,6 @@ export default function AcademiaLean({
               flex-direction: column;
               align-items: center;
               justify-content: center;
-              font-size: 3mm;
               color: #64748b;
               font-family: monospace;
               font-weight: 700;
@@ -708,66 +856,7 @@ export default function AcademiaLean({
           </style>
         </head>
         <body>
-          <div class="certificate-container">
-            <div class="corner-triangle"></div>
-            <div class="seal-container">
-              <div class="seal-outer-circle"></div>
-              <div class="seal-text-top">Flex Lean</div>
-              <div class="seal-center">LGB</div>
-              <div class="seal-text-bottom">Enterprise</div>
-            </div>
-            
-            <div class="cert-content">
-              <h1 class="title-recognition">RECOGNITION</h1>
-              <div class="subtitle">Lean Academy Certification Program</div>
-              
-              <div class="awarded-to">Awarded to:</div>
-              <h2 class="employee-name">${user.Nombre}</h2>
-              <div class="employee-details">Employee ID: ${user.ID} &nbsp;|&nbsp; Department: ${user.Departamento}</div>
-              
-              <div class="proficiency-text">For successfully completing and demonstrating proficiency in:</div>
-              <h3 class="course-name">${course.name}</h3>
-              
-              <div class="stats-row">
-                <span>Score: ${prog.examScore}%</span>
-                <span class="stats-dot">•</span>
-                <span>Completion Date: ${prog.completionDate}</span>
-                <span class="stats-dot">•</span>
-                <span>Status: Approved</span>
-              </div>
-            </div>
-            
-            <div class="bottom-row">
-              <img class="qr-code" src="${qrUrl}" alt="Validation QR" />
-              
-              <div class="evidence-id-container">
-                <span>Evidence ID:</span>
-                <span>${prog.certificateFolio}</span>
-              </div>
-
-              <div style="display: flex; gap: 15mm;">
-                <div class="signature-block">
-                  <div class="signature-line">
-                    <span class="signature-svg">Lean Academy</span>
-                  </div>
-                  <span class="signature-name">Ing. Luis Hernández</span>
-                  <span class="signature-title">Lean Academy Director</span>
-                </div>
-                
-                <div class="signature-block">
-                  <div class="signature-line">
-                    <span class="signature-svg">Philo B29</span>
-                  </div>
-                  <span class="signature-name">Dir. Alejandro Ruiz</span>
-                  <span class="signature-title">Plant Manager</span>
-                </div>
-              </div>
-            </div>
-            
-            <div class="footer-bar">
-              <span class="flex-logo">flex</span>
-            </div>
-          </div>
+          ${certificateBody}
           <script>
             window.onload = function() {
               window.print();
