@@ -44,10 +44,62 @@ interface AcademiaLeanProps {
 // Diapositivas predeterminadas para los cursos si no tienen material cargado por el admin
 const DEFAULT_SLIDES: Record<string, { title: string; content: string }[]> = {
   'lean-basics-1': [
-    { title: 'Introducción a Lean Manufacturing', content: 'Lean es una filosofía de gestión enfocada en la reducción de los 8 tipos de desperdicios en procesos de manufactura y servicios, maximizando el valor entregado al cliente con el mínimo de recursos.' },
-    { title: 'Los 8 Desperdicios (Mudas)', content: 'Los desperdicios son actividades que no agregan valor: 1. Transporte, 2. Inventario, 3. Movimiento, 4. Espera, 5. Sobreprocesamiento, 6. Sobreproducción, 7. Defectos, y 8. Talento no utilizado.' },
-    { title: 'Valor Agregado (VA) vs No Agregado (NVA)', content: 'VA: Actividades por las que el cliente está dispuesto a pagar (cambian la forma, ajuste o función del producto). NVA: Desperdicio puro que debe ser eliminado inmediatamente.' },
-    { title: 'El Ciclo PDCA (Deming)', content: 'Es la base de la mejora continua: Planificar (Plan), Hacer (Do), Verificar (Check) y Actuar (Act). Se repite de manera infinita para estandarizar procesos y resolver problemas.' }
+    { 
+      title: '1. Bienvenida y objetivos', 
+      content: '¡Bienvenidos al curso de Lean Basics 1!\n\nEste curso está diseñado especialmente para nuestro personal operativo (DL).\n\nObjetivos del curso:\n• Aprender qué es la filosofía Lean de manera muy sencilla.\n• Entender la diferencia entre agregar valor y generar desperdicios.\n• Conocer las herramientas clave: 5S+1, VSM y Supermercados.\n• Aprender cómo proponer ideas de mejora en tu área de trabajo (Kaizen).' 
+    },
+    { 
+      title: '2. ¿Qué es Lean? (Pensamiento Esbelto)', 
+      content: 'Es una forma de trabajar enfocada en eliminar lo que no sirve (desperdicio) para concentrarnos en lo que el cliente realmente valora.\n\nIdeas principales:\n• Nació para facilitarnos el trabajo, no para hacernos trabajar más rápido.\n• Busca que las actividades fluyan sin interrupciones.\n• Su meta es lograr la máxima calidad y seguridad con el mínimo de recursos.\n• Elimina el esfuerzo innecesario de los operadores.' 
+    },
+    { 
+      title: '3. Los 5 Principios Lean', 
+      content: 'Son las cinco reglas básicas para guiar la mejora continua en planta:\n\n• 1. Especificar el Valor: Definir qué es lo que el cliente quiere y paga.\n• 2. Mapear el Flujo de Valor: Identificar todos los pasos y ver dónde se traba.\n• 3. Crear Flujo Continuo: Hacer que el material avance de un paso a otro sin detenerse.\n• 4. Sistema Pull (Jalar): Producir solo cuando el cliente o el siguiente proceso lo pide.\n• 5. Buscar la Perfección: Trabajar en mejorar un poco todos los días.' 
+    },
+    { 
+      title: '4. Historia de Lean y sus Creadores', 
+      content: 'Lean se originó en Japón, en las fábricas de Toyota (TPS), buscando competir con la producción en masa de EE.UU.:\n\n• Sakichi Toyoda: Inventó el concepto "Jidoka" (máquinas inteligentes que detectan errores y se detienen solas).\n• Kiichiro Toyoda: Impulsó el concepto "Justo a Tiempo" (producir solo lo necesario).\n• Taiichi Ohno: Diseñó el sistema de Supermercados Lean para controlar materiales.\n• Shigeo Shingo: Creó los "Poka-Yokes" (dispositivos físicos a prueba de errores).' 
+    },
+    { 
+      title: '5. Valor Agregado vs Desperdicio', 
+      content: 'En tu día a día en la estación de trabajo, realizas dos tipos de actividades:\n\n• Valor Agregado (VA):\n  Actividades que transforman el producto y por las cuales el cliente paga.\n  *Ejemplos: Ensamblar componentes, soldar, colocar tornillos.*\n\n• Desperdicio (No Valor Agregado - NVA):\n  Actividades que consumen tiempo y esfuerzo pero no aportan nada al producto.\n  *Ejemplos: Buscar herramientas, esperar material, reparar piezas.*' 
+    },
+    { 
+      title: '6. Los 8 Desperdicios Lean (Mudas)', 
+      content: 'Son los 8 enemigos del flujo eficiente en piso de producción (TIMWOODS):\n\n• T - Transporte: Mover materiales de un lado a otro innecesariamente.\n• I - Inventario: Acumulación excesiva de materia prima o piezas (WIP).\n• M - Movimiento: Caminar, agacharse o estirarse de más por mala organización.\n• W - Espera: Operador o máquina parados por falta de material o información.\n• O - Sobreproducción: Hacer más piezas o antes de que se necesiten.\n• O - Sobreprocesamiento: Hacer tareas adicionales que el cliente no pidió.\n• D - Defectos: Generar scrap o tener que re-trabajar piezas.\n• S - Talento No Utilizado: No escuchar ni aprovechar las ideas de mejora del operador.' 
+    },
+    { 
+      title: '7. Ejemplos de Desperdicios en Planta', 
+      content: 'Veamos cómo se ven los desperdicios en nuestro piso de trabajo real:\n\n• Transporte: Mover palets vacíos o llevar materiales a almacenes lejanos.\n• Inventario: Cerros de cajas acumuladas entre estaciones bloqueando pasillos.\n• Movimiento: Buscar la soldadura o las pinzas porque no tienen un lugar fijo.\n• Espera: Estar parado en la línea porque la máquina está descompuesta o falta material.\n• Sobreproducción: Hacer ensambles de más "por si acaso" llenando la mesa de trabajo.\n• Defectos: Reparar una tarjeta con componentes mal soldados.' 
+    },
+    { 
+      title: '8. Introducción a la Metodología 5S+1', 
+      content: 'Es la herramienta fundamental para tener un área de trabajo ordenada, limpia y libre de peligros.\n\n¿Por qué es importante para ti?\n• Hace que cualquier problema o anomalía sea visible al instante.\n• Reduce el tiempo perdido buscando herramientas o materiales.\n• Evita el estrés y el cansancio físico innecesario.\n• La Seguridad (+1) se coloca en el centro para proteger tu integridad física.' 
+    },
+    { 
+      title: '9. Los Pasos de las 5S+1', 
+      content: 'Consiste en 5 palabras en japonés más el enfoque de seguridad:\n\n• 1. Clasificar (Seiri): Separar lo útil de lo inútil y retirar lo que no sirve.\n• 2. Ordenar (Seiton): Un lugar para cada cosa y cada cosa en su lugar.\n• 3. Limpiar (Seiso): Limpiar a fondo e inspeccionar las máquinas para detectar fallas.\n• 4. Estandarizar (Seiketsu): Señalar visualmente las reglas de orden y limpieza.\n• 5. Disciplina (Shitsuke): Convertir los pasos anteriores en un hábito diario.\n• +1. Seguridad: Eliminar condiciones de riesgo (cables sueltos, EPP incompleto).' 
+    },
+    { 
+      title: '10. Mapeo del Flujo de Valor (VSM)', 
+      content: 'Es un diagrama visual que dibuja todo el proceso de un producto, desde el proveedor hasta el cliente final:\n\n¿Qué nos muestra?\n• El flujo físico de los materiales (cómo se mueven).\n• El flujo de información (órdenes de trabajo, programación).\n• Los cuellos de botella y áreas donde el material se estanca.\n• Los tiempos de valor agregado (ensamble) vs. tiempos de desperdicio (esperas).' 
+    },
+    { 
+      title: '11. El Supermercado Lean', 
+      content: 'Es un almacén controlado y cercano a la línea que funciona como un supermercado comercial:\n\n• Regla FIFO (PEPS): Primero en entrar, primero en salir (evita material viejo).\n• Surtido por "Water Spider": Persona dedicada a reponer stock según se consume.\n• Las 5 Reglas del "NO":\n  1. NO pensar (todo está señalizado con Kanban).\n  2. NO buscar (cada componente tiene su sitio exacto).\n  3. NO esperar (surtido asegurado).\n  4. NO escribir (sistema visual sin papeleo).\n  5. NO contar (cantidades máximas y mínimas visibles).' 
+    },
+    { 
+      title: '12. Kaizen: Mejora Continua en tu Día a Día', 
+      content: 'Kaizen significa "Cambio para mejor" (Kai = Cambio, Zen = Bueno):\n\nPrincipios clave:\n• Pequeños cambios diarios sumados logran grandes resultados a largo plazo.\n• Regla de los 3 Gen (Gemba, Genbutsu, Genjitsu): Ir al lugar de trabajo real, observar la pieza/máquina real y analizar los datos y hechos reales.\n• Cultura de Calidad: No recibas defectos, no fabriques defectos, no pases defectos.\n• ¡Cualquier operador puede proponer una idea Kaizen!' 
+    },
+    { 
+      title: '13. ¿Cómo aplicamos Lean en Flex?', 
+      content: 'En Flex construimos la "Casa Flex Lean Enterprise" (FLE):\n\n• Cimientos: Estandarización, 5S+1 y Supermercados en todas las líneas.\n• Pilares:\n  - Justo a Tiempo (JIT): Takt Time (ritmo del cliente) y flujo pieza por pieza.\n  - Jidoka: Detener la línea ante cualquier falla para corregir el problema de raíz.\n• Tu participación:\n  - Proponer ideas en el SGA (Actividades de Grupos Pequeños).\n  - Participar activamente en los talleres Kaizen de tu línea.' 
+    },
+    { 
+      title: '14. Resumen y Preparación para tu Examen', 
+      content: 'Repasemos los aprendizajes más importantes antes de evaluar tu conocimiento:\n\n• El foco de Lean es eliminar desperdicios (Mudas) para dar valor al cliente.\n• Aplica la autodisciplina y mantén tus 5S+1 al inicio y fin de tu turno.\n• Respeta las señales Kanban y el flujo FIFO del Supermercado.\n• Participa, tu opinión en el piso es la más valiosa para mejorar.\n• El examen consta de 10 preguntas. Requiere 80% para aprobar (8 correctas).\n\n¡Muchas gracias por tu compromiso con la mejora continua!' 
+    }
   ],
   '5s-1': [
     { title: 'La Metodología de las 5S + 1', content: 'Es una práctica de calidad enfocada en organizar el lugar de trabajo, mantener el orden, la limpieza y la disciplina, sumando la Seguridad (+1) como prioridad transversal.' },
@@ -1148,7 +1200,7 @@ URL: ${activeUrl ? activeUrl.substring(0, 80) + '...' : 'N/A'}`);
                       <h4 className="text-lg md:text-2xl font-extrabold text-white leading-tight">
                         {currentSlide.title}
                       </h4>
-                      <p className="mt-4 md:mt-6 text-sm md:text-base text-slate-300 font-medium leading-relaxed max-w-3xl">
+                      <p className="mt-4 md:mt-6 text-sm md:text-base text-slate-300 font-medium leading-relaxed max-w-3xl whitespace-pre-line">
                         {currentSlide.content}
                       </p>
                     </div>

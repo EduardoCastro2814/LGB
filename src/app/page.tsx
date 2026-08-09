@@ -102,38 +102,122 @@ const defaultExams: Exam[] = [
     questions: [
       {
         id: 'lb-q1',
-        text: '¿Cuál es el objetivo principal de la filosofía Lean Manufacturing?',
+        text: '¿Cuál es el objetivo principal de la filosofía Lean Manufacturing en nuestro piso de trabajo?',
         options: [
-          'Incrementar los inventarios para evitar esperas',
-          'Eliminar desperdicios y maximizar el valor entregado al cliente con el mínimo de recursos',
-          'Automatizar todas las estaciones de trabajo reemplazando operarios',
-          'Aumentar el número de inspecciones al final de la línea'
+          'Producir la mayor cantidad de piezas posible sin importar los defectos',
+          'Eliminar desperdicios para hacer el trabajo más fácil, seguro y eficiente, agregando valor para el cliente',
+          'Automatizar todas las estaciones de trabajo para reemplazar a los operadores',
+          'Aumentar el inventario en las líneas para evitar que falte material'
         ],
         correctOptionIndex: 1,
         points: 10
       },
       {
         id: 'lb-q2',
-        text: '¿Cuál de los siguientes NO es uno de los 8 desperdicios (Mudas)?',
+        text: '¿Qué es una actividad que "Agrega Valor" (VA) en la producción?',
         options: [
-          'Sobreproducción innecesaria',
-          'Movimientos innecesarios del operador',
-          'La seguridad en la línea de trabajo',
-          'Defectos y re-trabajo'
+          'Cualquier acción que transforma físicamente el producto y por la cual el cliente está dispuesto a pagar',
+          'Mover cajas de componentes de un almacén a otro de la planta',
+          'Almacenar tarjetas electrónicas en un estante durante una semana',
+          'Inspeccionar dos veces el mismo ensamble al final del turno'
+        ],
+        correctOptionIndex: 0,
+        points: 10
+      },
+      {
+        id: 'lb-q3',
+        text: 'Según los Principios Lean, ¿qué significa producir bajo el sistema "Jalar" (Pull)?',
+        options: [
+          'Empujar el material a la siguiente estación lo más rápido posible, aunque no lo necesiten',
+          'Trabajar únicamente cuando el proceso siguiente o el cliente lo solicita',
+          'Jalar físicamente los carros de material sin usar equipo de protección',
+          'Aumentar la velocidad de las máquinas al doble de su capacidad'
+        ],
+        correctOptionIndex: 1,
+        points: 10
+      },
+      {
+        id: 'lb-q4',
+        text: '¿Qué significa la palabra "Kaizen" en la cultura de mejora continua en la que participamos?',
+        options: [
+          'Trabajar más rápido bajo presión extrema para cumplir la meta de producción',
+          '"Cambio para mejor" o "Mejora Continua" a través de pequeñas acciones diarias realizadas por todos',
+          'Realizar un rediseño completo de la planta cada cinco años',
+          'Automatizar toda la maquinaria de la empresa con presupuesto ilimitado'
+        ],
+        correctOptionIndex: 1,
+        points: 10
+      },
+      {
+        id: 'lb-q5',
+        text: 'Si un operador realiza movimientos innecesarios por mala ergonomía o desorden, ¿qué desperdicio ocurre?',
+        options: [
+          'Defectos de fabricación',
+          'Movimiento innecesario del operador',
+          'Sobreproducción de piezas',
+          'Transporte de material sobrante'
+        ],
+        correctOptionIndex: 1,
+        points: 10
+      },
+      {
+        id: 'lb-q6',
+        text: '¿Por qué la "Sobreproducción" (producir de más o antes de tiempo) se considera el peor de los desperdicios?',
+        options: [
+          'Porque genera más cansancio físico al operador durante el turno',
+          'Porque oculta otros problemas en la línea y genera desperdicios adicionales como almacenamiento y transporte',
+          'Porque el cliente nos pagará un bono extra por piezas excedentes',
+          'Porque ayuda a limpiar el área de trabajo más rápido'
+        ],
+        correctOptionIndex: 1,
+        points: 10
+      },
+      {
+        id: 'lb-q7',
+        text: 'En la metodología 5S+1, ¿cuál es el objetivo principal del paso Seiso (Limpiar)?',
+        options: [
+          'Ocultar la suciedad pintando sobre el aceite tirado',
+          'Barrer el área únicamente cuando viene una visita importante a la planta',
+          'Limpiar la estación de trabajo e inspeccionar el equipo para detectar anomalías o fugas a tiempo',
+          'Tirar todas las herramientas a la basura para que no se ensucien'
         ],
         correctOptionIndex: 2,
         points: 10
       },
       {
-        id: 'lb-q3',
-        text: '¿Qué tipo de actividad agrega valor real a un producto?',
+        id: 'lb-q8',
+        text: '¿Qué representa el "+ 1" en la metodología "5S + 1" que aplicamos en Flex?',
         options: [
-          'El traslado de material de una nave a otra',
-          'La inspección minuciosa de calidad al final del turno',
-          'El proceso de ensamble y ensamble directo según especificaciones',
-          'Almacenar piezas terminadas en estantes'
+          'Un operador de soporte extra por cada línea de producción',
+          'Una hora extra obligatoria al final del turno',
+          'Seguridad (identificar y eliminar riesgos para garantizar cero accidentes)',
+          'Una inspección de calidad adicional al final del proceso'
         ],
         correctOptionIndex: 2,
+        points: 10
+      },
+      {
+        id: 'lb-q9',
+        text: '¿Cuál es el propósito principal de usar un VSM (Mapeo del Flujo de Valor)?',
+        options: [
+          'Evaluar el desempeño individual de cada operador de la línea',
+          'Graficar el sueldo de los operadores contra las horas laboradas',
+          'Ver de forma gráfica el flujo completo de información y materiales para identificar desperdicios',
+          'Diseñar el logotipo corporativo de la línea de producción'
+        ],
+        correctOptionIndex: 2,
+        points: 10
+      },
+      {
+        id: 'lb-q10',
+        text: '¿Cuál es el beneficio de aplicar la regla FIFO (PEPS) en un Supermercado Lean?',
+        options: [
+          'Que los operadores nuevos elijan primero el turno en el que desean trabajar',
+          'Asegurar que el primer material en llegar sea el primero en consumirse, evitando obsolescencia y daños',
+          'Aumentar la cantidad de material acumulado en el piso',
+          'Que el supervisor decida qué material procesar según su preferencia diaria'
+        ],
+        correctOptionIndex: 1,
         points: 10
       }
     ]
