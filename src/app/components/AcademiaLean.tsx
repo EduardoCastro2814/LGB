@@ -127,6 +127,187 @@ const DEFAULT_SLIDES: Record<string, { title: string; content: string }[]> = {
   ]
 };
 
+function renderSlideIllustration(courseId: string, slideIndex: number) {
+  if (courseId !== 'lean-basics-1') {
+    return (
+      <svg viewBox="0 0 200 200" className="w-full h-full text-emerald-500 max-w-[280px]" fill="none" stroke="currentColor" strokeWidth="2.5">
+        <circle cx="100" cy="100" r="80" strokeDasharray="5,5" className="opacity-40 text-slate-400" />
+        <path d="M70,105 L90,125 L135,80" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M100,20 L100,40 M100,160 L100,180 M20,100 L40,100 M160,100 L180,100" strokeLinecap="round" className="opacity-40" />
+      </svg>
+    );
+  }
+
+  switch (slideIndex) {
+    case 0:
+      return (
+        <svg viewBox="0 0 200 200" className="w-full h-full text-[#0082c8] max-w-[280px]" fill="none" stroke="currentColor" strokeWidth="2">
+          <rect x="50" y="40" width="100" height="130" rx="10" strokeWidth="3" />
+          <line x1="75" y1="75" x2="125" y2="75" strokeWidth="3" strokeLinecap="round" />
+          <line x1="75" y1="105" x2="125" y2="105" strokeWidth="3" strokeLinecap="round" />
+          <line x1="75" y1="135" x2="105" y2="135" strokeWidth="3" strokeLinecap="round" />
+          <circle cx="100" cy="40" r="15" fill="#f8fafc" strokeWidth="3" />
+          <path d="M95,40 L100,45 L110,35" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-emerald-500" />
+        </svg>
+      );
+    case 1:
+      return (
+        <svg viewBox="0 0 200 200" className="w-full h-full text-[#0082c8] max-w-[280px]" fill="none" stroke="currentColor" strokeWidth="2">
+          <circle cx="85" cy="85" r="35" strokeWidth="3" strokeDasharray="2,2" className="opacity-40 text-slate-450" />
+          <path d="M140,50 L145,65 L160,70 L145,75 L140,90 L135,75 L120,70 L135,65 Z" fill="#10b981" stroke="none" />
+          <path d="M70,140 L73,148 L81,150 L73,152 L70,160 L67,152 L59,150 L67,148 Z" fill="#10b981" stroke="none" />
+          <path d="M40,110 L130,110 M115,95 L135,110 L115,125" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
+          <circle cx="140" cy="110" r="10" strokeWidth="3" />
+        </svg>
+      );
+    case 2:
+      return (
+        <svg viewBox="0 0 200 200" className="w-full h-full text-[#0082c8] max-w-[280px]" fill="none" stroke="currentColor" strokeWidth="2">
+          <circle cx="100" cy="100" r="65" strokeWidth="3" strokeDasharray="10,5" />
+          <path d="M165,100 A65,65 0 0,1 100,165" strokeWidth="4.5" stroke="#10b981" strokeLinecap="round" />
+          <polygon points="105,155 100,165 105,175" fill="#10b981" stroke="none" />
+          <circle cx="100" cy="35" r="15" fill="#0082c8" stroke="none" />
+          <circle cx="165" cy="100" r="15" fill="#10b981" stroke="none" />
+          <circle cx="100" cy="165" r="15" fill="#f59e0b" stroke="none" />
+          <circle cx="35" cy="100" r="15" fill="#ec4899" stroke="none" />
+          <text x="100" y="105" textAnchor="middle" fill="#0f172a" className="text-xs font-black" stroke="none">5</text>
+        </svg>
+      );
+    case 3:
+      return (
+        <svg viewBox="0 0 200 200" className="w-full h-full text-[#0082c8] max-w-[280px]" fill="none" stroke="currentColor" strokeWidth="2">
+          <rect x="30" y="130" width="140" height="20" rx="3" fill="#e2e8f0" stroke="currentColor" strokeWidth="2.5" />
+          <line x1="50" y1="60" x2="50" y2="130" strokeWidth="6" strokeLinecap="round" />
+          <line x1="90" y1="60" x2="90" y2="130" strokeWidth="6" strokeLinecap="round" />
+          <line x1="130" y1="60" x2="130" y2="130" strokeWidth="6" strokeLinecap="round" />
+          <rect x="40" y="40" width="120" height="20" rx="5" fill="#0082c8" stroke="none" />
+          <line x1="30" y1="100" x2="170" y2="100" strokeWidth="2" strokeDasharray="5,5" className="opacity-40" />
+        </svg>
+      );
+    case 4:
+      return (
+        <svg viewBox="0 0 200 200" className="w-full h-full text-[#0082c8] max-w-[280px]" fill="none" stroke="currentColor" strokeWidth="2">
+          <line x1="100" y1="40" x2="100" y2="140" strokeWidth="4" />
+          <line x1="60" y1="140" x2="140" y2="140" strokeWidth="4" strokeLinecap="round" />
+          <line x1="50" y1="90" x2="150" y2="70" strokeWidth="4" strokeLinecap="round" />
+          <line x1="50" y1="90" x2="50" y2="120" strokeWidth="2" />
+          <path d="M35,120 L65,120 L50,130 Z" fill="#ef4444" stroke="#ef4444" strokeWidth="2" />
+          <line x1="150" y1="70" x2="150" y2="110" strokeWidth="2" />
+          <path d="M135,110 L165,110 L150,120 Z" fill="#10b981" stroke="#10b981" strokeWidth="2" />
+        </svg>
+      );
+    case 5:
+      return (
+        <svg viewBox="0 0 200 200" className="w-full h-full text-[#0082c8] max-w-[280px]" fill="none" stroke="currentColor" strokeWidth="1.5">
+          <circle cx="100" cy="100" r="30" strokeWidth="2" className="opacity-40 text-slate-400" />
+          {Array.from({ length: 8 }).map((_, i) => {
+            const angle = (i * Math.PI) / 4;
+            const x = 100 + 55 * Math.cos(angle);
+            const y = 100 + 55 * Math.sin(angle);
+            const letter = 'TIMWOODS'[i];
+            return (
+              <g key={i}>
+                <circle cx={x} cy={y} r="14" fill={i === 7 ? '#f59e0b' : '#0082c8'} stroke="none" />
+                <text x={x} y={y + 4} textAnchor="middle" fill="#ffffff" className="text-xs font-black" stroke="none">{letter}</text>
+              </g>
+            );
+          })}
+        </svg>
+      );
+    case 6:
+      return (
+        <svg viewBox="0 0 200 200" className="w-full h-full text-[#0082c8] max-w-[280px]" fill="none" stroke="currentColor" strokeWidth="2">
+          <rect x="30" y="60" width="140" height="90" rx="8" strokeWidth="3" />
+          <line x1="75" y1="60" x2="75" y2="150" strokeWidth="1.5" className="opacity-30" />
+          <line x1="125" y1="60" x2="125" y2="150" strokeWidth="1.5" className="opacity-30" />
+          <path d="M45,80 L65,100 M65,80 L45,100" stroke="#ef4444" strokeWidth="3.5" strokeLinecap="round" />
+          <path d="M135,110 L155,130 M155,110 L135,130" stroke="#ef4444" strokeWidth="3.5" strokeLinecap="round" />
+          <path d="M80,105 L120,105 L115,100 M120,105 L115,110" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      );
+    case 7:
+      return (
+        <svg viewBox="0 0 200 200" className="w-full h-full text-[#0082c8] max-w-[280px]" fill="none" stroke="currentColor" strokeWidth="2">
+          <path d="M100,30 L160,55 L160,115 C160,150 130,175 100,185 C70,175 40,150 40,115 L40,55 Z" strokeWidth="3" />
+          <path d="M100,60 L100,120 M70,90 L130,90" stroke="#10b981" strokeWidth="10" strokeLinecap="round" />
+          <path d="M100,60 L100,120 M70,90 L130,90" stroke="#ffffff" strokeWidth="4" strokeLinecap="round" />
+        </svg>
+      );
+    case 8:
+      return (
+        <svg viewBox="0 0 200 200" className="w-full h-full text-[#0082c8] max-w-[280px]" fill="none" stroke="currentColor" strokeWidth="2">
+          <circle cx="100" cy="100" r="60" strokeWidth="3" />
+          {Array.from({ length: 6 }).map((_, i) => {
+            const angle = (i * Math.PI) / 3;
+            const x2 = 100 + 60 * Math.cos(angle);
+            const y2 = 100 + 60 * Math.sin(angle);
+            return <line key={i} x1="100" y1="100" x2={x2} y2={y2} strokeWidth="1.5" className="opacity-40" />;
+          })}
+          <circle cx="100" cy="100" r="22" fill="#10b981" stroke="none" />
+          <text x="100" y="104" textAnchor="middle" fill="#ffffff" className="text-[10px] font-black" stroke="none">5S+1</text>
+        </svg>
+      );
+    case 9:
+      return (
+        <svg viewBox="0 0 200 200" className="w-full h-full text-[#0082c8] max-w-[280px]" fill="none" stroke="currentColor" strokeWidth="2">
+          <rect x="25" y="75" width="35" height="30" rx="4" />
+          <text x="42.5" y="93.5" textAnchor="middle" fill="currentColor" className="text-[9px] font-bold" stroke="none">Prov</text>
+          <rect x="140" y="75" width="35" height="30" rx="4" />
+          <text x="157.5" y="93.5" textAnchor="middle" fill="currentColor" className="text-[9px] font-bold" stroke="none">Cli</text>
+          <path d="M65,90 L135,90 M120,80 L135,90 L120,100" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+          <rect x="80" y="30" width="40" height="25" rx="3" fill="#e2e8f0" stroke="none" />
+          <line x1="100" y1="55" x2="100" y2="85" strokeWidth="1.5" strokeDasharray="3,3" />
+        </svg>
+      );
+    case 10:
+      return (
+        <svg viewBox="0 0 200 200" className="w-full h-full text-[#0082c8] max-w-[280px]" fill="none" stroke="currentColor" strokeWidth="2">
+          <rect x="35" y="45" width="130" height="110" strokeWidth="3" />
+          <line x1="35" y1="80" x2="165" y2="80" strokeWidth="3" />
+          <line x1="35" y1="115" x2="165" y2="115" strokeWidth="3" />
+          <rect x="45" y="55" width="25" height="18" rx="2" fill="#10b981" stroke="none" />
+          <rect x="80" y="55" width="25" height="18" rx="2" fill="#10b981" stroke="none" />
+          <rect x="120" y="55" width="25" height="18" rx="2" fill="#ef4444" stroke="none" />
+          <rect x="45" y="90" width="25" height="18" rx="2" fill="#10b981" stroke="none" />
+          <rect x="80" y="90" width="25" height="18" rx="2" fill="#f59e0b" stroke="none" />
+          <rect x="120" y="90" width="25" height="18" rx="2" fill="#f59e0b" stroke="none" />
+          <path d="M50,137 L140,137 M130,132 L140,137 L130,142" strokeWidth="3.5" stroke="#0082c8" strokeLinecap="round" strokeLinejoin="round" />
+          <text x="95" y="130" textAnchor="middle" fill="#0082c8" className="text-[10px] font-black" stroke="none">FIFO</text>
+        </svg>
+      );
+    case 11:
+      return (
+        <svg viewBox="0 0 200 200" className="w-full h-full text-[#0082c8] max-w-[280px]" fill="none" stroke="currentColor" strokeWidth="2">
+          <path d="M40,150 L80,150 L80,115 L120,115 L120,80 L160,80" strokeWidth="4.5" strokeLinecap="round" />
+          <path d="M45,120 L135,45 M120,40 L135,45 L130,60" strokeWidth="4.5" stroke="#10b981" strokeLinecap="round" strokeLinejoin="round" />
+          <circle cx="160" cy="80" r="10" fill="#10b981" stroke="none" />
+        </svg>
+      );
+    case 12:
+      return (
+        <svg viewBox="0 0 200 200" className="w-full h-full text-[#0082c8] max-w-[280px]" fill="none" stroke="currentColor" strokeWidth="2">
+          <polygon points="100,30 30,80 170,80" fill="#0082c8" stroke="none" />
+          <rect x="45" y="80" width="20" height="70" fill="#e2e8f0" stroke="currentColor" strokeWidth="2" />
+          <rect x="135" y="80" width="20" height="70" fill="#e2e8f0" stroke="currentColor" strokeWidth="2" />
+          <rect x="40" y="150" width="120" height="20" rx="3" fill="#475569" stroke="none" />
+          <text x="100" y="115" textAnchor="middle" fill="currentColor" className="text-[9px] font-black" stroke="none">JIT & JIDOKA</text>
+          <text x="100" y="162" textAnchor="middle" fill="#ffffff" className="text-[8px] font-bold" stroke="none">5S+1 | VSM | SUPERMARKET</text>
+        </svg>
+      );
+    case 13:
+      return (
+        <svg viewBox="0 0 200 200" className="w-full h-full text-[#0082c8] max-w-[280px]" fill="none" stroke="currentColor" strokeWidth="2">
+          <rect x="50" y="40" width="100" height="130" rx="10" strokeWidth="3" />
+          <path d="M70,80 L85,95 L125,55" stroke="#10b981" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
+          <circle cx="100" cy="130" r="20" fill="#0082c8" stroke="none" />
+          <path d="M92,130 L97,135 L108,124" stroke="#ffffff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      );
+    default:
+      return null;
+  }
+}
+
 export default function AcademiaLean({
   user,
   courses,
@@ -1139,156 +1320,168 @@ URL: ${activeUrl ? activeUrl.substring(0, 80) + '...' : 'N/A'}`);
 
       {/* VIEW: VISOR DE CURSO INDIVIDUAL (LECTURA / DIAPOSITIVAS) */}
       {activeTab === 'cursos' && selectedCourse && !activeExam && (
-        <div className="glass-panel rounded-3xl p-6 bg-white dark:bg-[#1e293b] border-slate-200 dark:border-[#334155] flex flex-col gap-6">
+        <div className="fixed inset-0 w-full h-full bg-[#f3f4f6] z-[100] flex flex-col overflow-y-auto font-sans text-slate-800 animate-fade-in relative">
           
-          {/* Header Visor */}
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-4 border-b border-slate-200 dark:border-[#2d3a4f]">
-            <div className="flex items-center gap-3">
-              <button 
-                onClick={() => setSelectedCourse(null)}
-                className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-[#273449] dark:hover:bg-[#2d3b52] text-slate-655 dark:text-[#cbd5e1] transition-colors cursor-pointer"
-              >
-                <ChevronLeft className="w-4 h-4" />
-              </button>
-              <div>
-                <span className="text-[9px] font-bold tracking-widest text-emerald-500 uppercase">Módulo de Lectura</span>
-                <h3 className="text-base font-extrabold text-slate-800 dark:text-[#f8fafc]">{selectedCourse.name}</h3>
+          {/* Fondo de Líneas Azules Corporativas de Flex */}
+          <div className="absolute inset-0 pointer-events-none overflow-hidden select-none z-0">
+            <svg className="absolute w-full h-full" viewBox="0 0 1920 1080" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <line x1="-100" y1="100" x2="1600" y2="1100" stroke="#0082C8" strokeWidth="2.5" opacity="0.15" />
+              <line x1="200" y1="-100" x2="1900" y2="900" stroke="#0082C8" strokeWidth="2" opacity="0.15" />
+              <path d="M800,1080 C850,700 1100,400 1300,450 C1450,480 1500,800 1600,1080" stroke="#0082C8" strokeWidth="2.5" strokeLinecap="round" opacity="0.15" />
+              <path d="M1200,0 C1400,200 1500,500 1450,800 C1400,1080 1920,1080 1920,1080 L1920,0 Z" fill="#e5e7eb" opacity="0.25" />
+            </svg>
+          </div>
+
+          {/* Header Visor Fullscreen */}
+          <div className="relative z-10 flex justify-between items-center px-6 py-4 bg-white/80 backdrop-blur-md border-b border-slate-200/80 shadow-sm">
+            <div className="flex items-center gap-4">
+              {/* Flex Logo */}
+              <div className="flex items-center gap-1">
+                <svg viewBox="0 0 100 35" width="85" height="30" xmlns="http://www.w3.org/2000/svg" className="text-[#0082C8] fill-current">
+                  <path d="M12,8 C9,8 7.5,9.5 7.5,12.5 L7.5,30 M3.5,14 L11.5,14" stroke="#0082C8" strokeWidth="4.5" strokeLinecap="round" fill="none" />
+                  <path d="M16.5,4 L16.5,30" stroke="#0082C8" strokeWidth="4.5" strokeLinecap="round" fill="none" />
+                  <path d="M26,20 L36,20 C36,13.5 26,13.5 26,20 C26,26.5 36,26.5 37.5,23" stroke="#0082C8" strokeWidth="4.2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+                  <path d="M54.5,12 L44.5,29" stroke="#0082C8" strokeWidth="4.2" strokeLinecap="round" fill="none" />
+                  <path d="M44.5,12.5 C48,16 51,21 54.5,28.5" stroke="#0082C8" strokeWidth="4.8" strokeLinecap="round" fill="none" />
+                </svg>
+                <span className="text-[10px] font-black text-[#0082C8] tracking-widest uppercase border-l border-slate-300 pl-3">B29 SITE</span>
               </div>
             </div>
 
-            {/* Requisito de Lectura / Estado Examen */}
-            <div className="flex items-center gap-3">
-              {progress[selectedCourse.id]?.contentViewed ? (
-                <button
-                  onClick={handleStartExam}
-                  className="flex items-center gap-1.5 px-4.5 py-2.5 rounded-xl text-xs font-bold bg-emerald-500 hover:bg-emerald-600 text-white transition-all shadow-md cursor-pointer animate-pulse"
-                >
-                  <BookOpenCheck className="w-4 h-4" />
-                  <span>Realizar Examen</span>
-                </button>
-              ) : (
-                <div className="flex items-center gap-2 bg-amber-500/10 text-amber-500 border border-amber-500/20 px-3.5 py-2 rounded-xl text-xs font-bold">
-                  <AlertCircle className="w-4 h-4 flex-shrink-0" />
-                  <span>Finaliza la lectura para habilitar el examen</span>
-                </div>
-              )}
+            <div className="hidden md:block text-center">
+              <span className="text-[10px] font-bold tracking-widest text-[#0082c8] uppercase">Curso Oficial de Capacitación</span>
+              <h1 className="text-sm font-extrabold text-slate-800">{selectedCourse.name}</h1>
             </div>
+
+            <button 
+              onClick={() => {
+                if (confirm('¿Desea salir de la capacitación? Tu progreso actual se guardará.')) {
+                  setSelectedCourse(null);
+                }
+              }}
+              className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer border border-slate-200 shadow-sm"
+            >
+              <span>Salir</span>
+              <X className="w-4 h-4" />
+            </button>
           </div>
 
-          {/* Diapositivas / Contenido de Lectura */}
+          {/* Cuerpo del Visor */}
           {(() => {
             const slides = DEFAULT_SLIDES[selectedCourse.id] || [{ title: 'Contenido Simulado', content: 'El administrador aún no ha cargado diapositivas para este curso.' }];
             const currentSlide = slides[currentSlideIndex];
             
             return (
-              <div className="flex flex-col gap-6">
+              <div className="relative z-10 flex-1 flex flex-col justify-between p-6 lg:p-12 max-w-7xl mx-auto w-full gap-8">
                 
-                {/* Diapositiva Principal */}
-                <div className="aspect-[16/9] w-full max-w-4xl mx-auto rounded-3xl bg-slate-950 text-white p-8 flex flex-col justify-between border border-slate-800 relative shadow-2xl overflow-hidden select-none">
-                  {/* Patrón de fondo */}
-                  <div className="absolute inset-0 bg-[linear-gradient(to_right,#0c1525,#0d1f39)] opacity-90" />
-                  <div className="absolute top-[-10%] right-[-10%] w-[40%] h-[40%] bg-emerald-500/10 rounded-full blur-[80px]" />
+                {/* Contenido Slide Principal */}
+                <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-8 items-center w-full">
                   
-                  {/* Contenido Diapositiva */}
-                  <div className="relative z-10">
-                    <div className="flex justify-between items-center text-[10px] font-bold text-slate-550 uppercase tracking-widest border-b border-slate-800/80 pb-3">
-                      <span>Lean Academy B29</span>
-                      <span className="text-emerald-400">{selectedCourse.name}</span>
-                    </div>
-
-                    <div className="mt-8 md:mt-12">
-                      <h4 className="text-lg md:text-2xl font-extrabold text-white leading-tight">
+                  {/* Columna Izquierda: Texto y Viñetas */}
+                  <div className="flex flex-col text-left justify-center gap-6 bg-white/70 backdrop-blur-md border border-white/40 p-8 lg:p-10 rounded-3xl shadow-xl">
+                    <div>
+                      <span className="text-xs font-bold text-[#0082c8] uppercase tracking-wider font-mono">
+                        Diapositiva {currentSlideIndex + 1} de {slides.length}
+                      </span>
+                      <h2 className="text-2xl lg:text-3.5xl font-black text-slate-900 leading-tight mt-1 mb-4 border-b border-slate-200/80 pb-3">
                         {currentSlide.title}
-                      </h4>
-                      <p className="mt-4 md:mt-6 text-sm md:text-base text-slate-300 font-medium leading-relaxed max-w-3xl whitespace-pre-line">
-                        {currentSlide.content}
-                      </p>
+                      </h2>
+                    </div>
+
+                    <div className="space-y-4 max-w-2xl">
+                      {currentSlide.content.split('\n').map((line, idx) => {
+                        const trimmed = line.trim();
+                        const isBullet = trimmed.startsWith('•') || trimmed.startsWith('*') || trimmed.startsWith('-');
+                        const isSubBullet = trimmed.startsWith('*') || trimmed.startsWith('-');
+                        
+                        if (isBullet) {
+                          const cleanLine = trimmed.replace(/^[•*\-]\s*/, '');
+                          return (
+                            <div key={idx} className={`flex items-start gap-3 text-base lg:text-lg font-medium leading-relaxed text-slate-800 ${isSubBullet ? 'pl-6 text-sm lg:text-base text-slate-600' : ''}`}>
+                              <span className={`text-[#0082c8] font-bold text-lg mt-0.5 ${isSubBullet ? 'text-xs' : ''}`}>•</span>
+                              <span>{cleanLine}</span>
+                            </div>
+                          );
+                        } else if (trimmed === '') {
+                          return <div key={idx} className="h-1.5" />;
+                        } else {
+                          return (
+                            <p key={idx} className="text-base lg:text-lg font-semibold leading-relaxed text-slate-700">
+                              {line}
+                            </p>
+                          );
+                        }
+                      })}
                     </div>
                   </div>
 
-                  {/* Pie Diapositiva */}
-                  <div className="relative z-10 flex justify-between items-center text-[10px] font-bold text-slate-500/80 border-t border-slate-800/80 pt-3">
-                    <span>Material Oficial de Capacitación</span>
-                    <span>Diapositiva {currentSlideIndex + 1} de {slides.length}</span>
+                  {/* Columna Derecha: Ilustración SVG */}
+                  <div className="flex items-center justify-center bg-white/50 backdrop-blur-md border border-white/30 p-8 lg:p-12 rounded-3xl shadow-xl aspect-square w-full max-w-md mx-auto">
+                    {renderSlideIllustration(selectedCourse.id, currentSlideIndex)}
                   </div>
+
                 </div>
 
-                {/* Controles Diapositiva */}
-                <div className="flex justify-between items-center max-w-4xl w-full mx-auto">
-                  <button
-                    onClick={handlePrevSlide}
-                    disabled={currentSlideIndex === 0}
-                    className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold border border-slate-200 dark:border-[#334155] hover:bg-slate-100 dark:hover:bg-[#273449] disabled:opacity-40 disabled:hover:bg-transparent transition-colors cursor-pointer text-slate-700 dark:text-[#cbd5e1]"
-                  >
-                    <ChevronLeft className="w-4 h-4" />
-                    <span>Anterior</span>
-                  </button>
-
-                  <div className="flex gap-1.5">
-                    {slides.map((_, idx) => (
+                {/* Footer del Visor: Progreso y Controles */}
+                <div className="w-full flex flex-col gap-4 mt-6">
+                  {/* Barra de progreso inferior */}
+                  <div>
+                    <div className="flex justify-between text-[10px] font-black text-slate-450 uppercase mb-1">
+                      <span>Progreso de Lectura</span>
+                      <span>{Math.round(((currentSlideIndex + 1) / slides.length) * 100)}%</span>
+                    </div>
+                    <div className="w-full h-2 rounded-full bg-slate-200 overflow-hidden shadow-inner">
                       <div 
-                        key={idx} 
-                        className={`h-2.5 rounded-full transition-all duration-300 ${
-                          currentSlideIndex === idx ? 'w-6 bg-emerald-500' : 'w-2.5 bg-slate-200 dark:bg-slate-800'
-                        }`}
+                        className="h-full bg-gradient-to-r from-blue-500 to-[#0082C8] transition-all duration-350"
+                        style={{ width: `${((currentSlideIndex + 1) / slides.length) * 100}%` }}
                       />
-                    ))}
+                    </div>
                   </div>
 
-                  {currentSlideIndex === slides.length - 1 ? (
+                  {/* Controles de Navegación */}
+                  <div className="flex justify-between items-center py-2">
                     <button
-                      onClick={handleFinishReading}
-                      disabled={progress[selectedCourse.id]?.contentViewed}
-                      className={`flex items-center gap-1.5 px-5 py-2.5 rounded-xl text-xs font-bold transition-all shadow-sm cursor-pointer ${
-                        progress[selectedCourse.id]?.contentViewed
-                          ? 'bg-slate-100 text-slate-400 dark:bg-[#273449] cursor-not-allowed'
-                          : 'bg-emerald-500 hover:bg-emerald-600 text-white'
-                      }`}
+                      onClick={handlePrevSlide}
+                      disabled={currentSlideIndex === 0}
+                      className="flex items-center gap-1.5 px-5 py-3 rounded-xl text-xs font-bold border border-slate-300 bg-white hover:bg-slate-50 disabled:opacity-40 disabled:hover:bg-white transition-all cursor-pointer text-slate-700 shadow-sm"
                     >
-                      <CheckCircle2 className="w-4 h-4" />
-                      <span>{progress[selectedCourse.id]?.contentViewed ? 'Lectura Completada' : 'Finalizar Lectura'}</span>
+                      <ChevronLeft className="w-4 h-4" />
+                      <span>Anterior</span>
                     </button>
-                  ) : (
-                    <button
-                      onClick={handleNextSlide}
-                      className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold bg-slate-900 dark:bg-[#f8fafc] text-white dark:text-slate-900 hover:opacity-90 transition-all cursor-pointer"
-                    >
-                      <span>Siguiente</span>
-                      <ChevronRight className="w-4 h-4" />
-                    </button>
-                  )}
-                </div>
 
-                {/* Sección de material complementario (Simulado) */}
-                <div className="mt-4 pt-6 border-t border-slate-150 dark:border-[#2d3a4f] max-w-4xl w-full mx-auto">
-                  <h4 className="text-xs font-bold text-slate-800 dark:text-[#f8fafc] uppercase tracking-wider mb-3">
-                    Material Complementario Cargado
-                  </h4>
-                  {selectedCourse.materials && selectedCourse.materials.length > 0 ? (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      {selectedCourse.materials.map(mat => (
-                        <div key={mat.id} className="flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-[#273449]/40 border border-slate-200/50 dark:border-[#334155]/50">
-                          <div className="flex items-center gap-2">
-                            <BookOpen className="w-4 h-4 text-emerald-500" />
-                            <div className="min-w-0">
-                              <p className="text-xs font-bold text-slate-700 dark:text-slate-200 truncate">{mat.name}</p>
-                              <span className="text-[9px] uppercase text-slate-400">{mat.type} {mat.size ? `(${mat.size})` : ''}</span>
-                            </div>
-                          </div>
-                          <button 
-                            onClick={() => alert(`Visualizando archivo adjunto: ${mat.name} (${mat.type})`)}
-                            className="p-1.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-500 transition-colors cursor-pointer"
-                          >
-                            <Download className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
+                    <div className="flex gap-1.5">
+                      {slides.map((_, idx) => (
+                        <button
+                          key={idx}
+                          onClick={() => setCurrentSlideIndex(idx)}
+                          className={`h-2.5 rounded-full transition-all duration-300 cursor-pointer ${
+                            currentSlideIndex === idx ? 'w-6 bg-[#0082c8]' : 'w-2.5 bg-slate-300 hover:bg-slate-400'
+                          }`}
+                        />
                       ))}
                     </div>
-                  ) : (
-                    <p className="text-xs italic text-slate-400 dark:text-slate-500">
-                      El administrador no ha adjuntado archivos PDF, PPT o Videos adicionales para este curso.
-                    </p>
-                  )}
+
+                    {currentSlideIndex === slides.length - 1 ? (
+                      <button
+                        onClick={() => {
+                          handleFinishReading();
+                          handleStartExam();
+                        }}
+                        className="flex items-center gap-1.5 px-6 py-3 rounded-xl text-xs font-bold bg-emerald-500 hover:bg-emerald-600 text-white shadow-md cursor-pointer transition-all animate-pulse"
+                      >
+                        <BookOpenCheck className="w-4 h-4" />
+                        <span>Comenzar Examen</span>
+                      </button>
+                    ) : (
+                      <button
+                        onClick={handleNextSlide}
+                        className="flex items-center gap-1.5 px-6 py-3 rounded-xl text-xs font-bold bg-[#0082c8] hover:bg-[#0070ad] text-white shadow-md transition-all cursor-pointer"
+                      >
+                        <span>Siguiente</span>
+                        <ChevronRight className="w-4 h-4" />
+                      </button>
+                    )}
+                  </div>
                 </div>
 
               </div>
@@ -1298,221 +1491,258 @@ URL: ${activeUrl ? activeUrl.substring(0, 80) + '...' : 'N/A'}`);
         </div>
       )}
 
-      {/* VIEW: MODULO DE EXAMEN INTERACTIVO */}
+      {/* VIEW: MODULO DE EXAMEN INTERACTIVO FULL-SCREEN */}
       {activeTab === 'cursos' && selectedCourse && activeExam && (
-        <div className="glass-panel rounded-3xl p-6 bg-white dark:bg-[#1e293b] border-slate-200 dark:border-[#334155] flex flex-col gap-6">
+        <div className="fixed inset-0 w-full h-full bg-[#f3f4f6] z-[100] flex flex-col overflow-y-auto font-sans text-slate-800 animate-fade-in relative select-none">
           
-          {/* Header Examen */}
-          <div className="flex justify-between items-center pb-4 border-b border-slate-200 dark:border-[#2d3a4f]">
-            <div className="flex items-center gap-3">
-              <span className="bg-emerald-500/15 p-2 rounded-xl text-emerald-500 dark:text-emerald-400">
-                <HelpCircle className="w-5 h-5" />
-              </span>
-              <div>
-                <span className="text-[9px] font-bold tracking-widest text-emerald-500 uppercase">Evaluación del Módulo</span>
-                <h3 className="text-base font-extrabold text-slate-800 dark:text-[#f8fafc]">Examen de {selectedCourse.name}</h3>
+          {/* Fondo de Líneas Azules Corporativas de Flex */}
+          <div className="absolute inset-0 pointer-events-none overflow-hidden select-none z-0">
+            <svg className="absolute w-full h-full" viewBox="0 0 1920 1080" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <line x1="-100" y1="100" x2="1600" y2="1100" stroke="#0082C8" strokeWidth="2.5" opacity="0.15" />
+              <line x1="200" y1="-100" x2="1900" y2="900" stroke="#0082C8" strokeWidth="2" opacity="0.15" />
+              <path d="M800,1080 C850,700 1100,400 1300,450 C1450,480 1500,800 1600,1080" stroke="#0082C8" strokeWidth="2.5" strokeLinecap="round" opacity="0.15" />
+              <path d="M1200,0 C1400,200 1500,500 1450,800 C1400,1080 1920,1080 1920,1080 L1920,0 Z" fill="#e5e7eb" opacity="0.25" />
+            </svg>
+          </div>
+
+          {/* Header Visor Fullscreen */}
+          <div className="relative z-10 flex justify-between items-center px-6 py-4 bg-white/80 backdrop-blur-md border-b border-slate-200/80 shadow-sm">
+            <div className="flex items-center gap-4">
+              {/* Flex Logo */}
+              <div className="flex items-center gap-1">
+                <svg viewBox="0 0 100 35" width="85" height="30" xmlns="http://www.w3.org/2000/svg" className="text-[#0082C8] fill-current">
+                  <path d="M12,8 C9,8 7.5,9.5 7.5,12.5 L7.5,30 M3.5,14 L11.5,14" stroke="#0082C8" strokeWidth="4.5" strokeLinecap="round" fill="none" />
+                  <path d="M16.5,4 L16.5,30" stroke="#0082C8" strokeWidth="4.5" strokeLinecap="round" fill="none" />
+                  <path d="M26,20 L36,20 C36,13.5 26,13.5 26,20 C26,26.5 36,26.5 37.5,23" stroke="#0082C8" strokeWidth="4.2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+                  <path d="M54.5,12 L44.5,29" stroke="#0082C8" strokeWidth="4.2" strokeLinecap="round" fill="none" />
+                  <path d="M44.5,12.5 C48,16 51,21 54.5,28.5" stroke="#0082C8" strokeWidth="4.8" strokeLinecap="round" fill="none" />
+                </svg>
+                <span className="text-[10px] font-black text-[#0082C8] tracking-widest uppercase border-l border-slate-300 pl-3">B29 SITE</span>
               </div>
             </div>
 
-            {!examResult && (
-              <span className="text-xs font-bold text-slate-500 dark:text-[#cbd5e1] bg-slate-100 dark:bg-[#273449] border border-slate-200 dark:border-[#334155] rounded-xl px-3 py-1.5">
-                Calificación Mínima: {activeExam.minScore}%
-              </span>
+            <div className="hidden md:block text-center">
+              <span className="text-[10px] font-bold tracking-widest text-[#0082c8] uppercase">Evaluación de Módulo</span>
+              <h1 className="text-sm font-extrabold text-slate-800">Examen de {selectedCourse.name}</h1>
+            </div>
+
+            {!examResult ? (
+              <button 
+                onClick={() => {
+                  if (confirm('¿Desea salir del examen? Tu progreso no se guardará y se contará como intento incompleto.')) {
+                    setSelectedCourse(null);
+                    setActiveExam(null);
+                  }
+                }}
+                className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer border border-slate-200 shadow-sm"
+              >
+                <span>Abortar Examen</span>
+                <X className="w-4 h-4" />
+              </button>
+            ) : (
+              <div className="w-[10px]" />
             )}
           </div>
 
-          {/* CUERPO DEL EXAMEN */}
-          {!examResult ? (
-            <div className="max-w-3xl w-full mx-auto flex flex-col gap-6">
-              
-              {/* Progreso Preguntas */}
-              <div>
-                <div className="flex justify-between text-xs font-bold text-slate-450 dark:text-slate-400 mb-2">
-                  <span>Pregunta {currentQuestionIndex + 1} de {activeExam.questions.length}</span>
-                  <span>{Math.round(((currentQuestionIndex + 1) / activeExam.questions.length) * 100)}% Completado</span>
+          {/* Cuerpo del Examen */}
+          <div className="relative z-10 flex-1 flex flex-col justify-between p-6 lg:p-12 max-w-4xl mx-auto w-full gap-8">
+            {!examResult ? (
+              <div className="flex-1 flex flex-col justify-center gap-6 w-full max-w-2xl mx-auto">
+                
+                {/* Indicador de Preguntas y Barra de Progreso */}
+                <div>
+                  <div className="flex justify-between items-center text-xs font-black text-slate-450 uppercase mb-2">
+                    <span>Pregunta {currentQuestionIndex + 1} de {activeExam.questions.length}</span>
+                    <span className="text-[#0082c8] font-bold">{Math.round(((currentQuestionIndex) / activeExam.questions.length) * 100)}% Respondido</span>
+                  </div>
+                  <div className="w-full h-2 rounded-full bg-slate-200 overflow-hidden shadow-inner">
+                    <div 
+                      className="h-full bg-gradient-to-r from-blue-500 to-[#0082C8] transition-all duration-350"
+                      style={{ width: `${(currentQuestionIndex / activeExam.questions.length) * 100}%` }}
+                    />
+                  </div>
                 </div>
-                <div className="w-full h-1.5 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
-                  <div 
-                    className="h-full bg-emerald-500 transition-all duration-350"
-                    style={{ width: `${((currentQuestionIndex + 1) / activeExam.questions.length) * 100}%` }}
-                  />
+
+                {/* Pregunta */}
+                {(() => {
+                  const currentQuestion = activeExam.questions[currentQuestionIndex];
+                  if (!currentQuestion) return <p className="text-center font-bold">Cargando pregunta...</p>;
+
+                  return (
+                    <div className="flex flex-col gap-6 bg-white/70 backdrop-blur-md border border-white/40 p-8 rounded-3xl shadow-xl animate-fade-in" key={currentQuestion.id}>
+                      <span className="text-[10px] font-black tracking-widest text-[#0082c8] uppercase font-mono">Pregunta de opción múltiple</span>
+                      <h3 className="text-lg lg:text-xl font-extrabold text-slate-900 leading-tight">
+                        {currentQuestion.text}
+                      </h3>
+
+                      {/* Opciones */}
+                      <div className="flex flex-col gap-3">
+                        {currentQuestion.options.map((option, idx) => {
+                          const isSelected = selectedAnswers[currentQuestion.id] === idx;
+                          return (
+                            <button
+                              key={idx}
+                              onClick={() => handleAnswerSelect(currentQuestion.id, idx)}
+                              className={`w-full text-left p-4.5 rounded-2xl border transition-all cursor-pointer flex items-center gap-3.5 text-sm font-bold shadow-sm ${
+                                isSelected
+                                  ? 'bg-[#0082c8]/10 border-[#0082c8] text-[#0070ad]'
+                                  : 'bg-white hover:bg-slate-50 border-slate-200 text-slate-700'
+                              }`}
+                            >
+                              <span className={`w-6 h-6 rounded-lg text-xs font-black flex items-center justify-center border transition-all ${
+                                isSelected 
+                                  ? 'bg-[#0082c8] border-[#0082c8] text-white' 
+                                  : 'border-slate-300 text-slate-400 bg-slate-50'
+                              }`}>
+                                {String.fromCharCode(65 + idx)}
+                              </span>
+                              <span className="font-semibold text-slate-800">{option}</span>
+                            </button>
+                          );
+                        })}
+                      </div>
+
+                      {/* Botones de Navegación del Examen */}
+                      <div className="flex justify-between items-center pt-4 border-t border-slate-250/60 mt-4">
+                        <button
+                          onClick={handlePrevQuestion}
+                          disabled={currentQuestionIndex === 0}
+                          className="flex items-center gap-1.5 px-4.5 py-2.5 rounded-xl text-xs font-bold border border-slate-300 bg-white hover:bg-slate-50 disabled:opacity-40 disabled:hover:bg-white transition-all cursor-pointer text-slate-700 shadow-sm"
+                        >
+                          <ChevronLeft className="w-4 h-4" />
+                          <span>Anterior</span>
+                        </button>
+
+                        {currentQuestionIndex === activeExam.questions.length - 1 ? (
+                          <button
+                            onClick={handleSubmitExam}
+                            disabled={Object.keys(selectedAnswers).length < activeExam.questions.length}
+                            className="flex items-center gap-1.5 px-6 py-3 rounded-xl text-xs font-bold bg-emerald-500 hover:bg-emerald-600 text-white disabled:opacity-40 disabled:hover:bg-emerald-500 shadow-md cursor-pointer transition-all animate-pulse"
+                          >
+                            <BookOpenCheck className="w-4 h-4" />
+                            <span>Finalizar Examen</span>
+                          </button>
+                        ) : (
+                          <button
+                            onClick={handleNextQuestion}
+                            className="flex items-center gap-1.5 px-6 py-3 rounded-xl text-xs font-bold bg-[#0082c8] hover:bg-[#0070ad] text-white shadow-md transition-all cursor-pointer"
+                          >
+                            <span>Siguiente</span>
+                            <ChevronRight className="w-4 h-4" />
+                          </button>
+                        )}
+                      </div>
+
+                    </div>
+                  );
+                })()}
+
+              </div>
+            ) : (
+              /* RESULTADOS DEL EXAMEN FULL-SCREEN */
+              <div className="flex-grow flex items-center justify-center">
+                <div className="max-w-md w-full text-center flex flex-col items-center py-6 bg-white/70 backdrop-blur-md border border-white/40 p-8 rounded-3xl shadow-2xl animate-fade-in">
+                  {examResult.passed ? (
+                    <>
+                      <div className="bg-emerald-500/15 p-5 rounded-full border border-emerald-500/20 text-emerald-500 mb-6">
+                        <Award className="w-16 h-16 animate-bounce" />
+                      </div>
+                      <h4 className="text-2xl font-black text-slate-900 mb-1">
+                        ¡Felicidades, Aprobaste!
+                      </h4>
+                      <p className="text-xs font-black text-emerald-500 uppercase tracking-widest mb-4">
+                        ✅ Curso Aprobado y Certificado
+                      </p>
+                      
+                      <div className="bg-white border border-slate-200 rounded-2xl p-5 w-full mb-6 text-left space-y-2.5 shadow-sm">
+                        <div className="flex justify-between text-xs font-bold text-slate-505">
+                          <span>Calificación obtenida:</span>
+                          <span className="text-emerald-500 text-base font-extrabold">{examResult.score}%</span>
+                        </div>
+                        <div className="flex justify-between text-xs font-bold text-slate-505">
+                          <span>Preguntas correctas:</span>
+                          <span className="text-slate-800">{examResult.correctCount} de {examResult.totalQuestions}</span>
+                        </div>
+                        <div className="flex justify-between text-xs font-bold text-slate-505 pt-2 border-t border-slate-200/50">
+                          <span>Mínimo requerido:</span>
+                          <span>{activeExam.minScore}%</span>
+                        </div>
+                      </div>
+
+                      <div className="flex flex-col sm:flex-row gap-3 w-full">
+                        <button
+                          onClick={() => {
+                            setSelectedCertCourse(selectedCourse);
+                            setShowCertModal(true);
+                          }}
+                          className="flex-1 flex items-center justify-center gap-1.5 py-3 px-4 rounded-xl text-xs font-bold bg-[#0082c8] hover:bg-[#0070ad] text-white shadow-md cursor-pointer transition-all"
+                        >
+                          <Award className="w-4 h-4" />
+                          <span>Ver Diploma</span>
+                        </button>
+                        <button
+                          onClick={() => {
+                            setSelectedCourse(null);
+                            setActiveExam(null);
+                            setExamResult(null);
+                          }}
+                          className="flex-1 py-3 px-4 rounded-xl text-xs font-bold border border-slate-200 bg-white hover:bg-slate-50 transition-colors cursor-pointer text-slate-700 shadow-sm"
+                        >
+                          Cerrar e Ir a la Academia
+                        </button>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="bg-red-500/15 p-5 rounded-full border border-red-500/20 text-red-500 mb-6">
+                        <AlertCircle className="w-16 h-16 animate-pulse" />
+                      </div>
+                      <h4 className="text-2xl font-black text-slate-900 mb-1">
+                        Examen No Aprobado
+                      </h4>
+                      <p className="text-xs font-black text-red-500 uppercase tracking-widest mb-4">
+                        ❌ Calificación insuficiente ({examResult.score}%)
+                      </p>
+                      <p className="text-xs text-slate-500 font-semibold leading-relaxed mb-6">
+                        Has obtenido un score de {examResult.score}%, menor al {activeExam.minScore}% requerido. Te sugerimos repasar la presentación del módulo e intentarlo de nuevo.
+                      </p>
+
+                      <div className="bg-white border border-slate-200 rounded-2xl p-5 w-full mb-6 text-left space-y-2.5 shadow-sm">
+                        <div className="flex justify-between text-xs font-bold text-slate-505">
+                          <span>Calificación obtenida:</span>
+                          <span className="text-red-500 text-base font-extrabold">{examResult.score}%</span>
+                        </div>
+                        <div className="flex justify-between text-xs font-bold text-slate-505">
+                          <span>Preguntas correctas:</span>
+                          <span className="text-slate-800">{examResult.correctCount} de {examResult.totalQuestions}</span>
+                        </div>
+                      </div>
+
+                      <div className="flex gap-3 w-full">
+                        <button
+                          onClick={handleStartExam}
+                          className="flex-1 flex items-center justify-center gap-1.5 py-3 px-4 rounded-xl text-xs font-bold bg-[#0082c8] hover:bg-[#0070ad] text-white shadow-md cursor-pointer transition-all"
+                        >
+                          <RotateCcw className="w-4 h-4" />
+                          <span>Reintentar Examen</span>
+                        </button>
+                        <button
+                          onClick={() => {
+                            setSelectedCourse(null);
+                            setActiveExam(null);
+                            setExamResult(null);
+                          }}
+                          className="flex-1 py-3 px-4 rounded-xl text-xs font-bold border border-slate-200 bg-white hover:bg-slate-50 transition-colors cursor-pointer text-slate-700 shadow-sm"
+                        >
+                          Salir
+                        </button>
+                      </div>
+                    </>
+                  )}
                 </div>
               </div>
-
-              {/* Caja de Pregunta */}
-              {(() => {
-                const currentQuestion = activeExam.questions[currentQuestionIndex];
-                if (!currentQuestion) return <p>Cargando pregunta...</p>;
-
-                return (
-                  <div className="flex flex-col gap-5 animate-fade-in" key={currentQuestion.id}>
-                    <h4 className="text-base font-bold text-slate-800 dark:text-[#f8fafc]">
-                      {currentQuestion.text}
-                    </h4>
-
-                    {/* Opciones */}
-                    <div className="flex flex-col gap-3">
-                      {currentQuestion.options.map((option, idx) => {
-                        const isSelected = selectedAnswers[currentQuestion.id] === idx;
-                        return (
-                          <button
-                            key={idx}
-                            onClick={() => handleAnswerSelect(currentQuestion.id, idx)}
-                            className={`w-full text-left p-4.5 rounded-2xl border transition-all cursor-pointer flex items-center gap-3.5 text-xs font-bold ${
-                              isSelected
-                                ? 'bg-emerald-500/10 border-emerald-500 text-emerald-600 dark:text-emerald-400 shadow-sm'
-                                : 'bg-slate-50/50 hover:bg-slate-50 dark:bg-slate-900/40 dark:hover:bg-slate-900/70 border-slate-200 dark:border-[#334155] text-slate-700 dark:text-slate-300'
-                            }`}
-                          >
-                            <span className={`w-6 h-6 rounded-lg text-[10px] font-bold flex items-center justify-center border transition-all ${
-                              isSelected 
-                                ? 'bg-emerald-500 border-emerald-500 text-white' 
-                                : 'border-slate-350 dark:border-slate-700 text-slate-400 dark:text-slate-500 bg-white dark:bg-slate-950'
-                            }`}>
-                              {String.fromCharCode(65 + idx)}
-                            </span>
-                            <span>{option}</span>
-                          </button>
-                        );
-                      })}
-                    </div>
-
-                    {/* Botones de navegación del examen */}
-                    <div className="flex justify-between items-center pt-4 border-t border-slate-150 dark:border-[#2d3a4f] mt-4">
-                      <button
-                        onClick={handlePrevQuestion}
-                        disabled={currentQuestionIndex === 0}
-                        className="flex items-center gap-1 px-4 py-2 rounded-xl text-xs font-bold border border-slate-200 dark:border-[#334155] hover:bg-slate-100 dark:hover:bg-[#273449] disabled:opacity-40 disabled:hover:bg-transparent transition-colors cursor-pointer text-slate-700 dark:text-[#cbd5e1]"
-                      >
-                        <ChevronLeft className="w-4 h-4" />
-                        <span>Anterior</span>
-                      </button>
-
-                      {currentQuestionIndex === activeExam.questions.length - 1 ? (
-                        <button
-                          onClick={handleSubmitExam}
-                          disabled={Object.keys(selectedAnswers).length < activeExam.questions.length}
-                          className="flex items-center gap-1.5 px-6 py-2.5 rounded-xl text-xs font-bold bg-emerald-500 hover:bg-emerald-600 text-white disabled:opacity-40 disabled:hover:bg-emerald-500 disabled:cursor-not-allowed shadow-md cursor-pointer transition-all"
-                        >
-                          <BookOpenCheck className="w-4 h-4" />
-                          <span>Finalizar Examen</span>
-                        </button>
-                      ) : (
-                        <button
-                          onClick={handleNextQuestion}
-                          className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold bg-slate-900 dark:bg-[#f8fafc] text-white dark:text-slate-900 hover:opacity-90 transition-all cursor-pointer"
-                        >
-                          <span>Siguiente</span>
-                          <ChevronRight className="w-4 h-4" />
-                        </button>
-                      )}
-                    </div>
-
-                  </div>
-                );
-              })()}
-
-            </div>
-          ) : (
-            /* FEEDBACK DE RESULTADOS DEL EXAMEN */
-            <div className="max-w-md w-full mx-auto text-center flex flex-col items-center py-6 animate-fade-in">
-              {examResult.passed ? (
-                <>
-                  <div className="bg-emerald-500/15 p-5 rounded-full border border-emerald-500/20 text-emerald-500 mb-6">
-                    <Award className="w-16 h-16 animate-bounce" />
-                  </div>
-                  <h4 className="text-xl font-extrabold text-slate-800 dark:text-[#f8fafc] mb-1">
-                    ¡Felicidades, Aprobaste!
-                  </h4>
-                  <p className="text-xs font-bold text-emerald-500 uppercase tracking-widest mb-3">
-                    ✅ Curso Aprobado
-                  </p>
-                  <div className="bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-[#334155] rounded-2xl p-5 w-full mb-6 text-left space-y-2.5">
-                    <div className="flex justify-between text-xs font-bold text-slate-500 dark:text-[#94a3b8]">
-                      <span>Calificación obtenida:</span>
-                      <span className="text-emerald-500 text-sm font-extrabold">{examResult.score}%</span>
-                    </div>
-                    <div className="flex justify-between text-xs font-bold text-slate-500 dark:text-[#94a3b8]">
-                      <span>Preguntas correctas:</span>
-                      <span className="text-slate-800 dark:text-[#cbd5e1]">{examResult.correctCount} de {examResult.totalQuestions}</span>
-                    </div>
-                    <div className="flex justify-between text-xs font-bold text-slate-500 dark:text-[#94a3b8] pt-2 border-t border-slate-200/50 dark:border-[#334155]/50">
-                      <span>Mínimo requerido:</span>
-                      <span>{activeExam.minScore}%</span>
-                    </div>
-                  </div>
-
-                   <div className="flex flex-col sm:flex-row gap-3 w-full">
-                    <button
-                      onClick={() => {
-                        setSelectedCertCourse(selectedCourse);
-                        setShowCertModal(true);
-                      }}
-                      className="flex-1 flex items-center justify-center gap-1.5 py-3 px-4 rounded-xl text-xs font-bold bg-emerald-500 hover:bg-emerald-600 text-white shadow-md cursor-pointer transition-colors"
-                    >
-                      <Award className="w-4 h-4" />
-                      <span>Ver Diploma de Reconocimiento</span>
-                    </button>
-                    <button
-                      onClick={() => {
-                        setSelectedCourse(null);
-                        setActiveExam(null);
-                        setExamResult(null);
-                      }}
-                      className="flex-1 py-3 px-4 rounded-xl text-xs font-bold border border-slate-200 dark:border-[#334155] hover:bg-slate-100 dark:hover:bg-[#273449] transition-colors cursor-pointer text-slate-700 dark:text-[#cbd5e1]"
-                    >
-                      Volver a la Academia
-                    </button>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <div className="bg-red-500/15 p-5 rounded-full border border-red-500/20 text-red-500 mb-6">
-                    <AlertCircle className="w-16 h-16 animate-pulse" />
-                  </div>
-                  <h4 className="text-xl font-extrabold text-slate-800 dark:text-[#f8fafc] mb-1">
-                    Examen No Aprobado
-                  </h4>
-                  <p className="text-xs font-bold text-red-500 uppercase tracking-widest mb-3">
-                    ❌ Curso Reprobado
-                  </p>
-                  <p className="text-xs text-slate-400 dark:text-[#94a3b8] font-medium leading-relaxed mb-6">
-                    Has obtenido un score menor al 80% mínimo aprobatorio. Te sugerimos repasar las diapositivas del módulo e intentarlo nuevamente. ¡Tú puedes lograrlo!
-                  </p>
-                  <div className="bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-[#334155] rounded-2xl p-5 w-full mb-6 text-left space-y-2.5">
-                    <div className="flex justify-between text-xs font-bold text-slate-500 dark:text-[#94a3b8]">
-                      <span>Calificación obtenida:</span>
-                      <span className="text-red-500 text-sm font-extrabold">{examResult.score}%</span>
-                    </div>
-                    <div className="flex justify-between text-xs font-bold text-slate-500 dark:text-[#94a3b8]">
-                      <span>Preguntas correctas:</span>
-                      <span className="text-slate-800 dark:text-[#cbd5e1]">{examResult.correctCount} de {examResult.totalQuestions}</span>
-                    </div>
-                  </div>
-
-                  <div className="flex gap-3 w-full">
-                    <button
-                      onClick={handleStartExam}
-                      className="flex-1 flex items-center justify-center gap-1.5 py-3 px-4 rounded-xl text-xs font-bold bg-amber-500 hover:bg-amber-600 text-white shadow-md cursor-pointer transition-colors"
-                    >
-                      <RotateCcw className="w-4 h-4" />
-                      <span>Reintentar Examen</span>
-                    </button>
-                    <button
-                      onClick={() => {
-                        setSelectedCourse(null);
-                        setActiveExam(null);
-                        setExamResult(null);
-                      }}
-                      className="flex-1 py-3 px-4 rounded-xl text-xs font-bold border border-slate-200 dark:border-[#334155] hover:bg-slate-100 dark:hover:bg-[#273449] transition-colors cursor-pointer text-slate-700 dark:text-[#cbd5e1]"
-                    >
-                      Volver
-                    </button>
-                  </div>
-                </>
-              )}
-            </div>
-          )}
+            )}
+          </div>
 
         </div>
       )}

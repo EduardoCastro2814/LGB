@@ -498,7 +498,13 @@ export default function DashboardPage() {
       // 3. Cargar exámenes
       const savedExams = localStorage.getItem('lgb_exams_list');
       if (savedExams) {
-        setExams(JSON.parse(savedExams));
+        let loadedExams = JSON.parse(savedExams) as Exam[];
+        const lbExamIndex = loadedExams.findIndex(e => e.courseId === 'lean-basics-1');
+        if (lbExamIndex !== -1 && loadedExams[lbExamIndex].questions.length < 10) {
+          loadedExams[lbExamIndex] = defaultExams.find(e => e.courseId === 'lean-basics-1') || defaultExams[0];
+          localStorage.setItem('lgb_exams_list', JSON.stringify(loadedExams));
+        }
+        setExams(loadedExams);
       } else {
         setExams(defaultExams);
         localStorage.setItem('lgb_exams_list', JSON.stringify(defaultExams));
@@ -584,13 +590,31 @@ export default function DashboardPage() {
               await saveSupabaseExam(e);
             }
             dbExams = await getSupabaseExams();
+          } else {
+            const lbExamIndex = dbExams.findIndex((e: any) => e.courseId === 'lean-basics-1');
+            if (lbExamIndex !== -1 && dbExams[lbExamIndex].questions.length < 10) {
+              console.log('[LGB App debug] Examen de lean-basics-1 en Supabase desactualizado. Actualizando...');
+              const updatedExam = defaultExams.find(e => e.courseId === 'lean-basics-1') || defaultExams[0];
+              dbExams[lbExamIndex] = updatedExam;
+              await saveSupabaseExam(updatedExam);
+            }
           }
           setExams(dbExams);
           localStorage.setItem('lgb_exams_list', JSON.stringify(dbExams));
         } catch (examErr) {
           console.error('[LGB App debug] Error al cargar exámenes de Supabase:', examErr);
           const savedExams = localStorage.getItem('lgb_exams_list');
-          setExams(savedExams ? JSON.parse(savedExams) : defaultExams);
+          if (savedExams) {
+            let loadedExams = JSON.parse(savedExams) as Exam[];
+            const lbExamIndex = loadedExams.findIndex(e => e.courseId === 'lean-basics-1');
+            if (lbExamIndex !== -1 && loadedExams[lbExamIndex].questions.length < 10) {
+              loadedExams[lbExamIndex] = defaultExams.find(e => e.courseId === 'lean-basics-1') || defaultExams[0];
+              localStorage.setItem('lgb_exams_list', JSON.stringify(loadedExams));
+            }
+            setExams(loadedExams);
+          } else {
+            setExams(defaultExams);
+          }
         }
 
         // 3. Cargar progreso global de Supabase
