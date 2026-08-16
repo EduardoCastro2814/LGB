@@ -40,6 +40,7 @@ interface AcademiaLeanProps {
   exams: Exam[];
   onUpdateProgress: (courseId: string, updatedProgress: Partial<UserCourseProgress>) => void;
   certConfig: CertificateConfig;
+  onToggleFullscreen?: (active: boolean) => void;
 }
 
 // Diapositivas predeterminadas para los cursos si no tienen material cargado por el admin
@@ -94,24 +95,20 @@ const DEFAULT_SLIDES: Record<string, { title: string; content: string }[]> = {
       content: 'Tres pasos clave para la cultura de mejora diaria:\n\n• 1. Identificar: Entrenar el ojo para ver los 8 desperdicios (TIM WOODS) tanto en la planta como en la oficina.\n• 2. Eliminar: Aplicar 5S+1, crear flujo y establecer sistemas Pull y Supermercados.\n• 3. Construir: Fomentar una cultura donde Kaizen, las 3 Gen y el Try-storming sean hábitos diarios.\n\n"Lean no es un proyecto, es la arquitectura de nuestra cultura operativa. Identificamos el desperdicio. Lo eliminamos. Y creamos valor extraordinario."' 
     }
   ],
-  '5s-1': [
-    { title: 'La Metodología de las 5S + 1', content: 'Es una práctica de calidad enfocada en organizar el lugar de trabajo, mantener el orden, la limpieza y la disciplina, sumando la Seguridad (+1) como prioridad transversal.' },
-    { title: '1. Seiri (Clasificar) y 2. Seiton (Ordenar)', content: 'Clasificar: Separar lo necesario de lo innecesario en el área de trabajo y descartar esto último. Ordenar: Disponer los elementos necesarios para que se puedan encontrar y usar fácilmente (un lugar para cada cosa y cada cosa en su lugar).' },
-    { title: '3. Seiso (Limpiar) y 4. Seiketsu (Estandarizar)', content: 'Limpiar: Eliminar la suciedad y realizar inspecciones detalladas para identificar anomalías. Estandarizar: Crear reglas visuales y procedimientos para mantener el estado de las primeras 3S.' },
-    { title: '5. Shitsuke (Disciplina) y +1 Seguridad', content: 'Disciplina: Convertir en hábito el mantenimiento de los estándares establecidos. Seguridad: Identificar y mitigar actos y condiciones inseguras para garantizar cero accidentes en la línea de trabajo.' }
-  ],
+  '5s-1': Array.from({ length: 10 }).map((_, i) => ({
+    title: `5S + 1 - Diapositiva ${i + 1}`,
+    content: `Contenido de la diapositiva ${i + 1} de 5S + 1.`
+  })),
   '5-whys': [
     { title: 'Análisis de Causa Raíz (RCA)', content: 'El objetivo de la resolución de problemas es eliminar la causa raíz, no el síntoma. Si solo se ataca el síntoma, el problema volverá a ocurrir en el futuro.' },
     { title: 'La Técnica de los 5 Porqués', content: 'Consiste en preguntar "¿Por qué?" sucesivamente (típicamente 5 veces) ante una falla del proceso, hasta descubrir la raíz física, humana o de sistema que la originó.' },
     { title: 'Regla de Oro: Relación Causa-Efecto', content: 'Cada paso de la cadena de porqués debe tener un sustento lógico comprovable en el piso de producción (gemba). No asuma, verifique los hechos.' },
     { title: 'Acción Correctiva vs Acción Preventiva', content: 'Correctiva: Elimina la causa raíz identificada para evitar que el problema se repita. Preventiva: Aplica la misma solución a áreas o equipos similares para evitar la primera ocurrencia.' }
   ],
-  '7-ways': [
-    { title: 'Generación de Alternativas de Solución', content: 'Ante un problema complejo, la primera idea de solución no siempre es la mejor. La herramienta "7 Ways" obliga al equipo a pensar en 7 enfoques distintos de solución.' },
-    { title: 'Metodología de Lluvia de Ideas Estructurada', content: '1. Definir el problema con claridad. 2. Aportar ideas sin juzgar inicialmente. 3. Clasificar los enfoques en al menos 7 categorías o formas distintas de resolución.' },
-    { title: 'Matriz de Evaluación de Alternativas', content: 'Evaluar las 7 soluciones bajo criterios predefinidos como: Costo de implementación, Tiempo requerido, Impacto en calidad, Complejidad técnica y Seguridad.' },
-    { title: 'Selección e Implementación', content: 'Seleccionar la mejor alternativa (o combinación de ellas) y generar un plan de acción Kaizen con responsables y fechas límite de ejecución.' }
-  ],
+  '7-ways': Array.from({ length: 10 }).map((_, i) => ({
+    title: `Seven Ways - Diapositiva ${i + 1}`,
+    content: `Contenido de la diapositiva ${i + 1} de Seven Ways.`
+  })),
   'sga-guide': [
     { title: 'Small Group Activities (SGA)', content: 'Las Actividades de Grupos Pequeños son círculos de control de calidad autoorganizados formados por personal operativo (DL) enfocados en resolver problemas de su área cotidiana.' },
     { title: 'Roles clave dentro del Equipo SGA', content: '1. Líder del Equipo: Coordina las reuniones y reporta avances. 2. Facilitador: Asesor metodológico (LGB/BB). 3. Miembros: Operadores que conocen el proceso real.' },
@@ -284,6 +281,7 @@ export default function AcademiaLean({
   exams,
   onUpdateProgress,
   certConfig,
+  onToggleFullscreen,
 }: AcademiaLeanProps) {
   const [activeTab, setActiveTab] = useState<'cursos' | 'progreso' | 'certificados' | 'perfil'>('cursos');
   
@@ -328,6 +326,17 @@ Nombre: ${activeName}
 URL: ${activeUrl ? activeUrl.substring(0, 80) + '...' : 'N/A'}`);
     }
   }, [showCertModal, selectedCertCourse, isCustom, certConfig]);
+
+  React.useEffect(() => {
+    if (onToggleFullscreen) {
+      onToggleFullscreen(!!selectedCourse);
+    }
+    return () => {
+      if (onToggleFullscreen) {
+        onToggleFullscreen(false);
+      }
+    };
+  }, [selectedCourse, onToggleFullscreen]);
 
   // Determinar si todos los cursos requeridos están aprobados
   const requiredCourseIds = ['lean-basics-1', '5s-1', '5-whys', '7-ways', 'sga-guide'];
@@ -1328,7 +1337,7 @@ URL: ${activeUrl ? activeUrl.substring(0, 80) + '...' : 'N/A'}`);
           {(() => {
             const slides = DEFAULT_SLIDES[selectedCourse.id] || [{ title: 'Contenido Simulado', content: 'No hay material disponible.' }];
             
-            if (selectedCourse.id === 'lean-basics-1') {
+            if (['lean-basics-1', '5s-1', '7-ways'].includes(selectedCourse.id)) {
               // Vista PowerPoint Real con Diapositiva PNG
               return (
                 <div className="flex-1 flex flex-col justify-between p-4 md:p-8 max-w-6xl mx-auto w-full overflow-hidden">
@@ -1337,7 +1346,7 @@ URL: ${activeUrl ? activeUrl.substring(0, 80) + '...' : 'N/A'}`);
                   <div className="flex-1 flex items-center justify-center overflow-hidden py-4">
                     <div className="relative bg-[#111827] p-2 rounded-2xl shadow-[0_25px_60px_-15px_rgba(0,0,0,0.7)] border border-white/5 aspect-[16/9] max-w-full max-h-[70vh] flex items-center justify-center">
                       <img 
-                        src={getAssetPath(`/slides/lean-basics-1/slide_${currentSlideIndex + 1}.png`)} 
+                        src={getAssetPath(`/slides/${selectedCourse.id}/slide_${currentSlideIndex + 1}.png`)} 
                         alt={`Diapositiva ${currentSlideIndex + 1}`}
                         className="max-w-full max-h-full object-contain rounded-lg select-none pointer-events-none"
                       />

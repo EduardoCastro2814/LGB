@@ -2,6 +2,12 @@
 
 import React, { useEffect, useState } from 'react';
 
+const COURSES_TO_EXTRACT = [
+  { id: 'lean-basics-1', pdfName: 'Basicos de Lean 1.pdf' },
+  { id: '5s-1', pdfName: '5s+1.pdf' },
+  { id: '7-ways', pdfName: 'Seven Ways.pdf' }
+];
+
 export default function ExtractPage() {
   const [status, setStatus] = useState('Inicializando...');
   const [logs, setLogs] = useState<string[]>([]);
@@ -12,7 +18,6 @@ export default function ExtractPage() {
   };
 
   useEffect(() => {
-    // Load PDF.js script dynamically
     const script = document.createElement('script');
     script.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js';
     script.async = true;
@@ -40,62 +45,63 @@ export default function ExtractPage() {
     const pdfjsLib = (window as any).pdfjsLib;
     pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
 
-    const pdfUrl = '/LGB/lean-basics-1.pdf';
-    addLog(`Cargando PDF desde: ${pdfUrl}`);
+    for (const course of COURSES_TO_EXTRACT) {
+      const pdfUrl = `/LGB/${course.pdfName}`;
+      addLog(`[${course.id}] Cargando PDF desde: ${pdfUrl}`);
+      setStatus(`Procesando curso: ${course.id}...`);
 
-    const loadingTask = pdfjsLib.getDocument(pdfUrl);
-    const pdf = await loadingTask.promise;
-    const numPages = pdf.numPages;
-    addLog(`PDF cargado con éxito. Total páginas: ${numPages}`);
+      const loadingTask = pdfjsLib.getDocument(pdfUrl);
+      const pdf = await loadingTask.promise;
+      const numPages = pdf.numPages;
+      addLog(`[${course.id}] PDF cargado. Total páginas: ${numPages}`);
 
-    setStatus(`Procesando 12 diapositivas...`);
+      for (let i = 1; i <= numPages; i++) {
+        addLog(`[${course.id}] Renderizando página ${i}/${numPages}...`);
+        const page = await pdf.getPage(i);
+        
+        const viewport = page.getViewport({ scale: 2.0 });
+        const canvas = document.createElement('canvas');
+        const context = canvas.getContext('2d');
+        canvas.width = viewport.width;
+        canvas.height = viewport.height;
 
-    for (let i = 1; i <= Math.min(numPages, 12); i++) {
-      addLog(`Renderizando página ${i}...`);
-      const page = await pdf.getPage(i);
-      
-      const viewport = page.getViewport({ scale: 2.0 });
-      const canvas = document.createElement('canvas');
-      const context = canvas.getContext('2d');
-      canvas.width = viewport.width;
-      canvas.height = viewport.height;
+        if (!context) {
+          throw new Error('No se pudo obtener el contexto de canvas 2D');
+        }
 
-      if (!context) {
-        throw new Error('No se pudo obtener el contexto de canvas 2D');
+        await page.render({
+          canvasContext: context,
+          viewport: viewport,
+        }).promise;
+
+        const base64 = canvas.toDataURL('image/png');
+
+        addLog(`[${course.id}] Enviando página ${i}...`);
+        const res = await fetch('/LGB/api/save-slide', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ courseId: course.id, index: i, base64 }),
+        });
+
+        if (!res.ok) {
+          const errorData = await res.json().catch(() => ({}));
+          throw new Error(errorData.error || `Error HTTP ${res.status}`);
+        }
+
+        addLog(`[${course.id}] Página ${i} guardada.`);
       }
-
-      await page.render({
-        canvasContext: context,
-        viewport: viewport,
-      }).promise;
-
-      addLog(`Página ${i} renderizada en canvas. Convirtiendo a base64...`);
-      const base64 = canvas.toDataURL('image/png');
-
-      addLog(`Enviando página ${i} al servidor...`);
-      const res = await fetch('/LGB/api/save-slide', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ index: i, base64 }),
-      });
-
-      if (!res.ok) {
-        const errorData = await res.json().catch(() => ({}));
-        throw new Error(errorData.error || `Error HTTP ${res.status}`);
-      }
-
-      addLog(`Página ${i} guardada en servidor con éxito.`);
+      addLog(`[${course.id}] Extracción completada.`);
     }
 
     setStatus('¡Extracción completada con éxito!');
-    addLog('Todas las diapositivas reales han sido guardadas.');
+    addLog('Todas las diapositivas de los tres cursos han sido guardadas en el servidor.');
   };
 
   return (
     <div style={{ padding: '24px', fontFamily: 'sans-serif', background: '#0f172a', color: '#f8fafc', minHeight: '100vh' }}>
-      <h1 style={{ fontSize: '24px', marginBottom: '16px' }}>Extractor de Diapositivas Oficiales (Lean Basics 1)</h1>
+      <h1 style={{ fontSize: '24px', marginBottom: '16px' }}>Extractor Multicurso de Diapositivas (LGB Academy)</h1>
       <div style={{ padding: '16px', background: '#1e293b', borderRadius: '8px', marginBottom: '16px' }}>
         <strong>Estado: </strong>
         <span style={{ color: status.includes('Error') ? '#f87171' : '#34d399' }}>{status}</span>

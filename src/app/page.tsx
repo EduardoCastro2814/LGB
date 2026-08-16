@@ -478,6 +478,9 @@ export default function DashboardPage() {
   // Drill Down de Departamento (Modal)
   const [selectedDrillDownDept, setSelectedDrillDownDept] = useState<string | null>(null);
 
+  // CONTROL DE FULL SCREEN LMS
+  const [isFullscreenActive, setIsFullscreenActive] = useState<boolean>(false);
+
   // Forzar tema claro corporativo
   useEffect(() => {
     document.documentElement.classList.remove('dark');
@@ -1326,6 +1329,23 @@ export default function DashboardPage() {
     );
   }
 
+  // 2. Si está en modo Full Screen (visor de diapositivas o examen activo)
+  if (isFullscreenActive) {
+    return (
+      <div className="min-h-screen bg-[#0b0f19] text-slate-100 flex flex-col">
+        <AcademiaLean
+          user={currentUser}
+          courses={courses}
+          progress={trainingState[currentUser.ID] || {}}
+          exams={exams}
+          onUpdateProgress={handleUpdateUserProgress}
+          certConfig={certConfig}
+          onToggleFullscreen={setIsFullscreenActive}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen flex flex-col md:flex-row bg-[#f8fafc] text-slate-800 transition-colors duration-300">
       
@@ -1489,6 +1509,7 @@ export default function DashboardPage() {
                 exams={exams}
                 onUpdateProgress={handleUpdateUserProgress}
                 certConfig={certConfig}
+                onToggleFullscreen={setIsFullscreenActive}
               />
             )}
           </>
