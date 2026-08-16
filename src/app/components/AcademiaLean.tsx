@@ -31,6 +31,7 @@ import {
   MergedEmployee 
 } from '../types';
 import { ResponsiveContainer, PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip, Legend } from 'recharts';
+import { getAssetPath } from '../utils/paths';
 
 interface AcademiaLeanProps {
   user: MergedEmployee;
@@ -1288,22 +1289,11 @@ URL: ${activeUrl ? activeUrl.substring(0, 80) + '...' : 'N/A'}`);
 
       {/* VIEW: VISOR DE CURSO INDIVIDUAL (LECTURA / DIAPOSITIVAS) */}
       {activeTab === 'cursos' && selectedCourse && !activeExam && (
-        <div className="fixed inset-0 w-full h-full bg-[#f3f4f6] z-[100] flex flex-col overflow-y-auto font-sans text-slate-800 animate-fade-in relative">
+        <div className="fixed inset-0 w-full h-full bg-[#0b0f19] z-[100] flex flex-col font-sans text-slate-100 select-none animate-fade-in">
           
-          {/* Fondo de Líneas Azules Corporativas de Flex */}
-          <div className="absolute inset-0 pointer-events-none overflow-hidden select-none z-0">
-            <svg className="absolute w-full h-full" viewBox="0 0 1920 1080" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <line x1="-100" y1="100" x2="1600" y2="1100" stroke="#0082C8" strokeWidth="2.5" opacity="0.15" />
-              <line x1="200" y1="-100" x2="1900" y2="900" stroke="#0082C8" strokeWidth="2" opacity="0.15" />
-              <path d="M800,1080 C850,700 1100,400 1300,450 C1450,480 1500,800 1600,1080" stroke="#0082C8" strokeWidth="2.5" strokeLinecap="round" opacity="0.15" />
-              <path d="M1200,0 C1400,200 1500,500 1450,800 C1400,1080 1920,1080 1920,1080 L1920,0 Z" fill="#e5e7eb" opacity="0.25" />
-            </svg>
-          </div>
-
-          {/* Header Visor Fullscreen */}
-          <div className="relative z-10 flex justify-between items-center px-6 py-4 bg-white/80 backdrop-blur-md border-b border-slate-200/80 shadow-sm">
+          {/* Header del Visor PPT */}
+          <div className="relative z-10 flex justify-between items-center px-6 py-4 bg-[#111827]/80 backdrop-blur-md border-b border-white/10 shadow-lg">
             <div className="flex items-center gap-4">
-              {/* Flex Logo */}
               <div className="flex items-center gap-1">
                 <svg viewBox="0 0 100 35" width="85" height="30" xmlns="http://www.w3.org/2000/svg" className="text-[#0082C8] fill-current">
                   <path d="M12,8 C9,8 7.5,9.5 7.5,12.5 L7.5,30 M3.5,14 L11.5,14" stroke="#0082C8" strokeWidth="4.5" strokeLinecap="round" fill="none" />
@@ -1312,13 +1302,13 @@ URL: ${activeUrl ? activeUrl.substring(0, 80) + '...' : 'N/A'}`);
                   <path d="M54.5,12 L44.5,29" stroke="#0082C8" strokeWidth="4.2" strokeLinecap="round" fill="none" />
                   <path d="M44.5,12.5 C48,16 51,21 54.5,28.5" stroke="#0082C8" strokeWidth="4.8" strokeLinecap="round" fill="none" />
                 </svg>
-                <span className="text-[10px] font-black text-[#0082C8] tracking-widest uppercase border-l border-slate-300 pl-3">B29 SITE</span>
+                <span className="text-[10px] font-black text-[#0082C8] tracking-widest uppercase border-l border-white/20 pl-3">B29 SITE</span>
               </div>
             </div>
 
-            <div className="hidden md:block text-center">
-              <span className="text-[10px] font-bold tracking-widest text-[#0082c8] uppercase">Curso Oficial de Capacitación</span>
-              <h1 className="text-sm font-extrabold text-slate-800">{selectedCourse.name}</h1>
+            <div className="text-center">
+              <span className="text-[9px] font-bold tracking-widest text-[#0082c8] uppercase block">Presentación Oficial de Diapositivas</span>
+              <h1 className="text-sm font-extrabold text-white">{selectedCourse.name}</h1>
             </div>
 
             <button 
@@ -1327,7 +1317,7 @@ URL: ${activeUrl ? activeUrl.substring(0, 80) + '...' : 'N/A'}`);
                   setSelectedCourse(null);
                 }
               }}
-              className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer border border-slate-200 shadow-sm"
+              className="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer border border-white/10 shadow-sm"
             >
               <span>Salir</span>
               <X className="w-4 h-4" />
@@ -1336,126 +1326,208 @@ URL: ${activeUrl ? activeUrl.substring(0, 80) + '...' : 'N/A'}`);
 
           {/* Cuerpo del Visor */}
           {(() => {
-            const slides = DEFAULT_SLIDES[selectedCourse.id] || [{ title: 'Contenido Simulado', content: 'El administrador aún no ha cargado diapositivas para este curso.' }];
-            const currentSlide = slides[currentSlideIndex];
+            const slides = DEFAULT_SLIDES[selectedCourse.id] || [{ title: 'Contenido Simulado', content: 'No hay material disponible.' }];
             
-            return (
-              <div className="relative z-10 flex-1 flex flex-col justify-between p-6 lg:p-12 max-w-7xl mx-auto w-full gap-8">
-                
-                {/* Contenido Slide Principal */}
-                <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-8 items-center w-full">
+            if (selectedCourse.id === 'lean-basics-1') {
+              // Vista PowerPoint Real con Diapositiva PNG
+              return (
+                <div className="flex-1 flex flex-col justify-between p-4 md:p-8 max-w-6xl mx-auto w-full overflow-hidden">
                   
-                  {/* Columna Izquierda: Texto y Viñetas */}
-                  <div className="flex flex-col text-left justify-center gap-6 bg-white/70 backdrop-blur-md border border-white/40 p-8 lg:p-10 rounded-3xl shadow-xl">
-                    <div>
-                      <span className="text-xs font-bold text-[#0082c8] uppercase tracking-wider font-mono">
-                        Diapositiva {currentSlideIndex + 1} de {slides.length}
-                      </span>
-                      <h2 className="text-2xl lg:text-3.5xl font-black text-slate-900 leading-tight mt-1 mb-4 border-b border-slate-200/80 pb-3">
-                        {currentSlide.title}
-                      </h2>
-                    </div>
-
-                    <div className="space-y-4 max-w-2xl">
-                      {currentSlide.content.split('\n').map((line, idx) => {
-                        const trimmed = line.trim();
-                        const isBullet = trimmed.startsWith('•') || trimmed.startsWith('*') || trimmed.startsWith('-');
-                        const isSubBullet = trimmed.startsWith('*') || trimmed.startsWith('-');
-                        
-                        if (isBullet) {
-                          const cleanLine = trimmed.replace(/^[•*\-]\s*/, '');
-                          return (
-                            <div key={idx} className={`flex items-start gap-3 text-base lg:text-lg font-medium leading-relaxed text-slate-800 ${isSubBullet ? 'pl-6 text-sm lg:text-base text-slate-600' : ''}`}>
-                              <span className={`text-[#0082c8] font-bold text-lg mt-0.5 ${isSubBullet ? 'text-xs' : ''}`}>•</span>
-                              <span>{cleanLine}</span>
-                            </div>
-                          );
-                        } else if (trimmed === '') {
-                          return <div key={idx} className="h-1.5" />;
-                        } else {
-                          return (
-                            <p key={idx} className="text-base lg:text-lg font-semibold leading-relaxed text-slate-700">
-                              {line}
-                            </p>
-                          );
-                        }
-                      })}
-                    </div>
-                  </div>
-
-                  {/* Columna Derecha: Ilustración SVG */}
-                  <div className="flex items-center justify-center bg-white/50 backdrop-blur-md border border-white/30 p-8 lg:p-12 rounded-3xl shadow-xl aspect-square w-full max-w-md mx-auto">
-                    {renderSlideIllustration(selectedCourse.id, currentSlideIndex)}
-                  </div>
-
-                </div>
-
-                {/* Footer del Visor: Progreso y Controles */}
-                <div className="w-full flex flex-col gap-4 mt-6">
-                  {/* Barra de progreso inferior */}
-                  <div>
-                    <div className="flex justify-between text-[10px] font-black text-slate-450 uppercase mb-1">
-                      <span>Progreso de Lectura</span>
-                      <span>{Math.round(((currentSlideIndex + 1) / slides.length) * 100)}%</span>
-                    </div>
-                    <div className="w-full h-2 rounded-full bg-slate-200 overflow-hidden shadow-inner">
-                      <div 
-                        className="h-full bg-gradient-to-r from-blue-500 to-[#0082C8] transition-all duration-350"
-                        style={{ width: `${((currentSlideIndex + 1) / slides.length) * 100}%` }}
+                  {/* Diapositiva Centrada */}
+                  <div className="flex-1 flex items-center justify-center overflow-hidden py-4">
+                    <div className="relative bg-[#111827] p-2 rounded-2xl shadow-[0_25px_60px_-15px_rgba(0,0,0,0.7)] border border-white/5 aspect-[16/9] max-w-full max-h-[70vh] flex items-center justify-center">
+                      <img 
+                        src={getAssetPath(`/slides/lean-basics-1/slide_${currentSlideIndex + 1}.png`)} 
+                        alt={`Diapositiva ${currentSlideIndex + 1}`}
+                        className="max-w-full max-h-full object-contain rounded-lg select-none pointer-events-none"
                       />
+                      {/* Indicador flotante en la diapositiva */}
+                      <span className="absolute bottom-4 right-6 bg-[#0082c8]/85 text-white text-[10px] font-bold font-mono px-2 py-1 rounded shadow">
+                        Slide {currentSlideIndex + 1} / {slides.length}
+                      </span>
                     </div>
                   </div>
 
-                  {/* Controles de Navegación */}
-                  <div className="flex justify-between items-center py-2">
-                    <button
-                      onClick={handlePrevSlide}
-                      disabled={currentSlideIndex === 0}
-                      className="flex items-center gap-1.5 px-5 py-3 rounded-xl text-xs font-bold border border-slate-300 bg-white hover:bg-slate-50 disabled:opacity-40 disabled:hover:bg-white transition-all cursor-pointer text-slate-700 shadow-sm"
-                    >
-                      <ChevronLeft className="w-4 h-4" />
-                      <span>Anterior</span>
-                    </button>
-
-                    <div className="flex gap-1.5">
-                      {slides.map((_, idx) => (
-                        <button
-                          key={idx}
-                          onClick={() => setCurrentSlideIndex(idx)}
-                          className={`h-2.5 rounded-full transition-all duration-300 cursor-pointer ${
-                            currentSlideIndex === idx ? 'w-6 bg-[#0082c8]' : 'w-2.5 bg-slate-300 hover:bg-slate-400'
-                          }`}
+                  {/* Controles de Navegación y Progreso */}
+                  <div className="w-full flex flex-col gap-4 mt-2">
+                    {/* Barra de Progreso */}
+                    <div>
+                      <div className="flex justify-between text-[9px] font-black text-slate-400 uppercase mb-1">
+                        <span>Progreso de Diapositivas</span>
+                        <span>{Math.round(((currentSlideIndex + 1) / slides.length) * 100)}%</span>
+                      </div>
+                      <div className="w-full h-1.5 rounded-full bg-white/10 overflow-hidden shadow-inner">
+                        <div 
+                          className="h-full bg-gradient-to-r from-blue-500 to-[#0082C8] transition-all duration-300"
+                          style={{ width: `${((currentSlideIndex + 1) / slides.length) * 100}%` }}
                         />
-                      ))}
+                      </div>
                     </div>
 
-                    {currentSlideIndex === slides.length - 1 ? (
+                    {/* Controles */}
+                    <div className="flex justify-between items-center py-2">
                       <button
-                        onClick={() => {
-                          handleFinishReading();
-                          handleStartExam();
-                        }}
-                        className="flex items-center gap-1.5 px-6 py-3 rounded-xl text-xs font-bold bg-emerald-500 hover:bg-emerald-600 text-white shadow-md cursor-pointer transition-all animate-pulse"
+                        onClick={handlePrevSlide}
+                        disabled={currentSlideIndex === 0}
+                        className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-bold border border-white/10 bg-white/5 hover:bg-white/10 disabled:opacity-30 disabled:hover:bg-white/5 transition-all cursor-pointer text-white shadow-sm"
                       >
-                        <BookOpenCheck className="w-4 h-4" />
-                        <span>Comenzar Examen</span>
+                        <ChevronLeft className="w-4 h-4" />
+                        <span>Anterior</span>
                       </button>
-                    ) : (
+
+                      <div className="flex gap-1.5">
+                        {slides.map((_, idx) => (
+                          <button
+                            key={idx}
+                            onClick={() => setCurrentSlideIndex(idx)}
+                            className={`h-2.5 rounded-full transition-all duration-300 cursor-pointer ${
+                              currentSlideIndex === idx ? 'w-6 bg-[#0082c8]' : 'w-2.5 bg-white/10 hover:bg-white/20'
+                            }`}
+                          />
+                        ))}
+                      </div>
+
+                      {currentSlideIndex === slides.length - 1 ? (
+                        <button
+                          onClick={() => {
+                            handleFinishReading();
+                            handleStartExam();
+                          }}
+                          className="flex items-center gap-1.5 px-5 py-2.5 rounded-xl text-xs font-bold bg-emerald-500 hover:bg-emerald-600 text-white shadow-md cursor-pointer transition-all animate-pulse"
+                        >
+                          <BookOpenCheck className="w-4 h-4" />
+                          <span>Comenzar Examen</span>
+                        </button>
+                      ) : (
+                        <button
+                          onClick={handleNextSlide}
+                          className="flex items-center gap-1.5 px-5 py-2.5 rounded-xl text-xs font-bold bg-[#0082c8] hover:bg-[#0070ad] text-white shadow-md transition-all cursor-pointer"
+                        >
+                          <span>Siguiente</span>
+                          <ChevronRight className="w-4 h-4" />
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                </div>
+              );
+            } else {
+              // Vista Tradicional con Texto y Gráfico SVG (Para otros cursos)
+              const currentSlide = slides[currentSlideIndex];
+              return (
+                <div className="relative z-10 flex-1 flex flex-col justify-between p-6 lg:p-12 max-w-7xl mx-auto w-full gap-8">
+                  {/* Contenido Slide Principal */}
+                  <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-8 items-center w-full">
+                    {/* Columna Izquierda: Texto y Viñetas */}
+                    <div className="flex flex-col text-left justify-center gap-6 bg-white/70 backdrop-blur-md border border-white/40 p-8 lg:p-10 rounded-3xl shadow-xl">
+                      <div>
+                        <span className="text-xs font-bold text-[#0082c8] uppercase tracking-wider font-mono text-slate-700">
+                          Diapositiva {currentSlideIndex + 1} de {slides.length}
+                        </span>
+                        <h2 className="text-2xl lg:text-3.5xl font-black text-slate-900 leading-tight mt-1 mb-4 border-b border-slate-200/80 pb-3">
+                          {currentSlide.title}
+                        </h2>
+                      </div>
+
+                      <div className="space-y-4 max-w-2xl">
+                        {currentSlide.content.split('\n').map((line, idx) => {
+                          const trimmed = line.trim();
+                          const isBullet = trimmed.startsWith('•') || trimmed.startsWith('*') || trimmed.startsWith('-');
+                          const isSubBullet = trimmed.startsWith('*') || trimmed.startsWith('-');
+                          
+                          if (isBullet) {
+                            const cleanLine = trimmed.replace(/^[•*\-]\s*/, '');
+                            return (
+                              <div key={idx} className={`flex items-start gap-3 text-base lg:text-lg font-medium leading-relaxed text-slate-800 ${isSubBullet ? 'pl-6 text-sm lg:text-base text-slate-650' : ''}`}>
+                                <span className={`text-[#0082c8] font-bold text-lg mt-0.5 ${isSubBullet ? 'text-xs' : ''}`}>•</span>
+                                <span>{cleanLine}</span>
+                              </div>
+                            );
+                          } else if (trimmed === '') {
+                            return <div key={idx} className="h-1.5" />;
+                          } else {
+                            return (
+                              <p key={idx} className="text-base lg:text-lg font-semibold leading-relaxed text-slate-755">
+                                {line}
+                              </p>
+                            );
+                          }
+                        })}
+                      </div>
+                    </div>
+
+                    {/* Columna Derecha: Ilustración SVG */}
+                    <div className="flex items-center justify-center bg-white/50 backdrop-blur-md border border-white/30 p-8 lg:p-12 rounded-3xl shadow-xl aspect-square w-full max-w-md mx-auto">
+                      {renderSlideIllustration(selectedCourse.id, currentSlideIndex)}
+                    </div>
+                  </div>
+
+                  {/* Footer del Visor: Progreso y Controles */}
+                  <div className="w-full flex flex-col gap-4 mt-6">
+                    {/* Barra de progreso inferior */}
+                    <div>
+                      <div className="flex justify-between text-[10px] font-black text-slate-500 uppercase mb-1">
+                        <span>Progreso de Lectura</span>
+                        <span>{Math.round(((currentSlideIndex + 1) / slides.length) * 100)}%</span>
+                      </div>
+                      <div className="w-full h-2 rounded-full bg-slate-200 overflow-hidden shadow-inner">
+                        <div 
+                          className="h-full bg-gradient-to-r from-blue-500 to-[#0082C8] transition-all duration-350"
+                          style={{ width: `${((currentSlideIndex + 1) / slides.length) * 100}%` }}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Controles de Navegación */}
+                    <div className="flex justify-between items-center py-2">
                       <button
-                        onClick={handleNextSlide}
-                        className="flex items-center gap-1.5 px-6 py-3 rounded-xl text-xs font-bold bg-[#0082c8] hover:bg-[#0070ad] text-white shadow-md transition-all cursor-pointer"
+                        onClick={handlePrevSlide}
+                        disabled={currentSlideIndex === 0}
+                        className="flex items-center gap-1.5 px-5 py-3 rounded-xl text-xs font-bold border border-slate-300 bg-white hover:bg-slate-50 disabled:opacity-40 disabled:hover:bg-white transition-all cursor-pointer text-slate-700 shadow-sm"
                       >
-                        <span>Siguiente</span>
-                        <ChevronRight className="w-4 h-4" />
+                        <ChevronLeft className="w-4 h-4" />
+                        <span>Anterior</span>
                       </button>
-                    )}
+
+                      <div className="flex gap-1.5">
+                        {slides.map((_, idx) => (
+                          <button
+                            key={idx}
+                            onClick={() => setCurrentSlideIndex(idx)}
+                            className={`h-2.5 rounded-full transition-all duration-300 cursor-pointer ${
+                              currentSlideIndex === idx ? 'w-6 bg-[#0082c8]' : 'w-2.5 bg-slate-300 hover:bg-slate-400'
+                            }`}
+                          />
+                        ))}
+                      </div>
+
+                      {currentSlideIndex === slides.length - 1 ? (
+                        <button
+                          onClick={() => {
+                            handleFinishReading();
+                            handleStartExam();
+                          }}
+                          className="flex items-center gap-1.5 px-6 py-3 rounded-xl text-xs font-bold bg-emerald-500 hover:bg-emerald-600 text-white shadow-md cursor-pointer transition-all animate-pulse"
+                        >
+                          <BookOpenCheck className="w-4 h-4" />
+                          <span>Comenzar Examen</span>
+                        </button>
+                      ) : (
+                        <button
+                          onClick={handleNextSlide}
+                          className="flex items-center gap-1.5 px-6 py-3 rounded-xl text-xs font-bold bg-[#0082c8] hover:bg-[#0070ad] text-white shadow-md transition-all cursor-pointer"
+                        >
+                          <span>Siguiente</span>
+                          <ChevronRight className="w-4 h-4" />
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </div>
-
-              </div>
-            );
+              );
+            }
           })()}
-
         </div>
       )}
 
