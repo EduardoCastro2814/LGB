@@ -44,7 +44,7 @@ interface AcademiaLeanProps {
 }
 
 // Diapositivas predeterminadas para los cursos si no tienen material cargado por el admin
-const DEFAULT_SLIDES: Record<string, { title: string; content: string }[]> = {
+export const DEFAULT_SLIDES: Record<string, { title: string; content: string }[]> = {
   'lean-basics-1': [
     { 
       title: '1. Lean Basics 1: Creando lo Extraordinario a través del Valor', 
@@ -346,12 +346,6 @@ URL: ${activeUrl ? activeUrl.substring(0, 80) + '...' : 'N/A'}`);
 
   // Manejar click en curso para empezar a leer
   const handleStartCourse = (course: Course) => {
-    setSelectedCourse(course);
-    setCurrentSlideIndex(0);
-    setActiveExam(null);
-    setExamResult(null);
-    setSelectedAnswers({});
-    
     // Si no está iniciado, actualizar estado a en-progreso
     const currentProg = progress[course.id];
     if (!currentProg || currentProg.status === 'no-iniciado') {
@@ -360,6 +354,8 @@ URL: ${activeUrl ? activeUrl.substring(0, 80) + '...' : 'N/A'}`);
         progress: 10,
       });
     }
+    // Redirigir al course player independiente
+    window.location.href = getAssetPath(`/course-player?courseId=${course.id}`);
   };
 
   // Navegar slides
@@ -401,10 +397,7 @@ URL: ${activeUrl ? activeUrl.substring(0, 80) + '...' : 'N/A'}`);
     if (!selectedCourse) return;
     const exam = exams.find(e => e.courseId === selectedCourse.id);
     if (exam) {
-      setActiveExam(exam);
-      setCurrentQuestionIndex(0);
-      setSelectedAnswers({});
-      setExamResult(null);
+      window.location.href = getAssetPath(`/exam-player?courseId=${selectedCourse.id}`);
     } else {
       alert('Aviso: No hay examen disponible para este curso aún. Comuníquese con el administrador.');
     }
