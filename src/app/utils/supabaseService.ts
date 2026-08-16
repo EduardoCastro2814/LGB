@@ -99,7 +99,8 @@ import {
   TrainingState,
   UserProgressMap,
   LGBStatus,
-  TipoPersonal
+  TipoPersonal,
+  AppliedTool
 } from '../types';
 
 /**
@@ -234,7 +235,8 @@ export async function getSupabaseEmployees(): Promise<MergedEmployee[]> {
       : emp.certification_status === 'Potencial' 
         ? 'Create Form' 
         : '',
-    role: emp.role || 'User' // Atributo para control de roles
+    role: emp.role || 'User', // Atributo para control de roles
+    updated_at: emp.updated_at
   }));
 }
 
@@ -321,7 +323,7 @@ export async function importHcEmployees(hcRawData: any[]): Promise<void> {
       name,
       department,
       employee_type,
-      role: department.toUpperCase() === 'BE' ? 'Admin' : 'User',
+      role: empNo === '1163146' ? 'Admin' : 'User',
       puesto,
       manager,
       certification_status: currentStatus,
@@ -1130,6 +1132,10 @@ export async function diagnoseSupabaseSchema(): Promise<SchemaDiagnosis[]> {
     {
       table: 'certificates',
       query: () => supabase.from('certificates').select('id, employee_number, course_id, course_name, date_issued, grade, folio').limit(1)
+    },
+    {
+      table: 'applied_tools',
+      query: () => supabase.from('applied_tools').select('id, employee_number, tool_name, custom_tool_name, application, result, comment, status, admin_comment').limit(1)
     }
   ];
 
@@ -1173,3 +1179,68 @@ export async function diagnoseSupabaseSchema(): Promise<SchemaDiagnosis[]> {
 
   return diagnosis;
 }
+
+/**
+ * Obtiene todas las herramientas Lean aplicadas desde Supabase.
+ */
+export async function getSupabaseAppliedTools(): Promise<AppliedTool[]> {
+  const { data, error } = await supabase
+    .from('applied_tools')
+    .select('*')
+    .order('created_at', { ascending: false });
+    
+  if (error) {
+    console.warn('[Supabase getSupabaseAppliedTools warning]', error.message);
+    throw error;
+  }
+  return (data || []).map((t: any) => ({
+    id: t.id,
+    employee_number: t.employee_number,
+    tool_name: t.tool_name,
+    custom_tool_name: t.custom_tool_name || '',
+    application: t.application,
+    result: t.result,
+    comment: t.comment,
+    status: t.status as 'Pendiente' | 'Aprobada' | 'Rechazada',
+    admin_comment: t.admin_comment || '',
+    created_at: t.created_at,
+    updated_at: t.updated_at
+  }));
+}
+
+/**
+ * Guarda o actualiza una herramienta Lean aplicada en Supabase.
+ */
+export async function saveSupabaseAppliedTool(tool: AppliedTool): Promise<void> {
+  const payload = await buildSafePayload('applied_tools', {
+    id: tool.id,
+    employee_number: tool.employee_number,
+    tool_name: tool.tool_name,
+    custom_tool_name: tool.custom_tool_name || null,
+    application: tool.application,
+    result: tool.result,
+    comment: tool.comment,
+    status: tool.status,
+    admin_comment: tool.admin_comment || null,
+    updated_at: new Date().toISOString()
+  });
+
+  const { error } = await supabase
+    .from('applied_tools')
+    .upsert(payload, { onConflict: 'id' });
+    
+  if (error) throw error;
+}
+
+/**
+ * Elimina una herramienta Lean aplicada en Supabase.
+ */
+export async function deleteSupabaseAppliedTool(id: string): Promise<void> {
+  const { error } = await supabase
+    .from('applied_tools')
+    .delete()
+    .eq('id', id);
+    
+  if (error) throw error;
+}
+

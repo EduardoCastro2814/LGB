@@ -28,6 +28,7 @@ export interface MergedEmployee {
   Estatus: LGBStatus;
   TipoPersonal: TipoPersonal; // Clasificación: Direct (DL) o Indirect (IDL)
   role?: UserRole;
+  updated_at?: string;
 }
 
 export interface KPIStats {
@@ -139,4 +140,21 @@ export interface CertificateConfig {
   templateUrl?: string;
   useCustomTemplate?: boolean;
 }
+
+export interface AppliedTool {
+  id: string;
+  employee_number: string;
+  employee_name?: string;
+  department?: string;
+  tool_name: string;
+  custom_tool_name?: string;
+  application: string;
+  result: string;
+  comment: string;
+  status: 'Pendiente' | 'Aprobada' | 'Rechazada';
+  admin_comment?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
 

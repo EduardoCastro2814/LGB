@@ -273,3 +273,35 @@ DROP POLICY IF EXISTS "Permitir update a todos en certificates" ON public.certif
 CREATE POLICY "Permitir update a todos en certificates" ON public.certificates FOR UPDATE TO anon, authenticated USING (true) WITH CHECK (true);
 DROP POLICY IF EXISTS "Permitir delete a todos en certificates" ON public.certificates;
 CREATE POLICY "Permitir delete a todos en certificates" ON public.certificates FOR DELETE TO anon, authenticated USING (true);
+
+-- -------------------------------------------------------------------------
+-- 12. TABLA DE HERRAMIENTAS APLICADAS (applied_tools)
+-- -------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS public.applied_tools (
+    id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+    employee_number text NOT NULL REFERENCES public.employees(employee_number) ON DELETE CASCADE,
+    tool_name text NOT NULL,
+    custom_tool_name text,
+    application text NOT NULL,
+    result text NOT NULL,
+    comment text NOT NULL,
+    status text NOT NULL DEFAULT 'Pendiente', -- 'Pendiente' | 'Aprobada' | 'Rechazada'
+    admin_comment text,
+    created_at timestamptz DEFAULT now(),
+    updated_at timestamptz DEFAULT now()
+);
+
+-- Habilitar RLS para applied_tools
+ALTER TABLE public.applied_tools ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Permitir select a todos en applied_tools" ON public.applied_tools;
+CREATE POLICY "Permitir select a todos en applied_tools" ON public.applied_tools FOR SELECT TO anon, authenticated USING (true);
+DROP POLICY IF EXISTS "Permitir insert a todos en applied_tools" ON public.applied_tools;
+CREATE POLICY "Permitir insert a todos en applied_tools" ON public.applied_tools FOR INSERT TO anon, authenticated WITH CHECK (true);
+DROP POLICY IF EXISTS "Permitir update a todos en applied_tools" ON public.applied_tools;
+CREATE POLICY "Permitir update a todos en applied_tools" ON public.applied_tools FOR UPDATE TO anon, authenticated USING (true) WITH CHECK (true);
+DROP POLICY IF EXISTS "Permitir delete a todos en applied_tools" ON public.applied_tools;
+CREATE POLICY "Permitir delete a todos en applied_tools" ON public.applied_tools FOR DELETE TO anon, authenticated USING (true);
+
+-- Crear índice para applied_tools
+CREATE INDEX IF NOT EXISTS idx_applied_tools_emp ON public.applied_tools(employee_number);
+

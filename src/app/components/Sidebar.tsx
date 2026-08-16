@@ -12,7 +12,8 @@ import {
   Menu, 
   X, 
   User, 
-  GraduationCap 
+  GraduationCap,
+  Wrench 
 } from 'lucide-react';
 import { MergedEmployee, UserRole } from '../types';
 
@@ -37,11 +38,13 @@ export default function Sidebar({
     { id: 'dashboard', label: 'Dashboard LGB', icon: LayoutDashboard },
     { id: 'matrix', label: 'Matriz de Entrenamiento', icon: Grid },
     { id: 'academia', label: 'Academia Lean', icon: GraduationCap },
+    { id: 'appliedTools', label: 'Herramientas Lean', icon: Wrench },
     { id: 'config', label: 'Configuración', icon: Settings },
   ];
 
   const generalMenu = [
     { id: 'academia', label: 'Academia Lean', icon: GraduationCap },
+    { id: 'appliedTools', label: 'Mis Herramientas Lean', icon: Wrench },
   ];
 
   const menuItems = role === 'Admin' ? adminMenu : generalMenu;

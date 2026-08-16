@@ -1,9 +1,9 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
-import { FileSpreadsheet, Search, Edit2, Save, X, Trash2, CheckCircle2, AlertCircle, Clock, UploadCloud, Database, GraduationCap, Settings, Award } from 'lucide-react';
+import { FileSpreadsheet, Search, Edit2, Save, X, Trash2, CheckCircle2, AlertCircle, Clock, UploadCloud, Database, GraduationCap, Settings, Award, ShieldAlert, Wrench, XCircle, Calendar } from 'lucide-react';
 import * as XLSX from 'xlsx';
-import { MergedEmployee, LGBStatus, FileMetadata, EmployeeOverride, TipoPersonal, Course, Exam, CertificateConfig } from '../types';
+import { MergedEmployee, LGBStatus, FileMetadata, EmployeeOverride, TipoPersonal, Course, Exam, CertificateConfig, AppliedTool } from '../types';
 import ConfigCourses from './ConfigCourses';
 import ConfigExams from './ConfigExams';
 import ConfigCertificates from './ConfigCertificates';
@@ -35,6 +35,8 @@ interface ConfigViewProps {
   schemaDiagnosis: SchemaDiagnosis[];
   importProgress?: ImportProgress | null;
   importSummary?: ImportSummary | null;
+  appliedTools: AppliedTool[];
+  onReviewAppliedTool: (id: string, status: 'Aprobada' | 'Rechazada', adminComment: string) => Promise<void>;
 }
 
 export default function ConfigView({
@@ -62,8 +64,48 @@ export default function ConfigView({
   schemaDiagnosis,
   importProgress,
   importSummary,
+  appliedTools,
+  onReviewAppliedTool,
 }: ConfigViewProps) {
-  const [activeTab, setActiveTab] = useState<'files' | 'employees' | 'courses' | 'exams' | 'certificates'>('files');
+  const [activeTab, setActiveTab] = useState<'files' | 'employees' | 'courses' | 'exams' | 'certificates' | 'permissions' | 'evidences'>('files');
+  
+  // Nuevos estados para permisos y aprobaciones
+  const [searchPermName, setSearchPermName] = useState('');
+  const [searchPermId, setSearchPermId] = useState('');
+  const [selectedReviewId, setSelectedReviewId] = useState<string | null>(null);
+  const [reviewStatusFilter, setReviewStatusFilter] = useState<'Todos' | 'Pendiente' | 'Aprobada' | 'Rechazada'>('Todos');
+  const [adminReviewComment, setAdminReviewComment] = useState('');
+
+  // Filtrar candidatos para permisos
+  const permissionCandidates = useMemo(() => {
+    if (!searchPermName.trim() && !searchPermId.trim()) return [];
+    return employees.filter(emp => {
+      const matchId = !searchPermId.trim() || emp.ID.toLowerCase().includes(searchPermId.toLowerCase());
+      const matchName = !searchPermName.trim() || emp.Nombre.toLowerCase().includes(searchPermName.toLowerCase());
+      return matchId && matchName;
+    }).slice(0, 5);
+  }, [employees, searchPermName, searchPermId]);
+
+  // Administradores actuales
+  const currentAdmins = useMemo(() => {
+    return employees.filter(emp => emp.role === 'Admin');
+  }, [employees]);
+
+  // Filtrar evidencias
+  const filteredEvidences = useMemo(() => {
+    return appliedTools.filter(tool => {
+      if (reviewStatusFilter !== 'Todos' && tool.status !== reviewStatusFilter) return false;
+      return true;
+    });
+  }, [appliedTools, reviewStatusFilter]);
+
+  const getEmployeeDetails = (empNum: string) => {
+    const emp = employees.find(e => e.ID === empNum);
+    return {
+      name: emp?.Nombre || 'Desconocido',
+      department: emp?.Departamento || 'Desconocido'
+    };
+  };
   
   // Estados para la pestaña de colaboradores
   const [searchTermName, setSearchTermName] = useState('');
@@ -313,6 +355,28 @@ export default function ConfigView({
         >
           <Award className="w-4 h-4" />
           <span>📜 Adm. Certificados</span>
+        </button>
+        <button
+          onClick={() => { setActiveTab('permissions'); setCurrentPage(1); }}
+          className={`px-4 py-2.5 text-xs font-bold border-b-2 cursor-pointer transition-all flex items-center gap-2 ${
+            activeTab === 'permissions'
+              ? 'border-emerald-500 text-emerald-600 dark:text-emerald-400'
+              : 'border-transparent text-slate-500 hover:text-slate-750 dark:text-[#cbd5e1] dark:hover:text-[#f8fafc]'
+          }`}
+        >
+          <ShieldAlert className="w-4 h-4" />
+          <span>🔑 Adm. de Permisos</span>
+        </button>
+        <button
+          onClick={() => { setActiveTab('evidences'); setCurrentPage(1); }}
+          className={`px-4 py-2.5 text-xs font-bold border-b-2 cursor-pointer transition-all flex items-center gap-2 ${
+            activeTab === 'evidences'
+              ? 'border-emerald-500 text-emerald-600 dark:text-emerald-400'
+              : 'border-transparent text-slate-500 hover:text-slate-750 dark:text-[#cbd5e1] dark:hover:text-[#f8fafc]'
+          }`}
+        >
+          <Wrench className="w-4 h-4" />
+          <span>🔍 Evidencias Lean</span>
         </button>
       </div>
 
@@ -888,6 +952,340 @@ export default function ConfigView({
 
         {activeTab === 'certificates' && (
           <ConfigCertificates certConfig={certConfig} onSaveConfig={onSaveCertConfig} />
+        )}
+
+        {activeTab === 'permissions' && (
+          <div className="flex flex-col gap-6">
+            <div className="glass-panel rounded-2.5xl p-6 bg-white dark:bg-[#1e293b] border-slate-200 dark:border-[#334155]">
+              <h3 className="text-sm font-extrabold text-slate-850 dark:text-white mb-4 border-b border-slate-100 dark:border-[#334155] pb-3 flex items-center gap-1.5">
+                <ShieldAlert className="w-5 h-5 text-[#0082c8]" />
+                <span>Asignar Permisos Administrativos</span>
+              </h3>
+
+              {/* Buscar Colaborador */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-semibold">
+                <div>
+                  <label htmlFor="perm-search-id" className="block text-[10px] font-bold text-slate-400 dark:text-[#94a3b8] uppercase tracking-wider mb-1.5">
+                    Buscar por Número de Empleado
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      id="perm-search-id"
+                      placeholder="Ej: 520478"
+                      className="w-full pl-9 pr-3 py-2 rounded-xl bg-slate-50 dark:bg-[#273449] border border-slate-200 dark:border-[#334155] text-slate-800 dark:text-[#f8fafc] placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all font-semibold"
+                      value={searchPermId}
+                      onChange={(e) => setSearchPermId(e.target.value)}
+                    />
+                    <Search className="absolute left-3 top-2.5 w-4.5 h-4.5 text-slate-400" />
+                  </div>
+                </div>
+
+                <div>
+                  <label htmlFor="perm-search-name" className="block text-[10px] font-bold text-slate-400 dark:text-[#94a3b8] uppercase tracking-wider mb-1.5">
+                    Buscar por Nombre
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      id="perm-search-name"
+                      placeholder="Ej: Eduardo Castro"
+                      className="w-full pl-9 pr-3 py-2 rounded-xl bg-slate-50 dark:bg-[#273449] border border-slate-200 dark:border-[#334155] text-slate-800 dark:text-[#f8fafc] placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all font-semibold"
+                      value={searchPermName}
+                      onChange={(e) => setSearchPermName(e.target.value)}
+                    />
+                    <Search className="absolute left-3 top-2.5 w-4.5 h-4.5 text-slate-400" />
+                  </div>
+                </div>
+              </div>
+
+              {/* Resultados de candidatos */}
+              {(searchPermId || searchPermName) && (
+                <div className="mt-6 border-t border-slate-100 dark:border-[#334155] pt-4 animate-fade-in">
+                  <h4 className="text-xs font-bold text-slate-400 dark:text-[#94a3b8] uppercase tracking-wider mb-3">Resultados de Búsqueda</h4>
+                  {permissionCandidates.length === 0 ? (
+                    <p className="text-xs text-slate-500 dark:text-slate-400 font-semibold italic">No se encontraron candidatos para los criterios ingresados.</p>
+                  ) : (
+                    <div className="flex flex-col gap-3">
+                      {permissionCandidates.map(emp => {
+                        const isAdmin = emp.role === 'Admin';
+                        return (
+                          <div key={emp.ID} className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-900/40 border border-slate-200 dark:border-[#334155] flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 text-xs">
+                            <div className="font-semibold">
+                              <p className="text-slate-800 dark:text-white font-extrabold">{emp.Nombre}</p>
+                              <div className="flex items-center gap-2 text-[10px] text-slate-400 dark:text-[#94a3b8] mt-1">
+                                <span>ID: <span className="font-mono">{emp.ID}</span></span>
+                                <span>•</span>
+                                <span>Depto: {emp.Departamento}</span>
+                                <span>•</span>
+                                <span className={`px-1.5 py-0.5 rounded text-[8px] font-extrabold uppercase tracking-wider ${
+                                  isAdmin ? 'bg-purple-500/10 text-purple-600 border border-purple-500/15' : 'bg-slate-100 text-slate-600 border border-slate-200'
+                                }`}>
+                                  Rol: {isAdmin ? 'Administrador' : 'Colaborador'}
+                                </span>
+                              </div>
+                            </div>
+
+                            <button
+                              onClick={async () => {
+                                try {
+                                  const targetRole = isAdmin ? 'User' : 'Admin';
+                                  await onUpdateEmployeeRole(emp.ID, targetRole);
+                                  alert(`Rol de ${emp.Nombre} cambiado exitosamente a ${targetRole === 'Admin' ? 'Administrador' : 'Colaborador'}`);
+                                  setSearchPermId('');
+                                  setSearchPermName('');
+                                } catch (err: any) {
+                                  alert(`Error: ${err.message}`);
+                                }
+                              }}
+                              className={`flex items-center gap-1.5 px-4.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-sm ${
+                                isAdmin
+                                  ? 'bg-red-500/10 hover:bg-red-500/20 text-red-600 border border-red-500/20'
+                                  : 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-emerald-600/15'
+                              }`}
+                            >
+                              {isAdmin ? 'Remover Administrador' : 'Convertir a Administrador'}
+                            </button>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Administradores actuales */}
+            <div className="glass-panel rounded-2.5xl p-6 bg-white dark:bg-[#1e293b] border-slate-200 dark:border-[#334155]">
+              <h3 className="text-sm font-extrabold text-slate-850 dark:text-white mb-4 border-b border-slate-100 dark:border-[#334155] pb-3">
+                Administradores Actuales ({currentAdmins.length})
+              </h3>
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse text-xs">
+                  <thead>
+                    <tr className="border-b border-slate-100 dark:border-[#334155] text-[10px] text-slate-400 dark:text-[#94a3b8] font-bold uppercase tracking-wider">
+                      <th className="pb-3.5 pl-1">Nombre</th>
+                      <th className="pb-3.5">Número Empleado</th>
+                      <th className="pb-3.5">Departamento</th>
+                      <th className="pb-3.5">Fecha de asignación</th>
+                      <th className="pb-3.5 text-right pr-1">Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100/60 dark:divide-[#334155]/60 font-semibold text-slate-700 dark:text-[#f8fafc]">
+                    {currentAdmins.map((emp) => {
+                      const assignDate = emp.updated_at
+                        ? new Date(emp.updated_at).toLocaleDateString('es-MX', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+                        : 'De fábrica';
+                      return (
+                        <tr key={emp.ID} className="hover:bg-slate-50/50 dark:hover:bg-[#273449]/30 transition-colors">
+                          <td className="py-3.5 pl-1 font-bold">{emp.Nombre}</td>
+                          <td className="py-3.5 font-mono">{emp.ID}</td>
+                          <td className="py-3.5">{emp.Departamento}</td>
+                          <td className="py-3.5 text-slate-500 dark:text-[#cbd5e1] font-normal">{assignDate}</td>
+                          <td className="py-3.5 text-right pr-1">
+                            <button
+                              disabled={emp.ID === '1163146'}
+                              onClick={async () => {
+                                if (confirm(`¿Está seguro de remover los permisos de administrador de ${emp.Nombre}?`)) {
+                                  try {
+                                    await onUpdateEmployeeRole(emp.ID, 'User');
+                                  } catch (err: any) {
+                                    alert(`Error: ${err.message}`);
+                                  }
+                                }
+                              }}
+                              className="px-3 py-1.5 rounded-lg text-[10px] font-bold bg-red-500/10 hover:bg-red-500/20 text-red-600 disabled:opacity-40 disabled:hover:bg-red-500/10 transition-colors cursor-pointer border border-red-500/15"
+                            >
+                              Remover
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'evidences' && (
+          <div className="flex flex-col gap-6 animate-fade-in text-slate-800 dark:text-[#f8fafc]">
+            <div className="glass-panel rounded-2.5xl p-6 bg-white dark:bg-[#1e293b] border-slate-200 dark:border-[#334155]">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 dark:border-[#334155] pb-4 mb-4">
+                <div>
+                  <h3 className="text-sm font-extrabold text-slate-855 dark:text-white flex items-center gap-1.5">
+                    <Wrench className="w-5 h-5 text-emerald-500 animate-pulse" />
+                    <span>Aprobación de Evidencias Lean</span>
+                  </h3>
+                  <p className="text-[10px] text-slate-400 dark:text-[#94a3b8] font-bold uppercase mt-1">Revisión de proyectos y herramientas aplicadas por el personal</p>
+                </div>
+                
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] font-bold text-slate-400 uppercase">Filtrar Estado:</span>
+                  <select
+                    className="py-1.5 px-3 bg-slate-50 dark:bg-[#273449] border border-slate-200 dark:border-[#334155] rounded-xl text-xs font-bold text-slate-855 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/10"
+                    value={reviewStatusFilter}
+                    onChange={(e) => setReviewStatusFilter(e.target.value as any)}
+                  >
+                    <option value="Todos">Todos</option>
+                    <option value="Pendiente">Pendiente</option>
+                    <option value="Aprobada">Aprobada</option>
+                    <option value="Rechazada">Rechazada</option>
+                  </select>
+                </div>
+              </div>
+
+              {filteredEvidences.length === 0 ? (
+                <div className="text-center py-16 text-slate-400">
+                  <Wrench className="w-12 h-12 stroke-1 mx-auto text-slate-300 mb-3" />
+                  <h4 className="text-xs font-bold text-slate-700 dark:text-slate-400 mb-1">Sin Evidencias Encontradas</h4>
+                  <p className="text-[10px] text-slate-400 max-w-sm mx-auto">No hay herramientas registradas con el estado de filtrado seleccionado.</p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left border-collapse text-xs">
+                    <thead>
+                      <tr className="border-b border-slate-100 dark:border-[#334155] text-[10px] text-slate-400 dark:text-[#94a3b8] font-bold uppercase tracking-wider">
+                        <th className="pb-3.5 pl-1">Colaborador</th>
+                        <th className="pb-3.5">Herramienta</th>
+                        <th className="pb-3.5">Evidencia</th>
+                        <th className="pb-3.5">Estado</th>
+                        <th className="pb-3.5 text-right pr-1">Acción</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100/60 dark:divide-[#334155]/60 font-semibold">
+                      {filteredEvidences.map(tool => {
+                        const { name, department } = getEmployeeDetails(tool.employee_number);
+                        const isSelected = selectedReviewId === tool.id;
+                        const dateStr = tool.created_at
+                          ? new Date(tool.created_at).toLocaleDateString('es-MX', { day: 'numeric', month: 'short' })
+                          : 'Reciente';
+
+                        return (
+                          <React.Fragment key={tool.id}>
+                            <tr className="hover:bg-slate-50/50 dark:hover:bg-[#273449]/20 transition-colors">
+                              <td className="py-4 pl-1 align-top">
+                                <p className="font-bold text-slate-800 dark:text-white">{name}</p>
+                                <span className="text-[10px] text-slate-400 dark:text-slate-500 font-mono">No. {tool.employee_number}</span>
+                                <span className="text-[9px] block text-slate-505 font-bold uppercase">{department}</span>
+                              </td>
+                              <td className="py-4 align-top font-bold text-slate-855 dark:text-white">
+                                <span>{tool.tool_name}</span>
+                                <span className="block text-[9px] text-slate-400 font-medium">{dateStr}</span>
+                              </td>
+                              <td className="py-4 pr-3 align-top text-slate-650 dark:text-[#cbd5e1] max-w-xs">
+                                <div className="space-y-1 font-normal">
+                                  <p><span className="font-bold text-[10px] text-slate-400 uppercase tracking-wider block">Aplicación:</span> {tool.application}</p>
+                                  <p className="pt-1"><span className="font-bold text-[10px] text-slate-400 uppercase tracking-wider block">Resultado:</span> {tool.result}</p>
+                                  <p className="pt-1 text-slate-500 italic">&quot;{tool.comment}&quot;</p>
+                                </div>
+                                {tool.admin_comment && (
+                                  <p className="mt-2 p-2 rounded-xl bg-purple-500/5 text-purple-650 dark:text-purple-400 border border-purple-500/10 font-medium">
+                                    <span className="font-bold text-[9px] uppercase tracking-wider block">Comentario Admin:</span> {tool.admin_comment}
+                                  </p>
+                                )}
+                              </td>
+                              <td className="py-4 align-top text-slate-700 dark:text-slate-350">
+                                <div className="mt-0.5">
+                                  {tool.status === 'Aprobada' && (
+                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[9px] font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                                      <CheckCircle2 className="w-3 h-3" />
+                                      <span>Aprobada</span>
+                                    </span>
+                                  )}
+                                  {tool.status === 'Rechazada' && (
+                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[9px] font-bold bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20">
+                                      <XCircle className="w-3 h-3" />
+                                      <span>Rechazada</span>
+                                    </span>
+                                  )}
+                                  {tool.status === 'Pendiente' && (
+                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[9px] font-bold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+                                      <Clock className="w-3 h-3" />
+                                      <span>Pendiente</span>
+                                    </span>
+                                  )}
+                                </div>
+                              </td>
+                              <td className="py-4 text-right pr-1 align-top">
+                                <button
+                                  onClick={() => {
+                                    if (isSelected) {
+                                      setSelectedReviewId(null);
+                                    } else {
+                                      setSelectedReviewId(tool.id);
+                                      setAdminReviewComment(tool.admin_comment || '');
+                                    }
+                                  }}
+                                  className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[10px] font-bold bg-slate-100 hover:bg-slate-200 dark:bg-[#273449] dark:hover:bg-[#2d3b52] text-slate-700 dark:text-[#cbd5e1] border border-slate-200 dark:border-[#334155] cursor-pointer"
+                                >
+                                  {isSelected ? 'Cerrar' : '🔍 Revisar'}
+                                </button>
+                              </td>
+                            </tr>
+                            {isSelected && (
+                              <tr className="bg-slate-50/50 dark:bg-slate-900/15">
+                                <td colSpan={5} className="py-4 pl-4 pr-4">
+                                  <div className="flex flex-col gap-3 p-4 border border-dashed border-slate-200 dark:border-[#334155] rounded-2.5xl max-w-2xl bg-white dark:bg-[#1e293b]">
+                                    <h4 className="text-[10px] font-black text-slate-450 uppercase tracking-widest">Revisar Evidencia de {name}</h4>
+                                    
+                                    <div>
+                                      <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">
+                                        Comentarios / Notas del Evaluador
+                                      </label>
+                                      <textarea
+                                        rows={2}
+                                        placeholder="Agregue retroalimentación de la aprobación o motivos del rechazo..."
+                                        className="block w-full py-2 px-3 bg-slate-50 dark:bg-[#273449] border border-slate-250 dark:border-[#334155] rounded-xl text-xs font-semibold text-slate-855 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/15 focus:border-emerald-500"
+                                        value={adminReviewComment}
+                                        onChange={(e) => setAdminReviewComment(e.target.value)}
+                                      />
+                                    </div>
+
+                                    <div className="flex justify-end gap-2 text-xs">
+                                      <button
+                                        onClick={async () => {
+                                          try {
+                                            await onReviewAppliedTool(tool.id, 'Rechazada', adminReviewComment);
+                                            setSelectedReviewId(null);
+                                          } catch (e: any) {
+                                            alert(`Error: ${e.message}`);
+                                          }
+                                        }}
+                                        className="flex items-center gap-1 px-4 py-2 bg-red-650 hover:bg-red-500 text-white font-bold rounded-xl shadow-md shadow-red-600/10 cursor-pointer"
+                                      >
+                                        <XCircle className="w-4 h-4" />
+                                        <span>Rechazar Evidencia</span>
+                                      </button>
+                                      <button
+                                        onClick={async () => {
+                                          try {
+                                            await onReviewAppliedTool(tool.id, 'Aprobada', adminReviewComment);
+                                            setSelectedReviewId(null);
+                                          } catch (e: any) {
+                                            alert(`Error: ${e.message}`);
+                                          }
+                                        }}
+                                        className="flex items-center gap-1 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl shadow-md shadow-emerald-600/10 cursor-pointer"
+                                      >
+                                        <CheckCircle2 className="w-4 h-4" />
+                                        <span>Aprobación Oficial</span>
+                                      </button>
+                                    </div>
+                                  </div>
+                                </td>
+                              </tr>
+                            )}
+                          </React.Fragment>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </div>
         )}
       </div>
 

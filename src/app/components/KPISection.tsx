@@ -1,15 +1,20 @@
 'use client';
 
 import React from 'react';
-import { Users, CheckCircle2, Sparkles, Clock, Percent, ClipboardList } from 'lucide-react';
+import { Users, CheckCircle2, Sparkles, Clock, Percent, ClipboardList, Wrench } from 'lucide-react';
 import { KPIStats, TipoPersonal } from '../types';
 
 interface KPISectionProps {
   stats: KPIStats;
   selectedTipoPersonal: TipoPersonal | 'Todos';
+  toolStats?: {
+    pending: number;
+    approved: number;
+    rejected: number;
+  };
 }
 
-export default function KPISection({ stats, selectedTipoPersonal }: KPISectionProps) {
+export default function KPISection({ stats, selectedTipoPersonal, toolStats }: KPISectionProps) {
   const { totalHeadcount, certifiedCount, potentialCount, pendingCount, globalPercentage } = stats;
 
   const kpiItems = [
@@ -67,7 +72,7 @@ export default function KPISection({ stats, selectedTipoPersonal }: KPISectionPr
 
   return (
     <section 
-      className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6 animate-fade-in" 
+      className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-4 mb-6 animate-fade-in" 
       style={{ animationDelay: '0.1s' }}
     >
       {/* Primeros 5 KPIs tradicionales */}
@@ -113,7 +118,43 @@ export default function KPISection({ stats, selectedTipoPersonal }: KPISectionPr
         );
       })}
 
-      {/* 6. NUEVA TARJETA KPI: Resumen Filtrado */}
+      {/* 6. NUEVA TARJETA KPI: Herramientas Lean */}
+      {toolStats && (
+        <div 
+          className="glass-panel rounded-2xl p-4 flex flex-col justify-between h-[155px] bg-white border border-slate-200 border-l-4 border-l-purple-500 animate-fade-in"
+        >
+          <div className="flex justify-between items-start gap-1">
+            <div className="min-w-0">
+              <span className="text-[9px] sm:text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+                Herramientas Lean
+              </span>
+              <div className="text-[10px] font-bold text-purple-600 mt-0.5 truncate">
+                Evidencias Aplicadas
+              </div>
+            </div>
+            <div className="p-1.5 rounded-lg bg-purple-50 text-purple-600 border border-purple-100 flex-shrink-0">
+              <Wrench className="w-4 h-4" />
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-0.5 text-[9px] sm:text-[10px] font-bold text-slate-500 mt-2">
+            <div className="flex justify-between border-b border-slate-100 pb-0.5">
+              <span>Pendientes:</span>
+              <span className="text-amber-500">{toolStats.pending}</span>
+            </div>
+            <div className="flex justify-between border-b border-slate-100 py-0.5">
+              <span>Aprobadas:</span>
+              <span className="text-emerald-600">{toolStats.approved}</span>
+            </div>
+            <div className="flex justify-between pt-0.5">
+              <span>Rechazadas:</span>
+              <span className="text-red-500">{toolStats.rejected}</span>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 7. NUEVA TARJETA KPI: Resumen Filtrado */}
       <div 
         className="glass-panel rounded-2xl p-4 flex flex-col justify-between h-[155px] bg-white border border-slate-200 border-l-4 border-l-emerald-500"
       >

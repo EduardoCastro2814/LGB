@@ -6,6 +6,7 @@
 -- por el frontend. Ejecútelo con precaución.
 
 -- 1. ELIMINAR COMPLETAMENTE LAS TABLAS EN ORDEN DE DEPENDENCIAS
+DROP TABLE IF EXISTS public.applied_tools CASCADE;
 DROP TABLE IF EXISTS public.certificates CASCADE;
 DROP TABLE IF EXISTS public.course_progress CASCADE;
 DROP TABLE IF EXISTS public.questions CASCADE;
@@ -237,3 +238,29 @@ INSERT INTO public.questions (id, exam_id, text, options, correct_option_index, 
 ('sg-q2', 'sga-guide', '¿Cuál es el rol del Facilitador en un equipo de SGA?', '["Asesorar al equipo en la metodología Lean y guiar la resolución del problema", "Realizar todas las tareas del Kaizen en su oficina", "Tomar las decisiones definitivas del equipo de manera autoritaria", "Solo tomar lista de asistencia en las reuniones"]'::jsonb, 0, 10),
 ('sg-q3', 'sga-guide', '¿Cuál es el beneficio de involucrar al personal operativo (DL) en un SGA?', '["Reducir los sueldos del personal de línea", "Aprovechar el conocimiento real de quienes ejecutan el proceso para mejorar calidad y productividad", "Hacer que trabajen más horas extras sin pago", "Eliminar los puestos de supervisores"]'::jsonb, 1, 10)
 ON CONFLICT (id) DO NOTHING;
+
+-- 14. TABLA DE HERRAMIENTAS APLICADAS (applied_tools) Y POLÍTICAS
+CREATE TABLE public.applied_tools (
+    id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+    employee_number text NOT NULL REFERENCES public.employees(employee_number) ON DELETE CASCADE,
+    tool_name text NOT NULL,
+    custom_tool_name text,
+    application text NOT NULL,
+    result text NOT NULL,
+    comment text NOT NULL,
+    status text NOT NULL DEFAULT 'Pendiente',
+    admin_comment text,
+    created_at timestamptz DEFAULT now(),
+    updated_at timestamptz DEFAULT now()
+);
+
+-- RLS
+ALTER TABLE public.applied_tools ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Permitir select a todos en applied_tools" ON public.applied_tools FOR SELECT TO anon, authenticated USING (true);
+CREATE POLICY "Permitir insert a todos en applied_tools" ON public.applied_tools FOR INSERT TO anon, authenticated WITH CHECK (true);
+CREATE POLICY "Permitir update a todos en applied_tools" ON public.applied_tools FOR UPDATE TO anon, authenticated USING (true) WITH CHECK (true);
+CREATE POLICY "Permitir delete a todos en applied_tools" ON public.applied_tools FOR DELETE TO anon, authenticated USING (true);
+
+-- Index
+CREATE INDEX idx_applied_tools_emp ON public.applied_tools(employee_number);
+

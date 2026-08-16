@@ -11,6 +11,7 @@ import FiltersSection from './components/FiltersSection';
 import MainChartSection from './components/MainChartSection';
 import EmployeeTable from './components/EmployeeTable';
 import DepartmentModal from './components/DepartmentModal';
+import AppliedToolsView from './components/AppliedToolsView';
 import { 
   MergedEmployee, 
   LGBStatus, 
@@ -23,7 +24,8 @@ import {
   Exam,
   UserCourseProgress,
   TrainingState,
-  CertificateConfig
+  CertificateConfig,
+  AppliedTool
 } from './types';
 import { processLgbData, computeKPIs, computeDepartmentSummaries } from './utils/dataProcessor';
 import { Loader2, AlertCircle } from 'lucide-react';
@@ -47,7 +49,10 @@ import {
   diagnoseSupabaseSchema,
   SchemaDiagnosis,
   ImportProgress,
-  ImportSummary
+  ImportSummary,
+  getSupabaseAppliedTools,
+  saveSupabaseAppliedTool,
+  deleteSupabaseAppliedTool
 } from './utils/supabaseService';
 
 // Cursos predeterminados exigidos por las reglas del negocio
@@ -443,6 +448,10 @@ export default function DashboardPage() {
   const [trainingState, setTrainingState] = useState<TrainingState>({});
   const [certConfig, setCertConfig] = useState<CertificateConfig>(defaultCertConfig);
 
+  // HERRAMIENTAS LEAN Y ROLES LOCAL OVERRIDES
+  const [appliedTools, setAppliedTools] = useState<AppliedTool[]>([]);
+  const [roleOverrides, setRoleOverrides] = useState<Record<string, 'Admin' | 'User'>>({});
+
   // Estado de overrides manuales (modificaciones de administrador)
   const [overrides, setOverrides] = useState<OverrideMap>({});
 
@@ -529,6 +538,18 @@ export default function DashboardPage() {
       const savedOverrides = localStorage.getItem('lgb_dashboard_overrides');
       if (savedOverrides) {
         setOverrides(JSON.parse(savedOverrides));
+      }
+
+      // 7. Cargar herramientas lean aplicadas
+      const savedAppliedTools = localStorage.getItem('lgb_applied_tools');
+      if (savedAppliedTools) {
+        setAppliedTools(JSON.parse(savedAppliedTools));
+      }
+
+      // 8. Cargar overrides de roles
+      const savedRoleOverrides = localStorage.getItem('lgb_role_overrides');
+      if (savedRoleOverrides) {
+        setRoleOverrides(JSON.parse(savedRoleOverrides));
       }
     } catch (e) {
       console.error('Error al inicializar bases de datos locales:', e);
@@ -630,6 +651,15 @@ export default function DashboardPage() {
           }
         }
 
+        // 3.5 Cargar herramientas lean aplicadas de Supabase
+        try {
+          const dbAppliedTools = await getSupabaseAppliedTools();
+          setAppliedTools(dbAppliedTools);
+          localStorage.setItem('lgb_applied_tools', JSON.stringify(dbAppliedTools));
+        } catch (toolsErr) {
+          console.error('[LGB App debug] Error al cargar herramientas de Supabase:', toolsErr);
+        }
+
         // 4. Cargar colaboradores de Supabase
         try {
           const dbEmployees = await getSupabaseEmployees();
@@ -644,7 +674,7 @@ export default function DashboardPage() {
               Puesto: emp.Puesto || 'Operador DL',
               Manager: emp.Manager || 'N/A',
               TipoPersonal: emp.TipoPersonal || 'DL',
-              role: emp.role || 'User' // Conservar el rol administrativo
+              role: roleOverrides[emp.ID] || emp.role || (emp.ID === '1163146' ? 'Admin' : 'User')
             }));
 
             const reconstructedReport = dbEmployees.map(emp => ({
@@ -849,7 +879,7 @@ export default function DashboardPage() {
           Puesto: emp.Puesto || 'Operador DL',
           Manager: emp.Manager || 'N/A',
           TipoPersonal: emp.TipoPersonal || 'DL',
-          role: emp.role || 'User'
+          role: roleOverrides[emp.ID] || emp.role || (emp.ID === '1163146' ? 'Admin' : 'User')
         }));
         const reconstructedReport = dbEmployees.map(emp => ({
           'Employee#': emp.ID,
@@ -890,7 +920,7 @@ export default function DashboardPage() {
           Puesto: emp.Puesto || 'Operador DL',
           Manager: emp.Manager || 'N/A',
           TipoPersonal: emp.TipoPersonal || 'DL',
-          role: emp.role || 'User'
+          role: roleOverrides[emp.ID] || emp.role || (emp.ID === '1163146' ? 'Admin' : 'User')
         }));
         const reconstructedReport = dbEmployees.map(emp => ({
           'Employee#': emp.ID,
@@ -906,20 +936,120 @@ export default function DashboardPage() {
     }
   };
 
-  // Actualizar rol de un colaborador en Supabase
+  // Actualizar rol de un colaborador
   const handleUpdateEmployeeRole = async (employeeNumber: string, role: 'Admin' | 'User') => {
-    try {
-      await updateSupabaseEmployeeRole(employeeNumber, role);
-      // Refrescar estado local para mantener reactividad
-      setHcData(prev => prev.map(emp => {
-        if (emp.ID === employeeNumber) {
-          return { ...emp, role };
+    const updatedRoleOverrides = {
+      ...roleOverrides,
+      [employeeNumber]: role
+    };
+    setRoleOverrides(updatedRoleOverrides);
+    localStorage.setItem('lgb_role_overrides', JSON.stringify(updatedRoleOverrides));
+
+    if (supabaseStatus === 'online') {
+      try {
+        await updateSupabaseEmployeeRole(employeeNumber, role);
+      } catch (err: any) {
+        console.error(`Error al guardar el rol en Supabase para ${employeeNumber}:`, err.message);
+      }
+    }
+
+    setHcData(prev => prev.map(emp => {
+      if (emp.ID === employeeNumber) {
+        return { ...emp, role };
+      }
+      return emp;
+    }));
+
+    if (currentUser && currentUser.ID === employeeNumber) {
+      const updatedUser = { ...currentUser, role };
+      setCurrentUser(updatedUser);
+      setCurrentRole(role as UserRole);
+      localStorage.setItem('lgb_logged_in_user', JSON.stringify(updatedUser));
+      localStorage.setItem('lgb_logged_in_role', role);
+    }
+  };
+
+  // Manejadores para registrar/eliminar/revisar herramientas Lean
+  const handleSaveAppliedTool = async (tool: Omit<AppliedTool, 'employee_number' | 'status' | 'id'> & { id?: string }) => {
+    if (!currentUser) return;
+    
+    const isNew = !tool.id;
+    const toolId = tool.id || `tool-${Math.random().toString(36).substr(2, 9)}`;
+    const newTool: AppliedTool = {
+      id: toolId,
+      employee_number: currentUser.ID,
+      tool_name: tool.tool_name,
+      custom_tool_name: tool.custom_tool_name,
+      application: tool.application,
+      result: tool.result,
+      comment: tool.comment,
+      status: 'Pendiente',
+      admin_comment: '',
+      created_at: isNew ? new Date().toISOString() : undefined,
+      updated_at: new Date().toISOString()
+    };
+
+    const updatedTools = isNew 
+      ? [newTool, ...appliedTools]
+      : appliedTools.map(t => t.id === toolId ? { ...t, ...newTool, created_at: t.created_at } : t);
+
+    setAppliedTools(updatedTools);
+    localStorage.setItem('lgb_applied_tools', JSON.stringify(updatedTools));
+
+    if (supabaseStatus === 'online') {
+      try {
+        const existingTool = appliedTools.find(t => t.id === toolId);
+        const finalTool = {
+          ...newTool,
+          created_at: existingTool?.created_at || newTool.created_at
+        };
+        await saveSupabaseAppliedTool(finalTool);
+      } catch (err) {
+        console.error('Error al guardar herramienta en Supabase:', err);
+      }
+    }
+  };
+
+  const handleDeleteAppliedTool = async (id: string) => {
+    const updatedTools = appliedTools.filter(t => t.id !== id);
+    setAppliedTools(updatedTools);
+    localStorage.setItem('lgb_applied_tools', JSON.stringify(updatedTools));
+
+    if (supabaseStatus === 'online') {
+      try {
+        await deleteSupabaseAppliedTool(id);
+      } catch (err) {
+        console.error('Error al eliminar herramienta en Supabase:', err);
+      }
+    }
+  };
+
+  const handleReviewAppliedTool = async (id: string, status: 'Aprobada' | 'Rechazada', adminComment: string) => {
+    const updatedTools = appliedTools.map(t => {
+      if (t.id === id) {
+        return {
+          ...t,
+          status,
+          admin_comment: adminComment,
+          updated_at: new Date().toISOString()
+        };
+      }
+      return t;
+    });
+
+    setAppliedTools(updatedTools);
+    localStorage.setItem('lgb_applied_tools', JSON.stringify(updatedTools));
+
+    if (supabaseStatus === 'online') {
+      try {
+        const targetTool = updatedTools.find(t => t.id === id);
+        if (targetTool) {
+          await saveSupabaseAppliedTool(targetTool);
         }
-        return emp;
-      }));
-    } catch (err: any) {
-      alert(`Error al guardar el rol en Supabase: ${err.message}`);
-      throw err;
+      } catch (err) {
+        console.error('Error al evaluar herramienta en Supabase:', err);
+        throw err;
+      }
     }
   };
 
@@ -1019,8 +1149,11 @@ export default function DashboardPage() {
     // para que la interfaz (sidebar, perfil, etc.) se redibuje inmediatamente.
     const requiredIds = ['lean-basics-1', '5s-1', '5-whys', '7-ways', 'sga-guide'];
     const passedAll = requiredIds.every(id => newUserProgMap[id]?.examPassed === true);
+    const hasApprovedTool = appliedTools.some(
+      tool => tool.employee_number === currentUser.ID && tool.status === 'Aprobada'
+    );
     
-    if (passedAll && currentUser.Estatus !== 'Certificado') {
+    if (passedAll && hasApprovedTool && currentUser.Estatus !== 'Certificado') {
       const updatedUser = {
         ...currentUser,
         Estatus: 'Certificado' as LGBStatus,
@@ -1028,49 +1161,59 @@ export default function DashboardPage() {
       };
       setCurrentUser(updatedUser);
       localStorage.setItem('lgb_logged_in_user', JSON.stringify(updatedUser));
+    } else if ((!passedAll || !hasApprovedTool) && currentUser.Estatus === 'Certificado') {
+      const updatedUser = {
+        ...currentUser,
+        Estatus: 'Potencial' as LGBStatus,
+        Action: 'Create Form'
+      };
+      setCurrentUser(updatedUser);
+      localStorage.setItem('lgb_logged_in_user', JSON.stringify(updatedUser));
     }
   };
 
-  // PROCESAMIENTO Y CRUCE DE DATOS INTEGRADO CON ACADEMIA
-  // Las métricas del dashboard se recalculan dinámicamente si el empleado completa sus cursos
+  // PROCESAMIENTO Y CRUCE DE DATOS INTEGRADO CON ACADEMIA Y HERRAMIENTAS LEAN
   const mergedEmployees = useMemo(() => {
     if (hcData.length === 0) return [];
     
-    // Obtener los datos base del headcount y reporte LGB
     const baseList = processLgbData(hcData, reportData, overrides);
     const requiredIds = ['lean-basics-1', '5s-1', '5-whys', '7-ways', 'sga-guide'];
 
-    // Mapear y cruzar con el progreso local para cambiar estatus en caliente
     return baseList.map(emp => {
-      const empProgMap = trainingState[emp.ID] || {};
-      
-      // Comprobar si aprobó todos los exámenes mínimos
-      const passedAll = requiredIds.every(id => empProgMap[id]?.examPassed === true);
+      const empRole = roleOverrides[emp.ID] || emp.role || (emp.ID === '1163146' ? 'Admin' : 'User');
+      const updatedEmp = { ...emp, role: empRole };
 
-      if (passedAll) {
+      const empProgMap = trainingState[emp.ID] || {};
+      const passedAllExams = requiredIds.every(id => empProgMap[id]?.examPassed === true);
+
+      const hasApprovedTool = appliedTools.some(
+        tool => tool.employee_number === emp.ID && tool.status === 'Aprobada'
+      );
+
+      if (passedAllExams && hasApprovedTool) {
         return {
-          ...emp,
+          ...updatedEmp,
           Estatus: 'Certificado' as LGBStatus,
           Action: 'Complete',
         };
       }
 
-      // Si ha iniciado/completado alguno, pero no todos
-      const startedAny = requiredIds.some(
+      const startedAnyCourse = requiredIds.some(
         id => empProgMap[id]?.status === 'en-progreso' || empProgMap[id]?.status === 'completado'
       );
+      const hasAnyTool = appliedTools.some(tool => tool.employee_number === emp.ID);
 
-      if (startedAny && emp.Estatus !== 'Certificado') {
+      if ((startedAnyCourse || hasAnyTool) && updatedEmp.Estatus !== 'Certificado') {
         return {
-          ...emp,
+          ...updatedEmp,
           Estatus: 'Potencial' as LGBStatus,
-          Action: emp.Action || 'Create Form',
+          Action: updatedEmp.Action || 'Create Form',
         };
       }
 
-      return emp;
+      return updatedEmp;
     });
-  }, [hcData, reportData, overrides, trainingState]);
+  }, [hcData, reportData, overrides, trainingState, appliedTools, roleOverrides]);
 
   // Filtrado de la lista para el dashboard
   const filteredEmployees = useMemo(() => {
@@ -1110,6 +1253,25 @@ export default function DashboardPage() {
   const dashboardKPIs = useMemo(() => {
     return computeKPIs(filteredEmployees);
   }, [filteredEmployees]);
+
+  // Estadísticas de herramientas aplicadas filtradas por departamento y tipo personal
+  const filteredToolStats = useMemo(() => {
+    const toolsForStats = appliedTools.filter(tool => {
+      const emp = mergedEmployees.find(e => e.ID === tool.employee_number);
+      if (!emp) return false;
+
+      if (selectedDept !== 'Todos' && emp.Departamento !== selectedDept) return false;
+      if (selectedTipoPersonal !== 'Todos' && emp.TipoPersonal !== selectedTipoPersonal) return false;
+
+      return true;
+    });
+
+    return {
+      pending: toolsForStats.filter(t => t.status === 'Pendiente').length,
+      approved: toolsForStats.filter(t => t.status === 'Aprobada').length,
+      rejected: toolsForStats.filter(t => t.status === 'Rechazada').length
+    };
+  }, [appliedTools, mergedEmployees, selectedDept, selectedTipoPersonal]);
 
   // Resumen departamentos para gráficos
   const departmentSummaries = useMemo(() => {
@@ -1174,7 +1336,7 @@ export default function DashboardPage() {
         currentView={currentView}
         onViewChange={(view) => {
           // Seguridad: el usuario general no puede acceder a las áreas de administrador
-          if (currentRole !== 'Admin' && view !== 'academia') return;
+          if (currentRole !== 'Admin' && view !== 'academia' && view !== 'appliedTools') return;
           setCurrentView(view);
         }}
         onLogout={handleLogout}
@@ -1230,7 +1392,7 @@ export default function DashboardPage() {
 
                 {hcData.length > 0 ? (
                   <>
-                    <KPISection stats={dashboardKPIs} selectedTipoPersonal={selectedTipoPersonal} />
+                    <KPISection stats={dashboardKPIs} selectedTipoPersonal={selectedTipoPersonal} toolStats={filteredToolStats} />
 
                     <FiltersSection
                       searchTerm={searchTerm}
@@ -1303,6 +1465,18 @@ export default function DashboardPage() {
                 schemaDiagnosis={schemaDiagnosis}
                 importProgress={importProgress}
                 importSummary={importSummary}
+                appliedTools={appliedTools}
+                onReviewAppliedTool={handleReviewAppliedTool}
+              />
+            )}
+
+            {currentView === 'appliedTools' && (
+              /* EVIDENCIAS DE HERRAMIENTAS LEAN */
+              <AppliedToolsView
+                user={currentUser}
+                appliedTools={appliedTools}
+                onSaveAppliedTool={handleSaveAppliedTool}
+                onDeleteAppliedTool={handleDeleteAppliedTool}
               />
             )}
 

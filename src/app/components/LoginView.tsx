@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Award, KeyRound, ArrowRight, ShieldAlert, AlertCircle, Users } from 'lucide-react';
+import { Award, KeyRound, ArrowRight, ShieldAlert, AlertCircle } from 'lucide-react';
 import { MergedEmployee, UserRole } from '../types';
 import { normalizeId } from '../utils/dataProcessor';
 
@@ -25,23 +25,24 @@ export default function LoginView({ employees, onLogin, hcLoaded }: LoginViewPro
       return;
     }
 
-    // 1. Caso especial: si no hay base de datos cargada y se ingresa un ID de administrador de pruebas
+    // 1. Caso especial: si no hay base de datos cargada y se ingresa el ID de administrador inicial
     if (!hcLoaded || employees.length === 0) {
-      if (normalizedInput.toLowerCase() === 'admin' || normalizedInput === '123' || normalizedInput.toLowerCase() === 'admin-test') {
+      if (normalizedInput === '1163146') {
         const mockAdmin: MergedEmployee = {
-          ID: 'ADMIN-TEST',
-          Nombre: 'Administrador de Pruebas',
-          Departamento: 'BE', // Pertenece a BE para ser administrador
-          Puesto: 'Ingeniero de Procesos Principal',
-          Manager: 'Director de Planta',
+          ID: '1163146',
+          Nombre: 'Administrador Inicial',
+          Departamento: 'BE',
+          Puesto: 'Administrador del Sistema',
+          Manager: 'N/A',
           Action: '',
           Estatus: 'Certificado',
           TipoPersonal: 'IDL',
+          role: 'Admin'
         };
         onLogin(mockAdmin, 'Admin');
         return;
       }
-      setError('La base de datos de headcount aún no está cargada. Ingrese "admin" para acceder como Administrador de Pruebas y cargar los archivos Excel.');
+      setError('La base de datos de headcount aún no está cargada. Ingrese el número del administrador inicial (1163146) para acceder y configurarla.');
       return;
     }
 
@@ -49,55 +50,11 @@ export default function LoginView({ employees, onLogin, hcLoaded }: LoginViewPro
     const foundEmployee = employees.find(emp => normalizeId(emp.ID) === normalizedInput);
 
     if (foundEmployee) {
-      // Determinar rol: si el rol es Admin o pertenece a BE, es Admin. De lo contrario, General.
-      const role: UserRole = (foundEmployee as any).role === 'Admin' || foundEmployee.Departamento.toUpperCase() === 'BE' ? 'Admin' : 'General';
+      const role: UserRole = foundEmployee.role === 'Admin' ? 'Admin' : 'General';
       onLogin(foundEmployee, role);
     } else {
-      // Como contingencia, permitir un ID administrador universal 'admin'
-      if (normalizedInput.toLowerCase() === 'admin') {
-        const mockAdmin: MergedEmployee = {
-          ID: 'ADMIN-TEST',
-          Nombre: 'Administrador de Contingencia',
-          Departamento: 'BE',
-          Puesto: 'Soporte del Sistema',
-          Manager: 'Administrador de Red',
-          Action: '',
-          Estatus: 'Certificado',
-          TipoPersonal: 'IDL',
-        };
-        onLogin(mockAdmin, 'Admin');
-        return;
-      }
       setError(`No se encontró ningún empleado con el número "${employeeId}". Verifique el número e inténtelo de nuevo.`);
     }
-  };
-
-  const handleTestLogin = (isAdmin: boolean) => {
-    if (employees.length > 0) {
-      if (isAdmin) {
-        // Encontrar el primer empleado del departamento BE o con rol Admin
-        const beEmp = employees.find(e => (e as any).role === 'Admin' || e.Departamento.toUpperCase() === 'BE');
-        if (beEmp) {
-          onLogin(beEmp, 'Admin');
-          return;
-        }
-      } else {
-        // Encontrar el primer empleado de producción / DL (cualquiera no Admin)
-        const dlEmp = employees.find(e => (e as any).role !== 'Admin' && e.Departamento.toUpperCase() !== 'BE' && e.TipoPersonal === 'DL') 
-                     || employees.find(e => (e as any).role !== 'Admin' && e.Departamento.toUpperCase() !== 'BE');
-        if (dlEmp) {
-          onLogin(dlEmp, 'General');
-          return;
-        }
-      }
-    }
-
-    // Si no hay empleados, usar mock
-    const mockUser: MergedEmployee = isAdmin
-      ? { ID: '1001', Nombre: 'Carlos Admin BE', Departamento: 'BE', Puesto: 'LGB Coordinator', Manager: 'Supervisor N1', Action: '', Estatus: 'Potencial', TipoPersonal: 'IDL' }
-      : { ID: '5002', Nombre: 'Juan Operador DL', Departamento: 'Ensamble', Puesto: 'Operador DL B29', Manager: 'Carlos Admin BE', Action: '', Estatus: 'Por Certificar', TipoPersonal: 'DL' };
-    
-    onLogin(mockUser, isAdmin ? 'Admin' : 'General');
   };
 
   return (
@@ -170,29 +127,6 @@ export default function LoginView({ employees, onLogin, hcLoaded }: LoginViewPro
             <ArrowRight className="w-4 h-4" />
           </button>
         </form>
-
-        {/* Acceso Rápido Demo (Testing Buttons) */}
-        <div className="mt-8 pt-6 border-t border-slate-200">
-          <p className="text-center text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-3.5">
-            Acceso Rápido de Pruebas
-          </p>
-          <div className="grid grid-cols-2 gap-3">
-            <button
-              onClick={() => handleTestLogin(false)}
-              className="flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg text-xs font-bold bg-slate-50 hover:bg-slate-100 text-slate-600 border border-slate-200 hover:border-slate-350 transition-all cursor-pointer"
-            >
-              <Users className="w-3.5 h-3.5 text-slate-500" />
-              <span>Colaborador DL</span>
-            </button>
-            <button
-              onClick={() => handleTestLogin(true)}
-              className="flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg text-xs font-bold bg-slate-50 hover:bg-slate-100 text-slate-600 border border-slate-200 hover:border-slate-350 transition-all cursor-pointer"
-            >
-              <Users className="w-3.5 h-3.5 text-emerald-600" />
-              <span>Administrador BE</span>
-            </button>
-          </div>
-        </div>
 
         <div className="mt-6 text-center">
           <p className="text-[10px] text-slate-400 font-medium">
