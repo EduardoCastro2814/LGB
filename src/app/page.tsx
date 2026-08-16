@@ -107,122 +107,122 @@ const defaultExams: Exam[] = [
     questions: [
       {
         id: 'lb-q1',
-        text: '¿Cuál es el objetivo principal de la filosofía Lean Manufacturing en nuestro piso de trabajo?',
+        text: '¿Qué es Lean y cuál es su enfoque según el material del curso?',
         options: [
-          'Producir la mayor cantidad de piezas posible sin importar los defectos',
-          'Eliminar desperdicios para hacer el trabajo más fácil, seguro y eficiente, agregando valor para el cliente',
-          'Automatizar todas las estaciones de trabajo para reemplazar a los operadores',
-          'Aumentar el inventario en las líneas para evitar que falte material'
+          'Un sistema para automatizar la producción con tecnología de punta',
+          'Un enfoque sistemático para identificar y eliminar actividades que no agregan valor de los procesos',
+          'Un método enfocado en contratar más personal para acelerar los ensambles',
+          'Un plan trimestral de ventas para aumentar el catálogo de productos'
         ],
         correctOptionIndex: 1,
         points: 10
       },
       {
         id: 'lb-q2',
-        text: '¿Qué es una actividad que "Agrega Valor" (VA) en la producción?',
+        text: '¿Cómo se define "Valor" y "Desperdicio (Muda)" en la filosofía Lean?',
         options: [
-          'Cualquier acción que transforma físicamente el producto y por la cual el cliente está dispuesto a pagar',
-          'Mover cajas de componentes de un almacén a otro de la planta',
-          'Almacenar tarjetas electrónicas en un estante durante una semana',
-          'Inspeccionar dos veces el mismo ensamble al final del turno'
+          'Valor es todo proceso por el cual el cliente está dispuesto a pagar; Desperdicio es toda actividad que no agrega valor',
+          'Valor es el costo total de los materiales; Desperdicio es el desecho de cartón y plásticos en la línea',
+          'Valor es la velocidad de las máquinas; Desperdicio es el mantenimiento preventivo',
+          'Valor es el espacio del almacén; Desperdicio es el tiempo extra del supervisor'
         ],
         correctOptionIndex: 0,
         points: 10
       },
       {
         id: 'lb-q3',
-        text: 'Según los Principios Lean, ¿qué significa producir bajo el sistema "Jalar" (Pull)?',
+        text: 'En la historia de Lean, ¿qué aportes clave hicieron Sakichi Toyoda (1896) y Kiichiro Toyoda (1927)?',
         options: [
-          'Empujar el material a la siguiente estación lo más rápido posible, aunque no lo necesiten',
-          'Trabajar únicamente cuando el proceso siguiente o el cliente lo solicita',
-          'Jalar físicamente los carros de material sin usar equipo de protección',
-          'Aumentar la velocidad de las máquinas al doble de su capacidad'
+          'Sakichi introdujo el Mapeo de Flujo de Valor (VSM) y Kiichiro el sistema de Supermercado',
+          'Sakichi diseñó los Poka-Yokes y Kiichiro la matriz TIM WOODS',
+          'Sakichi introdujo el concepto de Jidoka (autonomatización) y Kiichiro introdujo el concepto Just-In-Time (JIT) con transportadores de cadena',
+          'Sakichi creó la nivelación Heijunka y Kiichiro el Try-storming'
         ],
-        correctOptionIndex: 1,
+        correctOptionIndex: 2,
         points: 10
       },
       {
         id: 'lb-q4',
-        text: '¿Qué significa la palabra "Kaizen" en la cultura de mejora continua en la que participamos?',
+        text: '¿Quién es conocido como el Arquitecto del TPS y padre del sistema de control de inventario de Supermercado?',
         options: [
-          'Trabajar más rápido bajo presión extrema para cumplir la meta de producción',
-          '"Cambio para mejor" o "Mejora Continua" a través de pequeñas acciones diarias realizadas por todos',
-          'Realizar un rediseño completo de la planta cada cinco años',
-          'Automatizar toda la maquinaria de la empresa con presupuesto ilimitado'
+          'Taiichi Ohno',
+          'Dr. Shigeo Shingo',
+          'Kiichiro Toyoda',
+          'Sakichi Toyoda'
         ],
-        correctOptionIndex: 1,
+        correctOptionIndex: 0,
         points: 10
       },
       {
         id: 'lb-q5',
-        text: 'Si un operador realiza movimientos innecesarios por mala ergonomía o desorden, ¿qué desperdicio ocurre?',
+        text: '¿Qué conceptos de precisión en manufactura desarrolló el Dr. Shigeo Shingo en la década de 1960?',
         options: [
-          'Defectos de fabricación',
-          'Movimiento innecesario del operador',
-          'Sobreproducción de piezas',
-          'Transporte de material sobrante'
+          'El Justo a Tiempo (JIT) y transportadores de cadena',
+          'Los conceptos de Poka-Yoke (a prueba de errores) y SMED (cambio de herramientas en un dígito de minuto)',
+          'Las 5S y el tablero Heijunka',
+          'La matriz de desperdicios TIM WOODS'
         ],
         correctOptionIndex: 1,
         points: 10
       },
       {
         id: 'lb-q6',
-        text: '¿Por qué la "Sobreproducción" (producir de más o antes de tiempo) se considera el peor de los desperdicios?',
+        text: '¿Cuáles son los 5 Principios Lean para guiar la mejora continua?',
         options: [
-          'Porque genera más cansancio físico al operador durante el turno',
-          'Porque oculta otros problemas en la línea y genera desperdicios adicionales como almacenamiento y transporte',
-          'Porque el cliente nos pagará un bono extra por piezas excedentes',
-          'Porque ayuda a limpiar el área de trabajo más rápido'
+          'Clasificar, Ordenar, Limpiar, Estandarizar y Mantener',
+          'JIT, Jidoka, Heijunka, 5S+1 y VSM',
+          'Transporte, Inventario, Movimiento, Espera y Defectos',
+          'Valor, Flujo de Valor, Flujo, Pull (Jalar) y Perfección'
         ],
-        correctOptionIndex: 1,
+        correctOptionIndex: 3,
         points: 10
       },
       {
         id: 'lb-q7',
-        text: 'En la metodología 5S+1, ¿cuál es el objetivo principal del paso Seiso (Limpiar)?',
+        text: 'En el modelo de la Casa Flex Lean Enterprise (FLE), ¿cuáles son los cimientos operativos (base del templo)?',
         options: [
-          'Ocultar la suciedad pintando sobre el aceite tirado',
-          'Barrer el área únicamente cuando viene una visita importante a la planta',
-          'Limpiar la estación de trabajo e inspeccionar el equipo para detectar anomalías o fugas a tiempo',
-          'Tirar todas las herramientas a la basura para que no se ensucien'
+          'JIT y Jidoka',
+          'Heijunka y Talento No Utilizado',
+          '5S+1, VSM y Supermercado',
+          'El cliente final y la gerencia de planta'
         ],
         correctOptionIndex: 2,
         points: 10
       },
       {
         id: 'lb-q8',
-        text: '¿Qué representa el "+ 1" en la metodología "5S + 1" que aplicamos en Flex?',
+        text: 'En la matriz TIM WOODS de desperdicios, ¿qué representan la "W" y la "+1" o "S" final?',
         options: [
-          'Un operador de soporte extra por cada línea de producción',
-          'Una hora extra obligatoria al final del turno',
-          'Seguridad (identificar y eliminar riesgos para garantizar cero accidentes)',
-          'Una inspección de calidad adicional al final del proceso'
+          'W representa Espera (Waiting); S representa Talento No Utilizado (Skills)',
+          'W representa Desecho (Waste); S representa Seguridad (Safety)',
+          'W representa Movimiento de Agua (Water Spider); S representa Velocidad (Speed)',
+          'W representa Trabajo (Work); S representa Supervisor'
         ],
-        correctOptionIndex: 2,
+        correctOptionIndex: 0,
         points: 10
       },
       {
         id: 'lb-q9',
-        text: '¿Cuál es el propósito principal de usar un VSM (Mapeo del Flujo de Valor)?',
+        text: '¿Qué herramientas representan la base del orden y la radiografía visual de los flujos de material e información?',
         options: [
-          'Evaluar el desempeño individual de cada operador de la línea',
-          'Graficar el sueldo de los operadores contra las horas laboradas',
-          'Ver de forma gráfica el flujo completo de información y materiales para identificar desperdicios',
-          'Diseñar el logotipo corporativo de la línea de producción'
+          'El Try-storming y la nivelación Heijunka',
+          'La metodología 5S+1 y el Mapeo de Flujo de Valor (VSM)',
+          'El sistema Push y las Small Group Activities (SGA)',
+          'La matriz TIM WOODS y el sistema FIFO'
         ],
-        correctOptionIndex: 2,
+        correctOptionIndex: 1,
         points: 10
       },
       {
         id: 'lb-q10',
-        text: '¿Cuál es el beneficio de aplicar la regla FIFO (PEPS) en un Supermercado Lean?',
+        text: '¿Qué es el Sistema Pull, el Supermercado y las prácticas de ADN Kaizen (Las 3 GEN y Try-storming)?',
         options: [
-          'Que los operadores nuevos elijan primero el turno en el que desean trabajar',
-          'Asegurar que el primer material en llegar sea el primero en consumirse, evitando obsolescencia y daños',
-          'Aumentar la cantidad de material acumulado en el piso',
-          'Que el supervisor decida qué material procesar según su preferencia diaria'
+          'Pull es empujar producción; Supermercado es guardar exceso; 3 GEN es planear en oficina; Try-storming es debatir ideas sin actuar',
+          'Pull es nivelar la línea Heijunka; Supermercado es control de sueldos; 3 GEN es clasificar herramientas; Try-storming es reportar scrap',
+          'Pull es aumentar velocidad de máquinas; Supermercado es almacén externo; 3 GEN es auditoría mensual; Try-storming es simular en computadora',
+          'Pull es jalar según demanda; Supermercado repone según el retiro del cliente; 3 GEN es observar piso, pieza y hechos reales; Try-storming es experimentación física rápida'
         ],
-        correctOptionIndex: 1,
+        correctOptionIndex: 3,
         points: 10
       }
     ]

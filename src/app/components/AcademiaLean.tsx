@@ -45,60 +45,52 @@ interface AcademiaLeanProps {
 const DEFAULT_SLIDES: Record<string, { title: string; content: string }[]> = {
   'lean-basics-1': [
     { 
-      title: '1. Bienvenida y objetivos', 
-      content: '¡Bienvenidos al curso de Lean Basics 1!\n\nEste curso está diseñado especialmente para nuestro personal operativo (DL).\n\nObjetivos del curso:\n• Aprender qué es la filosofía Lean de manera muy sencilla.\n• Entender la diferencia entre agregar valor y generar desperdicios.\n• Conocer las herramientas clave: 5S+1, VSM y Supermercados.\n• Aprender cómo proponer ideas de mejora en tu área de trabajo (Kaizen).' 
+      title: '1. Lean Basics 1: Creando lo Extraordinario a través del Valor', 
+      content: 'Bienvenido al Curso Oficial de Lean Basics 1 de Flex.\n\nEn este entrenamiento aprenderás las bases de la filosofía de manufactura esbelta, cómo identificar actividades que agregan valor frente a los desperdicios, y cómo las herramientas Lean como 5S+1, Mapeo de Flujo de Valor (VSM), Sistema Pull y Kaizen nos permiten crear lo extraordinario para nuestros clientes.' 
     },
     { 
-      title: '2. ¿Qué es Lean? (Pensamiento Esbelto)', 
-      content: 'Es una forma de trabajar enfocada en eliminar lo que no sirve (desperdicio) para concentrarnos en lo que el cliente realmente valora.\n\nIdeas principales:\n• Nació para facilitarnos el trabajo, no para hacernos trabajar más rápido.\n• Busca que las actividades fluyan sin interrupciones.\n• Su meta es lograr la máxima calidad y seguridad con el mínimo de recursos.\n• Elimina el esfuerzo innecesario de los operadores.' 
+      title: '2. ¿Qué es Lean?', 
+      content: 'Un enfoque sistemático para identificar y eliminar actividades que no agregan valor de los procesos. Trata sobre maximizar el valor mientras se minimizan los recursos, el tiempo, la energía y el esfuerzo.\n\n• Estado Actual: Lleno de desperdicios, alta variación, procesos rígidos.\n• Estado Futuro: Orientado al valor agregado, calidad mejorada, alta productividad.\n• Valor: Cualquier acción o proceso por el que el cliente estaría dispuesto a pagar.\n• Desperdicio (Muda): Toda actividad que no agrega valor.' 
     },
     { 
-      title: '3. Los 5 Principios Lean', 
-      content: 'Son las cinco reglas básicas para guiar la mejora continua en planta:\n\n• 1. Especificar el Valor: Definir qué es lo que el cliente quiere y paga.\n• 2. Mapear el Flujo de Valor: Identificar todos los pasos y ver dónde se traba.\n• 3. Crear Flujo Continuo: Hacer que el material avance de un paso a otro sin detenerse.\n• 4. Sistema Pull (Jalar): Producir solo cuando el cliente o el siguiente proceso lo pide.\n• 5. Buscar la Perfección: Trabajar en mejorar un poco todos los días.' 
+      title: '3. La Evolución de Lean', 
+      content: 'Línea de tiempo de la evolución e hitos clave del Sistema de Producción Toyota (TPS):\n\n• 1896 - Sakichi Toyoda (La Base): Introdujo el concepto de Jidoka (autonomatización) con un dispositivo de detención automática en el telar mecánico.\n• 1927 - Kiichiro Toyoda (El Flujo): Introdujo el concepto Just-In-Time (JIT), un método de producción de flujo usando transportadores de cadena.\n• 1942 - Taiichi Ohno (El Sistema): Conocido como el Arquitecto del TPS y padre del sistema de control de inventario de Supermercado.\n• 1960s - Dr. Shigeo Shingo (La Precisión): Desarrolló los conceptos de Poka-Yoke (a prueba de errores) y SMED (cambio de herramientas en un dígito de minuto).' 
     },
     { 
-      title: '4. Historia de Lean y sus Creadores', 
-      content: 'Lean se originó en Japón, en las fábricas de Toyota (TPS), buscando competir con la producción en masa de EE.UU.:\n\n• Sakichi Toyoda: Inventó el concepto "Jidoka" (máquinas inteligentes que detectan errores y se detienen solas).\n• Kiichiro Toyoda: Impulsó el concepto "Justo a Tiempo" (producir solo lo necesario).\n• Taiichi Ohno: Diseñó el sistema de Supermercados Lean para controlar materiales.\n• Shigeo Shingo: Creó los "Poka-Yokes" (dispositivos físicos a prueba de errores).' 
+      title: '4. Los 5 Principios Lean', 
+      content: 'Las cinco reglas fundamentales para guiar la mejora continua:\n\n• 1. Valor: Especificar correctamente el valor del producto/servicio con el cliente en mente.\n• 2. Flujo de Valor (Value Stream): Identificar y mapear todos los pasos, eliminando los desperdicios en todo el proceso.\n• 3. Flujo (Flow): Hacer que el producto y el valor fluyan suavemente sin interrupciones ni cuellos de botella.\n• 4. Pull (Jalar): Producir exclusivamente según la demanda del cliente (evitar empujar).\n• 5. Perfección: Mejora continua; repetir el ciclo hasta alcanzar un estado sin desperdicio.' 
     },
     { 
-      title: '5. Valor Agregado vs Desperdicio', 
-      content: 'En tu día a día en la estación de trabajo, realizas dos tipos de actividades:\n\n• Valor Agregado (VA):\n  Actividades que transforman el producto y por las cuales el cliente paga.\n  *Ejemplos: Ensamblar componentes, soldar, colocar tornillos.*\n\n• Desperdicio (No Valor Agregado - NVA):\n  Actividades que consumen tiempo y esfuerzo pero no aportan nada al producto.\n  *Ejemplos: Buscar herramientas, esperar material, reparar piezas.*' 
+      title: '5. Sistema Flex Lean Enterprise (FLE)', 
+      content: 'La Casa Flex Lean Enterprise representa nuestro modelo de excelencia operativa:\n\n• Techo (Meta): Flex Lean Enterprise (FLE) - Agregando Valor y Eliminando Desperdicio.\n• Pilares:\n  - JIT (Just-In-Time)\n  - JIDOKA\n• Base:\n  - HEIJUNKA (Nivelación de producción)\n  - 5S+1, VSM, Supermercado (Los cimientos operativos sobre los que se construye la estabilidad).' 
     },
     { 
-      title: '6. Los 8 Desperdicios Lean (Mudas)', 
-      content: 'Son los 8 enemigos del flujo eficiente en piso de producción (TIMWOODS):\n\n• T - Transporte: Mover materiales de un lado a otro innecesariamente.\n• I - Inventario: Acumulación excesiva de materia prima o piezas (WIP).\n• M - Movimiento: Caminar, agacharse o estirarse de más por mala organización.\n• W - Espera: Operador o máquina parados por falta de material o información.\n• O - Sobreproducción: Hacer más piezas o antes de que se necesiten.\n• O - Sobreprocesamiento: Hacer tareas adicionales que el cliente no pidió.\n• D - Defectos: Generar scrap o tener que re-trabajar piezas.\n• S - Talento No Utilizado: No escuchar ni aprovechar las ideas de mejora del operador.' 
+      title: '6. Los 7+1 Desperdicios (TIM WOODS)', 
+      content: 'Los 8 grandes desperdicios que afectan negativamente el flujo eficiente de la operación:\n\n• T - Transporte: Mover material innecesariamente (Ej: Montacargas viajando vacíos; enviar correos con exceso de adjuntos).\n• I - Inventario: Más material o información de la necesaria (Ej: Piezas acumuladas; bandejas de entrada desbordadas).\n• M - Movimiento: Movimiento humano innecesario (Ej: Caminar entre estaciones alejadas; buscar archivos digitales).\n• W - Espera: Tiempo inactivo (Ej: Máquina detenida; esperando aprobaciones).\n• O - Sobreproducción: Producir antes o más de lo demandado.\n• O - Sobreprocesamiento: Esfuerzos que no crean valor (Ej: Firmas redundantes).\n• D - Defectos: Retrabajo, scrap o información incorrecta.\n• S - Talento No Utilizado: No aprovechar la capacidad o creatividad de los empleados.' 
     },
     { 
-      title: '7. Ejemplos de Desperdicios en Planta', 
-      content: 'Veamos cómo se ven los desperdicios en nuestro piso de trabajo real:\n\n• Transporte: Mover palets vacíos o llevar materiales a almacenes lejanos.\n• Inventario: Cerros de cajas acumuladas entre estaciones bloqueando pasillos.\n• Movimiento: Buscar la soldadura o las pinzas porque no tienen un lugar fijo.\n• Espera: Estar parado en la línea porque la máquina está descompuesta o falta material.\n• Sobreproducción: Hacer ensambles de más "por si acaso" llenando la mesa de trabajo.\n• Defectos: Reparar una tarjeta con componentes mal soldados.' 
+      title: '7. La Base del Orden: 5S+1', 
+      content: 'El marco de organización, disciplina y seguridad en el lugar de trabajo:\n\n• 1. Clasificar (Seiri): Separar lo necesario de lo innecesario.\n• 2. Ordenar (Seiton): Un lugar para cada cosa y cada cosa en su lugar.\n• 3. Limpiar (Seiso): Mantener limpio e inspeccionar a través de la limpieza.\n• 4. Estandarizar (Seiketsu): Desarrollar métodos comunes para mantener la consistencia.\n• 5. Mantener (Shitsuke): Mantener los logros y formar la cultura de disciplina.\n• +1 Seguridad (Safety): Asegurar que la seguridad esté integrada de forma inherente en cada lugar de trabajo.' 
     },
     { 
-      title: '8. Introducción a la Metodología 5S+1', 
-      content: 'Es la herramienta fundamental para tener un área de trabajo ordenada, limpia y libre de peligros.\n\n¿Por qué es importante para ti?\n• Hace que cualquier problema o anomalía sea visible al instante.\n• Reduce el tiempo perdido buscando herramientas o materiales.\n• Evita el estrés y el cansancio físico innecesario.\n• La Seguridad (+1) se coloca en el centro para proteger tu integridad física.' 
+      title: '8. Mapeo de Flujo de Valor (VSM)', 
+      content: 'Una radiografía visual de los flujos de material e información, comparando el Estado Actual con el Estado Futuro:\n\n• Ver el Flujo Completo: Entender cómo se mueve realmente el valor a través de la operación, no solo en pasos aislados.\n• Diagnosticar: Identificar visualmente los cuellos de botella, inventarios ocultos y los tiempos de espera.\n• Diseñar el Futuro: Crear un Estado Futuro optimizado que conecte los procesos y maximice el flujo continuo.' 
     },
     { 
-      title: '9. Los Pasos de las 5S+1', 
-      content: 'Consiste en 5 palabras en japonés más el enfoque de seguridad:\n\n• 1. Clasificar (Seiri): Separar lo útil de lo inútil y retirar lo que no sirve.\n• 2. Ordenar (Seiton): Un lugar para cada cosa y cada cosa en su lugar.\n• 3. Limpiar (Seiso): Limpiar a fondo e inspeccionar las máquinas para detectar fallas.\n• 4. Estandarizar (Seiketsu): Señalar visualmente las reglas de orden y limpieza.\n• 5. Disciplina (Shitsuke): Convertir los pasos anteriores en un hábito diario.\n• +1. Seguridad: Eliminar condiciones de riesgo (cables sueltos, EPP incompleto).' 
+      title: '9. Sistema Pull y Supermercado', 
+      content: 'Comparación de sistemas de producción:\n\n• Empujar (Push): Produce independientemente de la demanda. Resulta en sobreproducción e inventario acumulado.\n• Jalar (Pull): El proceso anterior no produce hasta que el proceso siguiente lo requiere.\n• Atributos Clave del Supermercado (POU - Point of Use):\n  - Control visual estricto y sistema FIFO (PEPS).\n  - Reposición activada exclusivamente por el retiro del cliente.\n  - Lotes de tamaño definido basados en el Takt time.' 
     },
     { 
-      title: '10. Mapeo del Flujo de Valor (VSM)', 
-      content: 'Es un diagrama visual que dibuja todo el proceso de un producto, desde el proveedor hasta el cliente final:\n\n¿Qué nos muestra?\n• El flujo físico de los materiales (cómo se mueven).\n• El flujo de información (órdenes de trabajo, programación).\n• Los cuellos de botella y áreas donde el material se estanca.\n• Los tiempos de valor agregado (ensamble) vs. tiempos de desperdicio (esperas).' 
+      title: '10. Kaizen: La Cultura de Mejora', 
+      content: 'Pirámide Kaizen de mejora en Flex:\n\n• External & Champion Kaizen (EKW / CKW): Facilitado por consultores expertos o Vicepresidentes. Impacto estratégico, compartir mejores prácticas y alinear la estrategia de alto nivel.\n• Internal Kaizen Workshop (IKW): Eventos facilitados por el equipo interno, enfocados en reducir desperdicios a través de Operaciones, Cadena de Suministro y Oficinas.\n• Small Group Activities (SGA): Empleados trabajando juntos para identificar y mejorar procesos en su área de trabajo diaria. Empoderamiento desde la base.' 
     },
     { 
-      title: '11. El Supermercado Lean', 
-      content: 'Es un almacén controlado y cercano a la línea que funciona como un supermercado comercial:\n\n• Regla FIFO (PEPS): Primero en entrar, primero en salir (evita material viejo).\n• Surtido por "Water Spider": Persona dedicada a reponer stock según se consume.\n• Las 5 Reglas del "NO":\n  1. NO pensar (todo está señalizado con Kanban).\n  2. NO buscar (cada componente tiene su sitio exacto).\n  3. NO esperar (surtido asegurado).\n  4. NO escribir (sistema visual sin papeleo).\n  5. NO contar (cantidades máximas y mínimas visibles).' 
+      title: '11. El ADN del Kaizen', 
+      content: 'Método de observación y experimentación física en Flex:\n\n• El Diagnóstico (Las 3 GEN):\n  - Genchi: Ir al piso, ir al lugar de trabajo.\n  - Genbutsu: Ver el objeto real, observar la realidad del proceso.\n  - Genjitsu: Obtener los hechos y datos precisos en tiempo real.\n• La Ejecución (Try-storming):\n  - En lugar de parálisis por análisis, Lean utiliza la experimentación física rápida. Simular, probar con cartón/cinta, ajustar de inmediato y aprender iterando físicamente en el lugar de trabajo.' 
     },
     { 
-      title: '12. Kaizen: Mejora Continua en tu Día a Día', 
-      content: 'Kaizen significa "Cambio para mejor" (Kai = Cambio, Zen = Bueno):\n\nPrincipios clave:\n• Pequeños cambios diarios sumados logran grandes resultados a largo plazo.\n• Regla de los 3 Gen (Gemba, Genbutsu, Genjitsu): Ir al lugar de trabajo real, observar la pieza/máquina real y analizar los datos y hechos reales.\n• Cultura de Calidad: No recibas defectos, no fabriques defectos, no pases defectos.\n• ¡Cualquier operador puede proponer una idea Kaizen!' 
-    },
-    { 
-      title: '13. ¿Cómo aplicamos Lean en Flex?', 
-      content: 'En Flex construimos la "Casa Flex Lean Enterprise" (FLE):\n\n• Cimientos: Estandarización, 5S+1 y Supermercados en todas las líneas.\n• Pilares:\n  - Justo a Tiempo (JIT): Takt Time (ritmo del cliente) y flujo pieza por pieza.\n  - Jidoka: Detener la línea ante cualquier falla para corregir el problema de raíz.\n• Tu participación:\n  - Proponer ideas en el SGA (Actividades de Grupos Pequeños).\n  - Participar activamente en los talleres Kaizen de tu línea.' 
-    },
-    { 
-      title: '14. Resumen y Preparación para tu Examen', 
-      content: 'Repasemos los aprendizajes más importantes antes de evaluar tu conocimiento:\n\n• El foco de Lean es eliminar desperdicios (Mudas) para dar valor al cliente.\n• Aplica la autodisciplina y mantén tus 5S+1 al inicio y fin de tu turno.\n• Respeta las señales Kanban y el flujo FIFO del Supermercado.\n• Participa, tu opinión en el piso es la más valiosa para mejorar.\n• El examen consta de 10 preguntas. Requiere 80% para aprobar (8 correctas).\n\n¡Muchas gracias por tu compromiso con la mejora continua!' 
+      title: '12. Del Plano a la Acción', 
+      content: 'Tres pasos clave para la cultura de mejora diaria:\n\n• 1. Identificar: Entrenar el ojo para ver los 8 desperdicios (TIM WOODS) tanto en la planta como en la oficina.\n• 2. Eliminar: Aplicar 5S+1, crear flujo y establecer sistemas Pull y Supermercados.\n• 3. Construir: Fomentar una cultura donde Kaizen, las 3 Gen y el Try-storming sean hábitos diarios.\n\n"Lean no es un proyecto, es la arquitectura de nuestra cultura operativa. Identificamos el desperdicio. Lo eliminamos. Y creamos valor extraordinario."' 
     }
   ],
   '5s-1': [
@@ -139,7 +131,7 @@ function renderSlideIllustration(courseId: string, slideIndex: number) {
   }
 
   switch (slideIndex) {
-    case 0:
+    case 0: // Slide 1: Welcome / Creando lo Extraordinario
       return (
         <svg viewBox="0 0 200 200" className="w-full h-full text-[#0082c8] max-w-[280px]" fill="none" stroke="currentColor" strokeWidth="2">
           <rect x="50" y="40" width="100" height="130" rx="10" strokeWidth="3" />
@@ -150,17 +142,28 @@ function renderSlideIllustration(courseId: string, slideIndex: number) {
           <path d="M95,40 L100,45 L110,35" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-emerald-500" />
         </svg>
       );
-    case 1:
+    case 1: // Slide 2: ¿Qué es Lean?
       return (
         <svg viewBox="0 0 200 200" className="w-full h-full text-[#0082c8] max-w-[280px]" fill="none" stroke="currentColor" strokeWidth="2">
-          <circle cx="85" cy="85" r="35" strokeWidth="3" strokeDasharray="2,2" className="opacity-40 text-slate-450" />
+          <circle cx="85" cy="85" r="35" strokeWidth="3" strokeDasharray="2,2" className="opacity-40 text-slate-400" />
           <path d="M140,50 L145,65 L160,70 L145,75 L140,90 L135,75 L120,70 L135,65 Z" fill="#10b981" stroke="none" />
           <path d="M70,140 L73,148 L81,150 L73,152 L70,160 L67,152 L59,150 L67,148 Z" fill="#10b981" stroke="none" />
           <path d="M40,110 L130,110 M115,95 L135,110 L115,125" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
           <circle cx="140" cy="110" r="10" strokeWidth="3" />
         </svg>
       );
-    case 2:
+    case 2: // Slide 3: La Evolución de Lean
+      return (
+        <svg viewBox="0 0 200 200" className="w-full h-full text-[#0082c8] max-w-[280px]" fill="none" stroke="currentColor" strokeWidth="2">
+          <rect x="30" y="130" width="140" height="20" rx="3" fill="#e2e8f0" stroke="currentColor" strokeWidth="2.5" />
+          <line x1="50" y1="60" x2="50" y2="130" strokeWidth="6" strokeLinecap="round" />
+          <line x1="90" y1="60" x2="90" y2="130" strokeWidth="6" strokeLinecap="round" />
+          <line x1="130" y1="60" x2="130" y2="130" strokeWidth="6" strokeLinecap="round" />
+          <rect x="40" y="40" width="120" height="20" rx="5" fill="#0082c8" stroke="none" />
+          <line x1="30" y1="100" x2="170" y2="100" strokeWidth="2" strokeDasharray="5,5" className="opacity-40" />
+        </svg>
+      );
+    case 3: // Slide 4: Los 5 Principios Lean
       return (
         <svg viewBox="0 0 200 200" className="w-full h-full text-[#0082c8] max-w-[280px]" fill="none" stroke="currentColor" strokeWidth="2">
           <circle cx="100" cy="100" r="65" strokeWidth="3" strokeDasharray="10,5" />
@@ -173,30 +176,18 @@ function renderSlideIllustration(courseId: string, slideIndex: number) {
           <text x="100" y="105" textAnchor="middle" fill="#0f172a" className="text-xs font-black" stroke="none">5</text>
         </svg>
       );
-    case 3:
+    case 4: // Slide 5: Sistema Flex Lean Enterprise (FLE)
       return (
         <svg viewBox="0 0 200 200" className="w-full h-full text-[#0082c8] max-w-[280px]" fill="none" stroke="currentColor" strokeWidth="2">
-          <rect x="30" y="130" width="140" height="20" rx="3" fill="#e2e8f0" stroke="currentColor" strokeWidth="2.5" />
-          <line x1="50" y1="60" x2="50" y2="130" strokeWidth="6" strokeLinecap="round" />
-          <line x1="90" y1="60" x2="90" y2="130" strokeWidth="6" strokeLinecap="round" />
-          <line x1="130" y1="60" x2="130" y2="130" strokeWidth="6" strokeLinecap="round" />
-          <rect x="40" y="40" width="120" height="20" rx="5" fill="#0082c8" stroke="none" />
-          <line x1="30" y1="100" x2="170" y2="100" strokeWidth="2" strokeDasharray="5,5" className="opacity-40" />
+          <polygon points="100,30 30,80 170,80" fill="#0082c8" stroke="none" />
+          <rect x="45" y="80" width="20" height="70" fill="#e2e8f0" stroke="currentColor" strokeWidth="2" />
+          <rect x="135" y="80" width="20" height="70" fill="#e2e8f0" stroke="currentColor" strokeWidth="2" />
+          <rect x="40" y="150" width="120" height="20" rx="3" fill="#475569" stroke="none" />
+          <text x="100" y="115" textAnchor="middle" fill="currentColor" className="text-[9px] font-black" stroke="none">JIT & JIDOKA</text>
+          <text x="100" y="162" textAnchor="middle" fill="#ffffff" className="text-[8px] font-bold" stroke="none">5S+1 | VSM | SUPERMARKET</text>
         </svg>
       );
-    case 4:
-      return (
-        <svg viewBox="0 0 200 200" className="w-full h-full text-[#0082c8] max-w-[280px]" fill="none" stroke="currentColor" strokeWidth="2">
-          <line x1="100" y1="40" x2="100" y2="140" strokeWidth="4" />
-          <line x1="60" y1="140" x2="140" y2="140" strokeWidth="4" strokeLinecap="round" />
-          <line x1="50" y1="90" x2="150" y2="70" strokeWidth="4" strokeLinecap="round" />
-          <line x1="50" y1="90" x2="50" y2="120" strokeWidth="2" />
-          <path d="M35,120 L65,120 L50,130 Z" fill="#ef4444" stroke="#ef4444" strokeWidth="2" />
-          <line x1="150" y1="70" x2="150" y2="110" strokeWidth="2" />
-          <path d="M135,110 L165,110 L150,120 Z" fill="#10b981" stroke="#10b981" strokeWidth="2" />
-        </svg>
-      );
-    case 5:
+    case 5: // Slide 6: Los 7+1 Desperdicios (TIM WOODS)
       return (
         <svg viewBox="0 0 200 200" className="w-full h-full text-[#0082c8] max-w-[280px]" fill="none" stroke="currentColor" strokeWidth="1.5">
           <circle cx="100" cy="100" r="30" strokeWidth="2" className="opacity-40 text-slate-400" />
@@ -214,26 +205,7 @@ function renderSlideIllustration(courseId: string, slideIndex: number) {
           })}
         </svg>
       );
-    case 6:
-      return (
-        <svg viewBox="0 0 200 200" className="w-full h-full text-[#0082c8] max-w-[280px]" fill="none" stroke="currentColor" strokeWidth="2">
-          <rect x="30" y="60" width="140" height="90" rx="8" strokeWidth="3" />
-          <line x1="75" y1="60" x2="75" y2="150" strokeWidth="1.5" className="opacity-30" />
-          <line x1="125" y1="60" x2="125" y2="150" strokeWidth="1.5" className="opacity-30" />
-          <path d="M45,80 L65,100 M65,80 L45,100" stroke="#ef4444" strokeWidth="3.5" strokeLinecap="round" />
-          <path d="M135,110 L155,130 M155,110 L135,130" stroke="#ef4444" strokeWidth="3.5" strokeLinecap="round" />
-          <path d="M80,105 L120,105 L115,100 M120,105 L115,110" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-      );
-    case 7:
-      return (
-        <svg viewBox="0 0 200 200" className="w-full h-full text-[#0082c8] max-w-[280px]" fill="none" stroke="currentColor" strokeWidth="2">
-          <path d="M100,30 L160,55 L160,115 C160,150 130,175 100,185 C70,175 40,150 40,115 L40,55 Z" strokeWidth="3" />
-          <path d="M100,60 L100,120 M70,90 L130,90" stroke="#10b981" strokeWidth="10" strokeLinecap="round" />
-          <path d="M100,60 L100,120 M70,90 L130,90" stroke="#ffffff" strokeWidth="4" strokeLinecap="round" />
-        </svg>
-      );
-    case 8:
+    case 6: // Slide 7: La Base del Orden: 5S+1
       return (
         <svg viewBox="0 0 200 200" className="w-full h-full text-[#0082c8] max-w-[280px]" fill="none" stroke="currentColor" strokeWidth="2">
           <circle cx="100" cy="100" r="60" strokeWidth="3" />
@@ -247,7 +219,7 @@ function renderSlideIllustration(courseId: string, slideIndex: number) {
           <text x="100" y="104" textAnchor="middle" fill="#ffffff" className="text-[10px] font-black" stroke="none">5S+1</text>
         </svg>
       );
-    case 9:
+    case 7: // Slide 8: Mapeo de Flujo de Valor (VSM)
       return (
         <svg viewBox="0 0 200 200" className="w-full h-full text-[#0082c8] max-w-[280px]" fill="none" stroke="currentColor" strokeWidth="2">
           <rect x="25" y="75" width="35" height="30" rx="4" />
@@ -259,7 +231,7 @@ function renderSlideIllustration(courseId: string, slideIndex: number) {
           <line x1="100" y1="55" x2="100" y2="85" strokeWidth="1.5" strokeDasharray="3,3" />
         </svg>
       );
-    case 10:
+    case 8: // Slide 9: Sistema Pull y Supermercado
       return (
         <svg viewBox="0 0 200 200" className="w-full h-full text-[#0082c8] max-w-[280px]" fill="none" stroke="currentColor" strokeWidth="2">
           <rect x="35" y="45" width="130" height="110" strokeWidth="3" />
@@ -275,7 +247,7 @@ function renderSlideIllustration(courseId: string, slideIndex: number) {
           <text x="95" y="130" textAnchor="middle" fill="#0082c8" className="text-[10px] font-black" stroke="none">FIFO</text>
         </svg>
       );
-    case 11:
+    case 9: // Slide 10: Kaizen: La Cultura de Mejora
       return (
         <svg viewBox="0 0 200 200" className="w-full h-full text-[#0082c8] max-w-[280px]" fill="none" stroke="currentColor" strokeWidth="2">
           <path d="M40,150 L80,150 L80,115 L120,115 L120,80 L160,80" strokeWidth="4.5" strokeLinecap="round" />
@@ -283,18 +255,14 @@ function renderSlideIllustration(courseId: string, slideIndex: number) {
           <circle cx="160" cy="80" r="10" fill="#10b981" stroke="none" />
         </svg>
       );
-    case 12:
+    case 10: // Slide 11: El ADN del Kaizen
       return (
-        <svg viewBox="0 0 200 200" className="w-full h-full text-[#0082c8] max-w-[280px]" fill="none" stroke="currentColor" strokeWidth="2">
-          <polygon points="100,30 30,80 170,80" fill="#0082c8" stroke="none" />
-          <rect x="45" y="80" width="20" height="70" fill="#e2e8f0" stroke="currentColor" strokeWidth="2" />
-          <rect x="135" y="80" width="20" height="70" fill="#e2e8f0" stroke="currentColor" strokeWidth="2" />
-          <rect x="40" y="150" width="120" height="20" rx="3" fill="#475569" stroke="none" />
-          <text x="100" y="115" textAnchor="middle" fill="currentColor" className="text-[9px] font-black" stroke="none">JIT & JIDOKA</text>
-          <text x="100" y="162" textAnchor="middle" fill="#ffffff" className="text-[8px] font-bold" stroke="none">5S+1 | VSM | SUPERMARKET</text>
+        <svg viewBox="0 0 200 200" className="w-full h-full text-[#0082c8] max-w-[280px]" fill="none" stroke="currentColor" strokeWidth="3">
+          <circle cx="100" cy="100" r="10" fill="#0082c8" stroke="none" />
+          <path d="M70,80 L85,95 L125,55" stroke="#10b981" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       );
-    case 13:
+    case 11: // Slide 12: Del Plano a la Acción
       return (
         <svg viewBox="0 0 200 200" className="w-full h-full text-[#0082c8] max-w-[280px]" fill="none" stroke="currentColor" strokeWidth="2">
           <rect x="50" y="40" width="100" height="130" rx="10" strokeWidth="3" />
