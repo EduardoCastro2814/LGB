@@ -45,76 +45,26 @@ interface AcademiaLeanProps {
 
 // Diapositivas predeterminadas para los cursos si no tienen material cargado por el admin
 export const DEFAULT_SLIDES: Record<string, { title: string; content: string }[]> = {
-  'lean-basics-1': [
-    { 
-      title: '1. Lean Basics 1: Creando lo Extraordinario a través del Valor', 
-      content: 'Bienvenido al Curso Oficial de Lean Basics 1 de Flex.\n\nEn este entrenamiento aprenderás las bases de la filosofía de manufactura esbelta, cómo identificar actividades que agregan valor frente a los desperdicios, y cómo las herramientas Lean como 5S+1, Mapeo de Flujo de Valor (VSM), Sistema Pull y Kaizen nos permiten crear lo extraordinario para nuestros clientes.' 
-    },
-    { 
-      title: '2. ¿Qué es Lean?', 
-      content: 'Un enfoque sistemático para identificar y eliminar actividades que no agregan valor de los procesos. Trata sobre maximizar el valor mientras se minimizan los recursos, el tiempo, la energía y el esfuerzo.\n\n• Estado Actual: Lleno de desperdicios, alta variación, procesos rígidos.\n• Estado Futuro: Orientado al valor agregado, calidad mejorada, alta productividad.\n• Valor: Cualquier acción o proceso por el que el cliente estaría dispuesto a pagar.\n• Desperdicio (Muda): Toda actividad que no agrega valor.' 
-    },
-    { 
-      title: '3. La Evolución de Lean', 
-      content: 'Línea de tiempo de la evolución e hitos clave del Sistema de Producción Toyota (TPS):\n\n• 1896 - Sakichi Toyoda (La Base): Introdujo el concepto de Jidoka (autonomatización) con un dispositivo de detención automática en el telar mecánico.\n• 1927 - Kiichiro Toyoda (El Flujo): Introdujo el concepto Just-In-Time (JIT), un método de producción de flujo usando transportadores de cadena.\n• 1942 - Taiichi Ohno (El Sistema): Conocido como el Arquitecto del TPS y padre del sistema de control de inventario de Supermercado.\n• 1960s - Dr. Shigeo Shingo (La Precisión): Desarrolló los conceptos de Poka-Yoke (a prueba de errores) y SMED (cambio de herramientas en un dígito de minuto).' 
-    },
-    { 
-      title: '4. Los 5 Principios Lean', 
-      content: 'Las cinco reglas fundamentales para guiar la mejora continua:\n\n• 1. Valor: Especificar correctamente el valor del producto/servicio con el cliente en mente.\n• 2. Flujo de Valor (Value Stream): Identificar y mapear todos los pasos, eliminando los desperdicios en todo el proceso.\n• 3. Flujo (Flow): Hacer que el producto y el valor fluyan suavemente sin interrupciones ni cuellos de botella.\n• 4. Pull (Jalar): Producir exclusivamente según la demanda del cliente (evitar empujar).\n• 5. Perfección: Mejora continua; repetir el ciclo hasta alcanzar un estado sin desperdicio.' 
-    },
-    { 
-      title: '5. Sistema Flex Lean Enterprise (FLE)', 
-      content: 'La Casa Flex Lean Enterprise representa nuestro modelo de excelencia operativa:\n\n• Techo (Meta): Flex Lean Enterprise (FLE) - Agregando Valor y Eliminando Desperdicio.\n• Pilares:\n  - JIT (Just-In-Time)\n  - JIDOKA\n• Base:\n  - HEIJUNKA (Nivelación de producción)\n  - 5S+1, VSM, Supermercado (Los cimientos operativos sobre los que se construye la estabilidad).' 
-    },
-    { 
-      title: '6. Los 7+1 Desperdicios (TIM WOODS)', 
-      content: 'Los 8 grandes desperdicios que afectan negativamente el flujo eficiente de la operación:\n\n• T - Transporte: Mover material innecesariamente (Ej: Montacargas viajando vacíos; enviar correos con exceso de adjuntos).\n• I - Inventario: Más material o información de la necesaria (Ej: Piezas acumuladas; bandejas de entrada desbordadas).\n• M - Movimiento: Movimiento humano innecesario (Ej: Caminar entre estaciones alejadas; buscar archivos digitales).\n• W - Espera: Tiempo inactivo (Ej: Máquina detenida; esperando aprobaciones).\n• O - Sobreproducción: Producir antes o más de lo demandado.\n• O - Sobreprocesamiento: Esfuerzos que no crean valor (Ej: Firmas redundantes).\n• D - Defectos: Retrabajo, scrap o información incorrecta.\n• S - Talento No Utilizado: No aprovechar la capacidad o creatividad de los empleados.' 
-    },
-    { 
-      title: '7. La Base del Orden: 5S+1', 
-      content: 'El marco de organización, disciplina y seguridad en el lugar de trabajo:\n\n• 1. Clasificar (Seiri): Separar lo necesario de lo innecesario.\n• 2. Ordenar (Seiton): Un lugar para cada cosa y cada cosa en su lugar.\n• 3. Limpiar (Seiso): Mantener limpio e inspeccionar a través de la limpieza.\n• 4. Estandarizar (Seiketsu): Desarrollar métodos comunes para mantener la consistencia.\n• 5. Mantener (Shitsuke): Mantener los logros y formar la cultura de disciplina.\n• +1 Seguridad (Safety): Asegurar que la seguridad esté integrada de forma inherente en cada lugar de trabajo.' 
-    },
-    { 
-      title: '8. Mapeo de Flujo de Valor (VSM)', 
-      content: 'Una radiografía visual de los flujos de material e información, comparando el Estado Actual con el Estado Futuro:\n\n• Ver el Flujo Completo: Entender cómo se mueve realmente el valor a través de la operación, no solo en pasos aislados.\n• Diagnosticar: Identificar visualmente los cuellos de botella, inventarios ocultos y los tiempos de espera.\n• Diseñar el Futuro: Crear un Estado Futuro optimizado que conecte los procesos y maximice el flujo continuo.' 
-    },
-    { 
-      title: '9. Sistema Pull y Supermercado', 
-      content: 'Comparación de sistemas de producción:\n\n• Empujar (Push): Produce independientemente de la demanda. Resulta en sobreproducción e inventario acumulado.\n• Jalar (Pull): El proceso anterior no produce hasta que el proceso siguiente lo requiere.\n• Atributos Clave del Supermercado (POU - Point of Use):\n  - Control visual estricto y sistema FIFO (PEPS).\n  - Reposición activada exclusivamente por el retiro del cliente.\n  - Lotes de tamaño definido basados en el Takt time.' 
-    },
-    { 
-      title: '10. Kaizen: La Cultura de Mejora', 
-      content: 'Pirámide Kaizen de mejora en Flex:\n\n• External & Champion Kaizen (EKW / CKW): Facilitado por consultores expertos o Vicepresidentes. Impacto estratégico, compartir mejores prácticas y alinear la estrategia de alto nivel.\n• Internal Kaizen Workshop (IKW): Eventos facilitados por el equipo interno, enfocados en reducir desperdicios a través de Operaciones, Cadena de Suministro y Oficinas.\n• Small Group Activities (SGA): Empleados trabajando juntos para identificar y mejorar procesos en su área de trabajo diaria. Empoderamiento desde la base.' 
-    },
-    { 
-      title: '11. El ADN del Kaizen', 
-      content: 'Método de observación y experimentación física en Flex:\n\n• El Diagnóstico (Las 3 GEN):\n  - Genchi: Ir al piso, ir al lugar de trabajo.\n  - Genbutsu: Ver el objeto real, observar la realidad del proceso.\n  - Genjitsu: Obtener los hechos y datos precisos en tiempo real.\n• La Ejecución (Try-storming):\n  - En lugar de parálisis por análisis, Lean utiliza la experimentación física rápida. Simular, probar con cartón/cinta, ajustar de inmediato y aprender iterando físicamente en el lugar de trabajo.' 
-    },
-    { 
-      title: '12. Del Plano a la Acción', 
-      content: 'Tres pasos clave para la cultura de mejora diaria:\n\n• 1. Identificar: Entrenar el ojo para ver los 8 desperdicios (TIM WOODS) tanto en la planta como en la oficina.\n• 2. Eliminar: Aplicar 5S+1, crear flujo y establecer sistemas Pull y Supermercados.\n• 3. Construir: Fomentar una cultura donde Kaizen, las 3 Gen y el Try-storming sean hábitos diarios.\n\n"Lean no es un proyecto, es la arquitectura de nuestra cultura operativa. Identificamos el desperdicio. Lo eliminamos. Y creamos valor extraordinario."' 
-    }
-  ],
+  'lean-basics-1': Array.from({ length: 12 }).map((_, i) => ({
+    title: `Lean Basics 1 - Diapositiva ${i + 1}`,
+    content: `Diapositiva ${i + 1} del curso Lean Basics 1.`
+  })),
   '5s-1': Array.from({ length: 10 }).map((_, i) => ({
     title: `5S + 1 - Diapositiva ${i + 1}`,
-    content: `Contenido de la diapositiva ${i + 1} de 5S + 1.`
+    content: `Diapositiva ${i + 1} del curso 5S + 1.`
   })),
-  '5-whys': [
-    { title: 'Análisis de Causa Raíz (RCA)', content: 'El objetivo de la resolución de problemas es eliminar la causa raíz, no el síntoma. Si solo se ataca el síntoma, el problema volverá a ocurrir en el futuro.' },
-    { title: 'La Técnica de los 5 Porqués', content: 'Consiste en preguntar "¿Por qué?" sucesivamente (típicamente 5 veces) ante una falla del proceso, hasta descubrir la raíz física, humana o de sistema que la originó.' },
-    { title: 'Regla de Oro: Relación Causa-Efecto', content: 'Cada paso de la cadena de porqués debe tener un sustento lógico comprovable en el piso de producción (gemba). No asuma, verifique los hechos.' },
-    { title: 'Acción Correctiva vs Acción Preventiva', content: 'Correctiva: Elimina la causa raíz identificada para evitar que el problema se repita. Preventiva: Aplica la misma solución a áreas o equipos similares para evitar la primera ocurrencia.' }
-  ],
   '7-ways': Array.from({ length: 10 }).map((_, i) => ({
     title: `Seven Ways - Diapositiva ${i + 1}`,
-    content: `Contenido de la diapositiva ${i + 1} de Seven Ways.`
+    content: `Diapositiva ${i + 1} del curso Seven Ways.`
   })),
-  'sga-guide': [
-    { title: 'Small Group Activities (SGA)', content: 'Las Actividades de Grupos Pequeños son círculos de control de calidad autoorganizados formados por personal operativo (DL) enfocados en resolver problemas de su área cotidiana.' },
-    { title: 'Roles clave dentro del Equipo SGA', content: '1. Líder del Equipo: Coordina las reuniones y reporta avances. 2. Facilitador: Asesor metodológico (LGB/BB). 3. Miembros: Operadores que conocen el proceso real.' },
-    { title: 'Pasos de un Proyecto SGA (Kaizen)', content: '1. Seleccionar el tema. 2. Entender el estado actual. 3. Analizar causas raíz. 4. Desarrollar e implementar contramedidas. 5. Estandarizar los resultados. 6. Presentar reporte final.' },
-    { title: 'Reconocimiento y Estandarización', content: 'El éxito de SGA radica en celebrar los logros del personal operativo en foros corporativos, fomentando la cultura de mejora continua y el orgullo del trabajo bien hecho.' }
-  ]
+  '5-whys': Array.from({ length: 12 }).map((_, i) => ({
+    title: `5 Whys - Diapositiva ${i + 1}`,
+    content: `Diapositiva ${i + 1} del curso 5 Whys.`
+  })),
+  'sga-guide': Array.from({ length: 13 }).map((_, i) => ({
+    title: `Small Group Activities (SGA) - Diapositiva ${i + 1}`,
+    content: `Diapositiva ${i + 1} del curso Small Group Activities.`
+  })),
 };
 
 function renderSlideIllustration(courseId: string, slideIndex: number) {

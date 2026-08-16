@@ -5,7 +5,9 @@ import React, { useEffect, useState } from 'react';
 const COURSES_TO_EXTRACT = [
   { id: 'lean-basics-1', pdfName: 'Basicos de Lean 1.pdf' },
   { id: '5s-1', pdfName: '5s+1.pdf' },
-  { id: '7-ways', pdfName: 'Seven Ways.pdf' }
+  { id: '7-ways', pdfName: 'Seven Ways.pdf' },
+  { id: 'sga-guide', pdfName: 'SGA.pdf' },
+  { id: '5-whys', pdfName: '5 why´s.pdf' }
 ];
 
 export default function ExtractPage() {

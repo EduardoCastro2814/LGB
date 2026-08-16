@@ -8,7 +8,7 @@ import { DEFAULT_SLIDES } from '../components/AcademiaLean';
 import { saveSupabaseUserProgress } from '../utils/supabaseService';
 import { MergedEmployee, Course, UserCourseProgress } from '../types';
 
-const COURSES_WITH_IMAGES = ['lean-basics-1', '5s-1', '7-ways'];
+const COURSES_WITH_IMAGES = ['lean-basics-1', '5s-1', '7-ways', 'sga-guide', '5-whys'];
 
 function CoursePlayerContent() {
   const searchParams = useSearchParams();

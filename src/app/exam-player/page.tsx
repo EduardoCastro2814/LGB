@@ -19,6 +19,7 @@ function ExamPlayerContent() {
   const [courses, setCourses] = useState<Course[]>([]);
   const [exams, setExams] = useState<Exam[]>([]);
   const [loading, setLoading] = useState(true);
+  const [attemptsCount, setAttemptsCount] = useState(0);
 
   // Estados del examen
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -128,23 +129,27 @@ function ExamPlayerContent() {
     const attempts = (prevProg.examAttempts || 0) + 1;
     const now = new Date().toISOString();
     
-    // Generar Folio de certificado si aprobó
     let folio = prevProg.certificateFolio || null;
     if (passed && !folio) {
       const randHex = Math.floor(100000 + Math.random() * 900000).toString(16).toUpperCase();
       folio = `LGB-${courseId.substring(0, 3).toUpperCase()}-${randHex}`;
     }
 
+    const failedThreeTimes = !passed && (attempts % 3 === 0);
+
     const updatedProg: UserCourseProgress = {
       status: passed ? 'completado' : 'en-progreso',
-      progress: passed ? 100 : Math.max(prevProg.progress || 0, 90),
-      contentViewed: true,
+      progress: passed ? 100 : (failedThreeTimes ? 10 : Math.max(prevProg.progress || 0, 90)),
+      contentViewed: passed ? true : (failedThreeTimes ? false : true),
       examAttempts: attempts,
       examScore: score,
       examPassed: passed,
       completionDate: passed ? now : (prevProg.completionDate || null),
       certificateFolio: folio,
     };
+
+    setExamResult(result);
+    setAttemptsCount(attempts);
 
     // 2. Actualizar localmente el progreso
     userProgMap[courseId] = updatedProg;
@@ -399,7 +404,13 @@ function ExamPlayerContent() {
                   Score obtenido: {examResult.score}%
                 </p>
                 <p className="text-xs text-slate-500 font-semibold leading-relaxed mb-6">
-                  Has obtenido un porcentaje menor al {activeExam.minScore}% requerido para aprobar. Te sugerimos repasar la presentación oficial del módulo antes de volver a intentarlo.
+                  {attemptsCount > 0 && attemptsCount % 3 === 0 ? (
+                    <span className="text-red-650 font-bold block bg-red-50 p-4 rounded-xl border border-red-200">
+                      ⚠️ Has alcanzado 3 intentos fallidos en este módulo. Para garantizar el aprendizaje, debes revisar y estudiar nuevamente la presentación completa del curso antes de poder realizar otra evaluación.
+                    </span>
+                  ) : (
+                    `Has obtenido un porcentaje menor al ${activeExam.minScore}% requerido para aprobar. Te sugerimos repasar la presentación oficial del módulo antes de volver a intentarlo.`
+                  )}
                 </p>
 
                 <div className="bg-slate-50 border border-slate-100 rounded-2xl p-5 w-full mb-6 text-left space-y-2.5">
@@ -408,24 +419,26 @@ function ExamPlayerContent() {
                     <span className="text-slate-850">{examResult.correctCount} de {examResult.totalQuestions}</span>
                   </div>
                   <div className="flex justify-between text-xs font-bold text-slate-500">
-                    <span>Estatus del módulo:</span>
-                    <span className="text-amber-500">En Progreso</span>
+                    <span>Intentos acumulados:</span>
+                    <span className="text-slate-800">{attemptsCount}</span>
                   </div>
                 </div>
 
                 <div className="flex gap-3 w-full">
-                  <button
-                    onClick={handleRetry}
-                    className="flex-1 flex items-center justify-center gap-1.5 py-3 px-4 rounded-xl text-xs font-bold bg-[#0082c8] hover:bg-[#0070ad] text-white shadow-md cursor-pointer transition-all"
-                  >
-                    <RotateCcw className="w-4 h-4" />
-                    <span>Reintentar</span>
-                  </button>
+                  {!(attemptsCount > 0 && attemptsCount % 3 === 0) && (
+                    <button
+                      onClick={handleRetry}
+                      className="flex-1 flex items-center justify-center gap-1.5 py-3 px-4 rounded-xl text-xs font-bold bg-[#0082c8] hover:bg-[#0070ad] text-white shadow-md cursor-pointer transition-all"
+                    >
+                      <RotateCcw className="w-4 h-4" />
+                      <span>Reintentar</span>
+                    </button>
+                  )}
                   <button
                     onClick={handleExit}
                     className="flex-1 py-3 px-4 rounded-xl text-xs font-bold border border-slate-200 bg-white hover:bg-slate-50 text-slate-705 cursor-pointer transition-colors shadow-sm"
                   >
-                    Salir
+                    {attemptsCount > 0 && attemptsCount % 3 === 0 ? 'Volver al Curso' : 'Salir'}
                   </button>
                 </div>
               </>

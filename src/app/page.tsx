@@ -233,38 +233,122 @@ const defaultExams: Exam[] = [
     questions: [
       {
         id: '5s-q1',
-        text: '¿Qué significa Seiri en la metodología de las 5S?',
+        text: '¿Cuál es el objetivo principal de la metodología de las 5S + 1 en el lugar de trabajo?',
         options: [
-          'Limpiar la maquinaria al final del turno',
-          'Clasificar y separar los elementos necesarios de los innecesarios',
-          'Estandarizar las ayudas visuales de la estación',
-          'Tener disciplina para llegar a tiempo'
+          'Aumentar la cantidad de operadores en la línea de ensamble',
+          'Lograr un ambiente de trabajo ordenado, limpio, seguro y disciplinado para mejorar la productividad',
+          'Reducir el sueldo de los trabajadores que cometen errores',
+          'Comprar más maquinaria para automatizar el 100% de la producción'
         ],
         correctOptionIndex: 1,
         points: 10
       },
       {
         id: '5s-q2',
-        text: 'En la práctica de "5S + 1", ¿qué representa la suma de "+ 1"?',
+        text: '¿Qué significa el primer paso "Seiri" (Clasificar)?',
         options: [
-          'Una hora adicional de sobretiempo',
-          'Seguridad laboral (mitigación de riesgos)',
-          'Un operador extra en la línea',
-          'Una inspección adicional de calidad'
+          'Pintar las líneas de tráfico peatonal en el piso',
+          'Barrer y sacudir el polvo de toda el área',
+          'Separar las herramientas y materiales necesarios de los innecesarios, eliminando estos últimos',
+          'Tomar fotos de "antes y después" de la estación'
+        ],
+        correctOptionIndex: 2,
+        points: 10
+      },
+      {
+        id: '5s-q3',
+        text: 'La regla de oro asociada al segundo paso, "Seiton" (Ordenar) se define como:',
+        options: [
+          'Un lugar para cada cosa y cada cosa en su lugar',
+          'Limpiar más para producir más rápido',
+          'Tirar todo lo que no se use hoy',
+          'Estandarizar las firmas de los reportes'
+        ],
+        correctOptionIndex: 0,
+        points: 10
+      },
+      {
+        id: '5s-q4',
+        text: 'En el paso "Seiso" (Limpiar), además de limpiar la suciedad, ¿qué acción crítica se debe realizar?',
+        options: [
+          'Evaluar la asistencia de los trabajadores',
+          'Inspeccionar los equipos para detectar anomalías, fugas o fallas potenciales',
+          'Tomar el tiempo de ciclo de la máquina',
+          'Cambiar el color de los contenedores de basura'
         ],
         correctOptionIndex: 1,
         points: 10
       },
       {
-        id: '5s-q3',
-        text: 'El lema "Un lugar para cada cosa y cada cosa en su lugar" corresponde a:',
+        id: '5s-q5',
+        text: '¿Qué busca lograr el cuarto paso, "Seiketsu" (Estandarizar)?',
         options: [
-          'Seiton (Ordenar)',
-          'Seiso (Limpiar)',
-          'Seiri (Clasificar)',
-          'Shitsuke (Disciplina)'
+          'Eliminar la necesidad de auditorías de control',
+          'Rediseñar la distribución física de la planta entera',
+          'Contratar a un inspector externo de limpieza',
+          'Definir ayudas visuales, etiquetas y reglas claras para mantener los logros de las primeras 3S'
+        ],
+        correctOptionIndex: 3,
+        points: 10
+      },
+      {
+        id: '5s-q6',
+        text: '¿Cómo se define el quinto paso, "Shitsuke" (Disciplina / Mantener)?',
+        options: [
+          'Castigar a los operadores que no cumplan los reglamentos de limpieza',
+          'Hacer de las 5S un hábito cotidiano y una parte natural del trabajo mediante la autodisciplina',
+          'Llenar reportes diarios en una hoja de Excel',
+          'Reorganizar el área de trabajo cada fin de año'
+        ],
+        correctOptionIndex: 1,
+        points: 10
+      },
+      {
+        id: '5s-q7',
+        text: '¿Por qué se agrega el componente "+1" (Seguridad - Safety) a las 5S en Flex?',
+        options: [
+          'Para mitigar actos y condiciones inseguras de forma transversal y prevenir accidentes',
+          'Para aumentar el inventario de equipo de protección personal',
+          'Para auditar la asistencia del personal médico',
+          'Para dar bonos financieros mensuales'
         ],
         correctOptionIndex: 0,
+        points: 10
+      },
+      {
+        id: '5s-q8',
+        text: 'Al realizar la clasificación (Seiri), ¿qué se debe hacer con los objetos de uso poco frecuente o dudoso?',
+        options: [
+          'Colocarles una tarjeta roja y moverlos a un área de cuarentena para definir su destino final',
+          'Tirarlos a la basura de inmediato sin preguntar a nadie',
+          'Esconderlos debajo de la mesa de trabajo para que no los vea el auditor',
+          'Dejarlos en el pasillo principal hasta que alguien los reclame'
+        ],
+        correctOptionIndex: 0,
+        points: 10
+      },
+      {
+        id: '5s-q9',
+        text: '¿Cuál es un ejemplo claro de control visual en Seiton (Ordenar)?',
+        options: [
+          'Un manual de 100 páginas sobre cómo usar las herramientas',
+          'Sombras pintadas en el tablero de herramientas para identificar rápidamente si falta alguna',
+          'Un correo electrónico enviado al supervisor al terminar la jornada',
+          'Un cartel con la foto de la gerencia general de la empresa'
+        ],
+        correctOptionIndex: 1,
+        points: 10
+      },
+      {
+        id: '5s-q10',
+        text: '¿Quién es responsable de realizar y mantener las actividades de 5S + 1 en una línea de producción?',
+        options: [
+          'El departamento de limpieza externo contratado',
+          'Únicamente el gerente de la planta de producción',
+          'Absolutamente todos los miembros del equipo que trabajan en esa área',
+          'El auditor de calidad que pasa una vez por semana'
+        ],
+        correctOptionIndex: 2,
         points: 10
       }
     ]
@@ -275,14 +359,14 @@ const defaultExams: Exam[] = [
     questions: [
       {
         id: 'fw-q1',
-        text: '¿Cuál es el propósito primordial de la herramienta de los 5 Porqués?',
+        text: '¿Cuál es el propósito primordial de la herramienta de los "5 Porqués"?',
         options: [
           'Encontrar al operador responsable del error en la línea',
-          'Identificar la causa raíz de un problema para evitar su repetición',
-          'Proponer 5 soluciones Kaizen alternativas rápidamente',
+          'Reemplazar la maquinaria que falla de manera constante',
+          'Identificar la causa raíz de un problema para evitar su repetición mediante el análisis de relaciones causa-efecto',
           'Llenar el papeleo administrativo de incidentes'
         ],
-        correctOptionIndex: 1,
+        correctOptionIndex: 2,
         points: 10
       },
       {
@@ -290,23 +374,107 @@ const defaultExams: Exam[] = [
         text: '¿Cuántas preguntas de "¿Por qué?" se deben realizar en esta herramienta?',
         options: [
           'Exactamente 5 preguntas en todos los casos obligatoriamente',
+          'Las necesarias hasta llegar a la verdadera causa raíz, siendo típicamente cinco',
           'Siempre 3 preguntas para ser rápidos',
-          'Las necesarias hasta llegar a la verdadera causa raíz (típicamente 5)',
           'Ninguna, se deduce directamente de la primera respuesta'
+        ],
+        correctOptionIndex: 1,
+        points: 10
+      },
+      {
+        id: 'fw-q3',
+        text: '¿Por qué se debe ir al Gemba (lugar real de trabajo) al realizar los 5 Porqués?',
+        options: [
+          'Para verificar los hechos y evidencias reales sin basarse en suposiciones o teorías',
+          'Para hablar con la gerencia de planta',
+          'Para detener la línea de producción',
+          'Para limpiar la máquina que falló'
+        ],
+        correctOptionIndex: 0,
+        points: 10
+      },
+      {
+        id: 'fw-q4',
+        text: '¿Qué es una relación de causa-efecto lógica en la cadena de los 5 Porqués?',
+        options: [
+          'Una secuencia que dependa enteramente de la intuición del supervisor',
+          'Una conjetura rápida para cerrar el caso en el sistema',
+          'Un supuesto que no requiera verificación de campo',
+          'Una secuencia comprobable donde cada causa es suficiente para provocar el efecto inmediato superior'
+        ],
+        correctOptionIndex: 3,
+        points: 10
+      },
+      {
+        id: 'fw-q5',
+        text: '¿Qué se debe hacer una vez identificada la causa raíz con esta técnica?',
+        options: [
+          'Implementar acciones correctivas para eliminar la causa y preventivas para evitar que ocurra en áreas similares',
+          'Cambiar de puesto al operador responsable del error',
+          'Aplicar una sanción administrativa',
+          'Reiniciar la máquina y seguir produciendo de la misma manera'
+        ],
+        correctOptionIndex: 0,
+        points: 10
+      },
+      {
+        id: 'fw-q6',
+        text: 'Si al preguntar el tercer "¿Por qué?" nos basamos en una suposición no verificable, ¿qué regla de oro se está rompiendo?',
+        options: [
+          'La regla de cambiar el operario',
+          'La regla de Genchi Genbutsu: verificar los hechos físicamente en el Gemba',
+          'El principio de velocidad SMED',
+          'La auditoría trimestral corporativa'
+        ],
+        correctOptionIndex: 1,
+        points: 10
+      },
+      {
+        id: 'fw-q7',
+        text: '¿Cuál de las siguientes es una causa raíz de tipo "sistema"?',
+        options: [
+          'Que el operador se sintiera cansado durante el turno',
+          'Que hubiera polvo en la estación de ensamble',
+          'Falta de un estándar de mantenimiento preventivo definido en el sistema de gestión',
+          'Que la herramienta estuviera gastada'
         ],
         correctOptionIndex: 2,
         points: 10
       },
       {
-        id: 'fw-q3',
-        text: '¿Por qué se debe ir al Gemba (piso de trabajo) al realizar los 5 Porqués?',
+        id: 'fw-q8',
+        text: '¿Qué diferencia a una acción correctiva de una acción preventiva?',
         options: [
-          'Para hablar con la gerencia de planta',
-          'Para verificar los hechos y la evidencia real sin basarse en suposiciones',
-          'Para detener la línea de producción',
-          'Para limpiar la máquina que falló'
+          'La correctiva elimina la causa raíz en el proceso actual; la preventiva la extiende a otros equipos o procesos similares',
+          'La correctiva es más costosa que la preventiva',
+          'La correctiva es opcional y la preventiva es obligatoria',
+          'No existe ninguna diferencia práctica entre ambas'
         ],
-        correctOptionIndex: 1,
+        correctOptionIndex: 0,
+        points: 10
+      },
+      {
+        id: 'fw-q9',
+        text: '¿Cuál es un error común al aplicar los 5 Porqués?',
+        options: [
+          'Verificar la causa física en el Gemba',
+          'Involucrar a los operarios en la sesión de análisis',
+          'Echarle la culpa al error humano del operador en lugar de buscar la falla del sistema o proceso',
+          'Tomar datos numéricos del tiempo de paro de la máquina'
+        ],
+        correctOptionIndex: 2,
+        points: 10
+      },
+      {
+        id: 'fw-q10',
+        text: '¿Cómo sabemos que hemos llegado a la causa raíz de un problema?',
+        options: [
+          'Cuando el supervisor decide dar por terminado el reporte',
+          'Cuando se han cumplido exactamente 5 porqués en la hoja',
+          'Cuando el operador promete no volver a cometer el error',
+          'Cuando la eliminación del factor identificado impide de manera lógica que el problema vuelva a ocurrir'
+        ],
+        correctOptionIndex: 3,
         points: 10
       }
     ]
@@ -317,38 +485,122 @@ const defaultExams: Exam[] = [
     questions: [
       {
         id: '7w-q1',
-        text: '¿Qué busca promover la herramienta "7 Ways"?',
+        text: '¿Qué busca promover principalmente la herramienta "7 Ways"?',
         options: [
           'Resolver el problema en 7 minutos',
+          'Forzar al equipo a generar al menos 7 ideas de solución alternativas y creativas ante un problema',
           'Limitar las ideas del equipo a 1 sola solución obvia',
-          'Forzar la generación de al menos 7 ideas de solución distintas ante un problema',
           'Tener 7 operadores en cada reunión Kaizen'
         ],
-        correctOptionIndex: 2,
+        correctOptionIndex: 1,
         points: 10
       },
       {
         id: '7w-q2',
-        text: 'Al evaluar los "7 Ways", ¿qué factores se ponderan típicamente?',
+        text: '¿Por qué es importante generar múltiples alternativas de solución en lugar de elegir la primera idea?',
         options: [
-          'Costo, Esfuerzo de implementación, Impacto en calidad y Factibilidad',
-          'La opinión del supervisor de producción únicamente',
-          'El color de las máquinas a modificar',
-          'Ninguno, se escoge la idea al azar'
+          'Porque la primera idea suele ser la más obvia pero no necesariamente la más eficiente, económica o segura',
+          'Para retrasar el inicio de las tareas correctivas',
+          'Para llenar la documentación del sistema de calidad',
+          'Porque la primera idea siempre es incorrecta'
         ],
         correctOptionIndex: 0,
         points: 10
       },
       {
         id: '7w-q3',
-        text: '¿Qué fase sigue inmediatamente después de evaluar los 7 Ways?',
+        text: 'Al evaluar las alternativas en la matriz de "7 Ways", ¿cuáles son los criterios típicos de análisis?',
         options: [
-          'Olvidar el problema y continuar la rutina',
-          'Seleccionar la mejor alternativa o combinación, e implementar un plan de acción',
-          'Despedir al equipo de ingenieros de calidad',
-          'Volver a empezar a buscar otros 7 ways'
+          'La opinión de la gerencia de planta únicamente',
+          'El color de los componentes que se van a fabricar',
+          'Costo, tiempo de implementación, impacto en calidad, factibilidad y seguridad',
+          'Ninguno, se escoge la idea de forma aleatoria'
+        ],
+        correctOptionIndex: 2,
+        points: 10
+      },
+      {
+        id: '7w-q4',
+        text: '¿Qué técnica de facilitación se sugiere para la primera fase de los 7 Ways?',
+        options: [
+          'Discusión crítica uno a uno',
+          'Llenar cuestionarios individuales en la computadora',
+          'Hacer una encuesta con clientes externos',
+          'Lluvia de ideas (Brainstorming) libre y estructurada, sin juzgar ni descartar ideas inicialmente'
+        ],
+        correctOptionIndex: 3,
+        points: 10
+      },
+      {
+        id: '7w-q5',
+        text: '¿Qué se hace si algunas de las 7 soluciones propuestas no son factibles de implementar por sí solas?',
+        options: [
+          'Se pueden combinar elementos de varias propuestas para diseñar una solución superadora y robusta',
+          'Se descarta todo el proyecto y se inicia desde cero',
+          'Se elige la más sencilla sin importar su efectividad',
+          'Se implementan todas las 7 propuestas a la vez'
+        ],
+        correctOptionIndex: 0,
+        points: 10
+      },
+      {
+        id: '7w-q6',
+        text: 'En la matriz de selección de los 7 Ways, ¿cuál de los siguientes criterios tiene prioridad absoluta sobre los demás?',
+        options: [
+          'El costo total de adquisición de las herramientas',
+          'La seguridad e higiene del personal (mitigación de riesgos)',
+          'El tiempo de entrega estimado de los proveedores',
+          'La estética del diseño de la estación de trabajo'
         ],
         correctOptionIndex: 1,
+        points: 10
+      },
+      {
+        id: '7w-q7',
+        text: '¿Quiénes deben participar en el taller de generación de los 7 Ways?',
+        options: [
+          'Exclusivamente los gerentes de departamento',
+          'Solo el auditor de calidad externo',
+          'Un equipo multidisciplinario que incluya ingenieros, supervisores y operadores del área afectada',
+          'Cualquier persona que no pertenezca al área del problema'
+        ],
+        correctOptionIndex: 2,
+        points: 10
+      },
+      {
+        id: '7w-q8',
+        text: '¿Qué entregable o resultado final se genera después de la selección de la mejor alternativa de los 7 Ways?',
+        options: [
+          'Una presentación de PowerPoint con fotos decorativas',
+          'Una solicitud de incremento de presupuesto general',
+          'Una felicitación verbal al líder del área',
+          'Un plan de acción Kaizen con tareas, responsables y fechas límite de implementación'
+        ],
+        correctOptionIndex: 3,
+        points: 10
+      },
+      {
+        id: '7w-q9',
+        text: '¿Cuál es el beneficio de clasificar las ideas en al menos 7 enfoques diferentes?',
+        options: [
+          'Romper paradigmas mentales y forzar la exploración de soluciones mecánicas, digitales, logísticas y humanas',
+          'Cumplir con las normas ISO de forma obligatoria',
+          'Hacer que la junta de trabajo dure más tiempo',
+          'Aumentar el número de patentes registradas'
+        ],
+        correctOptionIndex: 0,
+        points: 10
+      },
+      {
+        id: '7w-q10',
+        text: '¿Qué significa que una alternativa seleccionada de los 7 Ways se considere una "acción preventiva"?',
+        options: [
+          'Que requiere una aprobación gerencial compleja antes de usarse',
+          'Que se implementa después de que la línea falló por segunda vez',
+          'Que su diseño busca evitar que el modo de falla ocurra por primera vez o se propague a áreas similares',
+          'Que es una contramedida provisional de corta duración'
+        ],
+        correctOptionIndex: 2,
         points: 10
       }
     ]
@@ -359,7 +611,7 @@ const defaultExams: Exam[] = [
     questions: [
       {
         id: 'sg-q1',
-        text: '¿Qué significan las siglas SGA en mejora continua?',
+        text: '¿Qué significan las siglas SGA en el contexto de mejora continua de Flex?',
         options: [
           'Sistema de Gestión de Almacenes',
           'Small Group Activities (Actividades de Grupos Pequeños)',
@@ -371,26 +623,110 @@ const defaultExams: Exam[] = [
       },
       {
         id: 'sg-q2',
-        text: '¿Cuál es el rol del Facilitador en un equipo de SGA?',
+        text: '¿Quiénes conforman principalmente los miembros de un equipo SGA?',
         options: [
-          'Asesorar al equipo en la metodología Lean y guiar la resolución del problema',
-          'Realizar todas las tareas del Kaizen en su oficina',
-          'Tomar las decisiones definitivas del equipo de manera autoritaria',
-          'Solo tomar lista de asistencia en las reuniones'
+          'El personal operativo y técnicos directos (DL) del área de trabajo afectada',
+          'Exclusivamente los directores y gerentes de la planta',
+          'El equipo corporativo de recursos humanos',
+          'Los consultores externos contratados por la empresa'
         ],
         correctOptionIndex: 0,
         points: 10
       },
       {
         id: 'sg-q3',
-        text: '¿Cuál es el beneficio de involucrar al personal operativo (DL) en un SGA?',
+        text: '¿Cuál es el rol del Facilitador en el desarrollo de un proyecto SGA?',
         options: [
-          'Reducir los sueldos del personal de línea',
-          'Aprovechar el conocimiento real de quienes ejecutan el proceso para mejorar calidad y productividad',
-          'Hacer que trabajen más horas extras sin pago',
-          'Eliminar los puestos de supervisores'
+          'Realizar las tareas del Kaizen en su propia oficina',
+          'Tomar decisiones autoritarias por encima del equipo',
+          'Guiar al equipo en la metodología Lean, asesorar en herramientas y facilitar la resolución de obstáculos',
+          'Tomar el tiempo de asistencia de las reuniones únicamente'
+        ],
+        correctOptionIndex: 2,
+        points: 10
+      },
+      {
+        id: 'sg-q4',
+        text: '¿Quién tiene el rol de coordinar las reuniones del SGA y reportar los avances al sponsor?',
+        options: [
+          'El auditor de calidad de la línea de ensamble',
+          'El gerente general de la división',
+          'El supervisor de mantenimiento',
+          'El Líder del Equipo SGA, elegido democráticamente por los miembros operativos'
+        ],
+        correctOptionIndex: 3,
+        points: 10
+      },
+      {
+        id: 'sg-q5',
+        text: '¿Cuál de los siguientes es el primer paso metodológico en un proyecto SGA?',
+        options: [
+          'Seleccionar el tema y definir el problema con claridad',
+          'Implementar las contramedidas en la línea de ensamble',
+          'Presentar el reporte final a la gerencia de planta',
+          'Estandarizar el proceso en las demás estaciones'
+        ],
+        correctOptionIndex: 0,
+        points: 10
+      },
+      {
+        id: 'sg-q6',
+        text: 'En la metodología SGA, ¿por qué es crítico entender el "estado actual" antes de implementar contramedidas?',
+        options: [
+          'Para justificar el tiempo extra gastado en las juntas',
+          'Para cuantificar el problema con datos precisos y establecer una línea base de comparación',
+          'Para reportar scrap acumulado del mes anterior',
+          'Para cambiar el orden de las máquinas en la celda de trabajo'
         ],
         correctOptionIndex: 1,
+        points: 10
+      },
+      {
+        id: 'sg-q7',
+        text: '¿Qué herramienta se utiliza típicamente en SGA para descubrir la causa raíz de una anomalía?',
+        options: [
+          'Una encuesta telefónica con los clientes',
+          'Auditoría visual de 5S en toda la planta',
+          'El análisis de los 5 Porqués y los diagramas de Ishikawa',
+          'La reubicación de los operarios de la celda'
+        ],
+        correctOptionIndex: 2,
+        points: 10
+      },
+      {
+        id: 'sg-q8',
+        text: 'Una vez implementadas las contramedidas y lograda la mejora, ¿cuál es el siguiente paso crítico en el ciclo SGA?',
+        options: [
+          'Eliminar el equipo de trabajo y disolver el grupo',
+          'Iniciar una nueva lluvia de ideas al día siguiente',
+          'Incrementar la velocidad de las líneas de producción',
+          'Estandarizar el nuevo método mediante ayudas visuales y hojas de operación estándar para evitar retrocesos'
+        ],
+        correctOptionIndex: 3,
+        points: 10
+      },
+      {
+        id: 'sg-q9',
+        text: '¿Cómo se fomenta la cultura de mejora continua y motivación en los proyectos SGA en Flex?',
+        options: [
+          'Mediante el reconocimiento de los equipos en foros de presentación corporativos ante la gerencia',
+          'Mediante auditorías sorpresa y castigos a los equipos lentos',
+          'Aumentando la velocidad de las bandas de producción',
+          'Manteniendo las ideas en secreto para que otras líneas no las copien'
+        ],
+        correctOptionIndex: 0,
+        points: 10
+      },
+      {
+        id: 'sg-q10',
+        text: '¿Cuál es la duración típica de un proyecto o ciclo de mejora de un equipo SGA?',
+        options: [
+          'Exactamente un año de desarrollo continuo',
+          'Menos de dos horas en una sola junta de trabajo',
+          'De 4 a 12 semanas de reuniones periódicas y experimentación rápida en piso',
+          'Diez minutos antes del inicio del turno de trabajo'
+        ],
+        correctOptionIndex: 2,
         points: 10
       }
     ]
