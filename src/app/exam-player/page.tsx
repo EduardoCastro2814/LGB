@@ -16,7 +16,8 @@ import {
   Layers,
   HelpCircle,
   History,
-  Sparkles
+  Sparkles,
+  Eye
 } from 'lucide-react';
 import { getAssetPath } from '../utils/paths';
 import { 
@@ -24,8 +25,9 @@ import {
   saveSupabaseCertificate, 
   updateSupabaseEmployeeDetails
 } from '../utils/supabaseService';
-import { MergedEmployee, Course, Exam, Question, UserCourseProgress, ExamAttempt } from '../types';
+import { MergedEmployee, Course, Exam, Question, UserCourseProgress, ExamAttempt, CertificateConfig } from '../types';
 import officialExams from '@/data/exams.json';
+import CertificateModal, { downloadCertificatePNG, DEFAULT_CERT_CONFIG, CertificateData } from '../components/CertificateModal';
 
 const DEFAULT_COURSES: Course[] = [
   {
@@ -97,6 +99,13 @@ function ExamPlayerContent() {
   // Filtro de revisión en pantalla de resultados
   const [reviewFilter, setReviewFilter] = useState<'all' | 'incorrect' | 'correct'>('all');
 
+  // Estados para certificado oficial (Requerimientos 1, 4, 7)
+  const [showCertModal, setShowCertModal] = useState(false);
+  const [certificateFolio, setCertificateFolio] = useState('');
+  const [completionDate, setCompletionDate] = useState('');
+  const [certConfig, setCertConfig] = useState<CertificateConfig>(DEFAULT_CERT_CONFIG);
+  const [isDownloadingCert, setIsDownloadingCert] = useState(false);
+
   // Cargar datos al iniciar
   useEffect(() => {
     const savedUser = localStorage.getItem('lgb_logged_in_user');
@@ -153,8 +162,38 @@ function ExamPlayerContent() {
       setExams(officialExams as unknown as Exam[]);
     }
 
+    // Cargar configuración de plantilla de certificados desde Admin. Certificados
+    const savedCertConfig = localStorage.getItem('lgb_cert_config');
+    if (savedCertConfig) {
+      try {
+        setCertConfig(JSON.parse(savedCertConfig));
+      } catch (e) {
+        console.error('Error al cargar certConfig:', e);
+      }
+    }
+
+    // Verificar si el usuario ya tenía certificado previo para este curso
+    if (savedUser && courseId) {
+      try {
+        const u = JSON.parse(savedUser);
+        const savedTraining = localStorage.getItem('lgb_training_state');
+        if (savedTraining) {
+          const tState = JSON.parse(savedTraining);
+          const prog = tState[u.ID]?.[courseId];
+          if (prog?.certificateFolio) {
+            setCertificateFolio(prog.certificateFolio);
+          }
+          if (prog?.completionDate) {
+            setCompletionDate(prog.completionDate);
+          }
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
     setLoading(false);
-  }, []);
+  }, [courseId]);
 
   // Redirigir si falta courseId tras terminar de cargar
   useEffect(() => {
@@ -313,6 +352,16 @@ function ExamPlayerContent() {
       folio = `LGB-${courseId.substring(0, 3).toUpperCase()}-${randHex}`;
     }
 
+    if (passed) {
+      const formattedDate = new Date().toLocaleDateString('es-MX', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+      });
+      setCompletionDate(formattedDate);
+      setCertificateFolio(folio || `LGB-${courseId.substring(0, 3).toUpperCase()}-PASS`);
+    }
+
     const failedThreeTimes = !passed && (attempts % 3 === 0);
 
     // Requerimiento 6: El curso solo debe marcarse como completado cuando:
@@ -329,7 +378,7 @@ function ExamPlayerContent() {
       examScore: score,
       examPassed: passed,
       completionDate: isCompleted ? now : (prevProg.completionDate || null),
-      certificateFolio: isCompleted ? folio : null,
+      certificateFolio: folio || prevProg.certificateFolio || null,
     };
 
     // 2. Guardar en Historial de Exámenes (Requerimiento 8)
@@ -438,6 +487,34 @@ function ExamPlayerContent() {
     setSelectedAnswers({});
     setExamResult(null);
     setReviewFilter('all');
+  };
+
+  // Descarga directa del certificado oficial en formato PNG (Requerimiento 1)
+  const handleDirectDownloadCertificate = async () => {
+    if (!currentUser || !currentCourse || !examResult) return;
+    setIsDownloadingCert(true);
+    try {
+      const activeFolio = certificateFolio || `LGB-${currentCourse.id.substring(0, 3).toUpperCase()}-${Math.floor(100000 + Math.random() * 900000).toString(16).toUpperCase()}`;
+      const activeDate = completionDate || new Date().toLocaleDateString('es-MX', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+      });
+      const certData: CertificateData = {
+        userName: currentUser.Nombre,
+        userId: currentUser.ID,
+        courseName: currentCourse.name,
+        courseId: currentCourse.id,
+        completionDate: activeDate,
+        score: examResult.score,
+        folio: activeFolio,
+      };
+      await downloadCertificatePNG(certData, certConfig);
+    } catch (e) {
+      console.error('Error al descargar certificado:', e);
+    } finally {
+      setIsDownloadingCert(false);
+    }
   };
 
   const currentQuestion = questions[currentQuestionIndex];
@@ -800,7 +877,29 @@ function ExamPlayerContent() {
             </div>
 
             {/* Acciones Rápidas */}
-            <div className="flex flex-wrap gap-3">
+            <div className="flex flex-wrap gap-3 items-center">
+              {/* Botones de Certificado Oficial (Requerimientos 1, 5, 6, 7): Solo si Aprobó con >= 80 */}
+              {examResult.passed && examResult.score >= 80 && (
+                <>
+                  <button
+                    onClick={() => setShowCertModal(true)}
+                    className="flex items-center gap-2 px-5 py-3 rounded-xl text-xs font-bold bg-white hover:bg-slate-50 text-slate-800 border border-slate-300 shadow-sm cursor-pointer transition-all hover:border-emerald-500 hover:text-emerald-600"
+                  >
+                    <Eye className="w-4 h-4 text-emerald-600" />
+                    <span>Ver Certificado</span>
+                  </button>
+
+                  <button
+                    onClick={handleDirectDownloadCertificate}
+                    disabled={isDownloadingCert}
+                    className="flex items-center gap-2 px-5 py-3 rounded-xl text-xs font-bold bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white shadow-md shadow-emerald-600/20 cursor-pointer transition-all scale-100 hover:scale-[1.02] disabled:opacity-70"
+                  >
+                    <Award className="w-4 h-4" />
+                    <span>{isDownloadingCert ? 'Generando Certificado...' : '🎓 Descargar Certificado'}</span>
+                  </button>
+                </>
+              )}
+
               {!examResult.passed && (
                 <button
                   onClick={handleRetry}
@@ -979,6 +1078,24 @@ function ExamPlayerContent() {
 
           </div>
         )}
+        {/* Modal de Previsualización de Certificado (Requerimiento 7) */}
+        {showCertModal && currentCourse && currentUser && examResult && examResult.passed && examResult.score >= 80 && (
+          <CertificateModal
+            isOpen={showCertModal}
+            onClose={() => setShowCertModal(false)}
+            data={{
+              userName: currentUser.Nombre,
+              userId: currentUser.ID,
+              courseName: currentCourse.name,
+              courseId: currentCourse.id,
+              completionDate: completionDate || new Date().toLocaleDateString('es-MX', { year: 'numeric', month: 'short', day: 'numeric' }),
+              score: examResult.score,
+              folio: certificateFolio || `LGB-${currentCourse.id.substring(0, 3).toUpperCase()}-PASS`
+            }}
+            certConfig={certConfig}
+          />
+        )}
+
       </div>
 
     </div>
