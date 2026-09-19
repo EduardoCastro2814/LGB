@@ -258,7 +258,7 @@ function CoursePlayerContent() {
                   className="flex items-center gap-1.5 px-5 py-2.5 rounded-xl text-xs font-bold bg-emerald-500 hover:bg-emerald-600 text-white shadow-md cursor-pointer transition-all animate-pulse"
                 >
                   <BookOpenCheck className="w-4 h-4" />
-                  <span>Comenzar Examen</span>
+                  <span>Presentar Examen</span>
                 </button>
               ) : (
                 <button
@@ -300,7 +300,7 @@ function CoursePlayerContent() {
                   }}
                   className="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 rounded-xl text-xs font-bold text-white cursor-pointer"
                 >
-                  Comenzar Examen
+                  Presentar Examen
                 </button>
               ) : (
                 <button

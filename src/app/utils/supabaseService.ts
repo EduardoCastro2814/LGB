@@ -906,7 +906,9 @@ export async function getSupabaseExams(): Promise<Exam[]> {
         text: q.text,
         options: Array.isArray(q.options) ? q.options : JSON.parse(q.options || '[]'),
         correctOptionIndex: q.correct_option_index,
-        points: q.points !== undefined ? q.points : 10
+        points: q.points !== undefined ? q.points : 10,
+        explanation: q.explanation || undefined,
+        questionNumber: q.question_number !== undefined ? q.question_number : undefined
       }))
   }));
 }
@@ -944,7 +946,8 @@ export async function saveSupabaseExam(exam: Exam): Promise<void> {
         text: q.text,
         options: JSON.stringify(q.options),
         correct_option_index: q.correctOptionIndex,
-        points: q.points
+        points: q.points,
+        explanation: q.explanation
       }))
     );
 

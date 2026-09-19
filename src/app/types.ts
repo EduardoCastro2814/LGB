@@ -89,16 +89,34 @@ export interface Course {
 
 export interface Question {
   id: string;
+  questionNumber?: number;
   text: string;
   options: string[];
   correctOptionIndex: number;
   points: number;
+  explanation?: string;
 }
 
 export interface Exam {
   courseId: string;
   minScore: number; // Por defecto 80
   questions: Question[];
+}
+
+export interface ExamAttempt {
+  id: string;
+  employeeId: string;
+  courseId: string;
+  courseName: string;
+  score: number;
+  passed: boolean;
+  correctCount: number;
+  incorrectCount: number;
+  totalQuestions: number;
+  attemptNumber: number;
+  date: string;
+  timestamp: string;
+  answers?: Record<string, number>;
 }
 
 export interface UserCourseProgress {

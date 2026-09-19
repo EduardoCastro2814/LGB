@@ -19,7 +19,12 @@ import {
   RotateCcw,
   Sparkles,
   X,
-  FileText
+  FileText,
+  History,
+  XCircle,
+  Check,
+  ChevronDown,
+  ChevronUp
 } from 'lucide-react';
 import { 
   Course, 
@@ -28,8 +33,10 @@ import {
   Exam, 
   Question, 
   CertificateConfig, 
-  MergedEmployee 
+  MergedEmployee,
+  ExamAttempt
 } from '../types';
+import officialExams from '@/data/exams.json';
 import { ResponsiveContainer, PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip, Legend } from 'recharts';
 import { getAssetPath } from '../utils/paths';
 
@@ -233,7 +240,29 @@ export default function AcademiaLean({
   certConfig,
   onToggleFullscreen,
 }: AcademiaLeanProps) {
-  const [activeTab, setActiveTab] = useState<'cursos' | 'progreso' | 'certificados' | 'perfil'>('cursos');
+  const [activeTab, setActiveTab] = useState<'cursos' | 'progreso' | 'historial' | 'certificados' | 'perfil'>('cursos');
+  
+  // Estado para el Historial de Exámenes (Requerimiento 9)
+  const [examHistory, setExamHistory] = useState<ExamAttempt[]>([]);
+  const [historyCourseFilter, setHistoryCourseFilter] = useState<string>('all');
+  const [historyStatusFilter, setHistoryStatusFilter] = useState<'all' | 'passed' | 'failed'>('all');
+  const [expandedAttemptId, setExpandedAttemptId] = useState<string | null>(null);
+
+  // Cargar historial de intentos del colaborador
+  React.useEffect(() => {
+    try {
+      const raw = localStorage.getItem('lgb_exam_history');
+      if (raw) {
+        const parsed: ExamAttempt[] = JSON.parse(raw);
+        const userAttempts = parsed.filter(a => a.employeeId === user.ID);
+        setExamHistory(userAttempts);
+      } else {
+        setExamHistory([]);
+      }
+    } catch (e) {
+      console.error('Error al cargar historial en Academia:', e);
+    }
+  }, [user.ID, activeTab]);
   
   // Estado para previsualización interactiva de certificado
   const [showCertModal, setShowCertModal] = useState(false);
@@ -288,10 +317,13 @@ URL: ${activeUrl ? activeUrl.substring(0, 80) + '...' : 'N/A'}`);
     };
   }, [selectedCourse, onToggleFullscreen]);
 
-  // Determinar si todos los cursos requeridos están aprobados
+  // Determinar si todos los cursos requeridos están aprobados y completados (Requerimiento 6 y 7)
   const requiredCourseIds = ['lean-basics-1', '5s-1', '5-whys', '7-ways', 'sga-guide'];
   const allCoursesCompleted = useMemo(() => {
-    return requiredCourseIds.every(id => progress[id]?.examPassed === true);
+    return requiredCourseIds.every(id => {
+      const p = progress[id];
+      return p && p.examPassed === true && p.contentViewed === true && p.status === 'completado';
+    });
   }, [progress]);
 
   // Manejar click en curso para empezar a leer
@@ -345,7 +377,8 @@ URL: ${activeUrl ? activeUrl.substring(0, 80) + '...' : 'N/A'}`);
   // Iniciar examen
   const handleStartExam = () => {
     if (!selectedCourse) return;
-    const exam = exams.find(e => e.courseId === selectedCourse.id);
+    const exam = exams.find(e => e.courseId === selectedCourse.id) ||
+      (officialExams as unknown as Exam[]).find(e => e.courseId === selectedCourse.id);
     if (exam) {
       window.location.href = getAssetPath(`/exam-player?courseId=${selectedCourse.id}`);
     } else {
@@ -1056,9 +1089,10 @@ URL: ${activeUrl ? activeUrl.substring(0, 80) + '...' : 'N/A'}`);
     requiredCourseIds.forEach((id) => {
       const cProg = progress[id];
       if (cProg) {
-        if (cProg.status === 'completado') {
+        const isComp = cProg.status === 'completado' && cProg.contentViewed === true && cProg.examPassed === true;
+        if (isComp) {
           completed++;
-        } else if (cProg.status === 'en-progreso') {
+        } else if (cProg.status === 'en-progreso' || (cProg.progress || 0) > 0) {
           enProgreso++;
         } else {
           noIniciado++;
@@ -1141,6 +1175,7 @@ URL: ${activeUrl ? activeUrl.substring(0, 80) + '...' : 'N/A'}`);
           {[
             { id: 'cursos', label: 'Mis Cursos', icon: BookOpen },
             { id: 'progreso', label: 'Mi Progreso', icon: TrendingUp },
+            { id: 'historial', label: 'Historial de Exámenes', icon: History },
             { id: 'certificados', label: 'Mis Certificados', icon: Award },
             { id: 'perfil', label: 'Mi Perfil', icon: User },
           ].map((tab) => {
@@ -1168,12 +1203,17 @@ URL: ${activeUrl ? activeUrl.substring(0, 80) + '...' : 'N/A'}`);
       {activeTab === 'cursos' && !selectedCourse && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {courses.map((course) => {
-            const prog = progress[course.id] || { status: 'no-iniciado', progress: 0, examPassed: false };
-            const statusLabel = prog.status === 'completado' 
-              ? 'Completado' 
-              : prog.status === 'en-progreso' 
-                ? 'En progreso' 
-                : 'No iniciado';
+            const prog = progress[course.id] || { 
+              status: 'no-iniciado', 
+              progress: 0, 
+              examPassed: false,
+              contentViewed: false,
+              examAttempts: 0,
+              examScore: null
+            };
+            
+            const isCompleted = prog.status === 'completado' && prog.examPassed === true && prog.contentViewed === true;
+            const isFailed = (prog.examAttempts || 0) > 0 && !prog.examPassed;
             
             return (
               <div 
@@ -1183,18 +1223,36 @@ URL: ${activeUrl ? activeUrl.substring(0, 80) + '...' : 'N/A'}`);
                 <div>
                   <div className="flex justify-between items-start mb-4">
                     <span className="text-[10px] font-bold text-slate-400 uppercase font-mono bg-slate-100 dark:bg-[#273449] px-2.5 py-1 rounded-md border border-slate-200/50 dark:border-[#334155]/50">
-                      Orden: {course.order}
+                      Módulo {course.order}
                     </span>
-                    <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-1 rounded-full border ${
-                      prog.status === 'completado'
-                        ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'
-                        : prog.status === 'en-progreso'
-                          ? 'bg-amber-500/10 text-amber-500 border-amber-500/20 animate-pulse'
-                          : 'bg-slate-100 text-slate-400 dark:bg-[#273449] dark:text-slate-500 border-transparent'
-                    }`}>
-                      {prog.status === 'completado' ? <CheckCircle2 className="w-3 h-3" /> : <Circle className="w-3 h-3" />}
-                      <span>{statusLabel}</span>
-                    </span>
+
+                    {/* Insignia de Estado y Examen (Requerimiento 10) */}
+                    {prog.examPassed ? (
+                      <span className="inline-flex items-center gap-1 text-[10px] font-extrabold px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                        <CheckCircle2 className="w-3 h-3 text-emerald-500" />
+                        <span>Aprobado ✅ ({prog.examScore}%)</span>
+                      </span>
+                    ) : isFailed ? (
+                      <span className="inline-flex items-center gap-1 text-[10px] font-extrabold px-2.5 py-1 rounded-full bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20">
+                        <XCircle className="w-3 h-3 text-red-500" />
+                        <span>Reprobado ❌ ({prog.examScore}%)</span>
+                      </span>
+                    ) : prog.contentViewed ? (
+                      <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-1 rounded-full bg-blue-500/10 text-[#0082c8] border border-blue-500/20">
+                        <BookOpenCheck className="w-3 h-3" />
+                        <span>Contenido Visto</span>
+                      </span>
+                    ) : prog.status === 'en-progreso' ? (
+                      <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-500 border border-amber-500/20 animate-pulse">
+                        <Circle className="w-3 h-3" />
+                        <span>En progreso</span>
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-1 rounded-full bg-slate-100 text-slate-400 dark:bg-[#273449] dark:text-slate-500 border-transparent">
+                        <Circle className="w-3 h-3" />
+                        <span>No iniciado</span>
+                      </span>
+                    )}
                   </div>
 
                   <h3 className="text-base font-bold text-slate-800 dark:text-[#f8fafc] mb-2 group-hover:text-emerald-500 transition-colors">
@@ -1205,33 +1263,60 @@ URL: ${activeUrl ? activeUrl.substring(0, 80) + '...' : 'N/A'}`);
                   </p>
                 </div>
 
-                <div className="pt-4 border-t border-slate-100 dark:border-[#2d3a4f] space-y-4">
+                <div className="pt-4 border-t border-slate-100 dark:border-[#2d3a4f] space-y-3.5">
                   <div className="flex justify-between text-[11px] font-bold text-slate-450 dark:text-[#94a3b8]">
                     <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5 text-slate-400" /> {course.duration}</span>
-                    <span>Progreso: {prog.progress || 0}%</span>
+                    <span>Avance: {isCompleted ? 100 : (prog.progress || 0)}%</span>
                   </div>
                   
                   {/* Progress Bar */}
                   <div className="w-full h-1.5 rounded-full bg-slate-100 dark:bg-[#273449] overflow-hidden">
                     <div 
-                      className={`h-full rounded-full transition-all duration-505 ${
-                        prog.status === 'completado' ? 'bg-emerald-500' : 'bg-amber-500'
+                      className={`h-full rounded-full transition-all duration-500 ${
+                        isCompleted ? 'bg-emerald-500' : isFailed ? 'bg-red-500' : 'bg-[#0082c8]'
                       }`}
-                      style={{ width: `${prog.progress || 0}%` }}
+                      style={{ width: `${isCompleted ? 100 : (prog.progress || 0)}%` }}
                     />
                   </div>
 
-                  <button
-                    onClick={() => handleStartCourse(course)}
-                    className={`w-full py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
-                      prog.status === 'completado'
-                        ? 'bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-[#273449] dark:hover:bg-[#2f3e58] dark:text-[#cbd5e1]'
-                        : 'bg-emerald-500 hover:bg-emerald-600 text-white shadow-sm'
-                    }`}
-                  >
-                    <span>{prog.status === 'completado' ? 'Repasar Contenido' : prog.status === 'en-progreso' ? 'Continuar Curso' : 'Iniciar Curso'}</span>
-                    <ChevronRight className="w-4 h-4" />
-                  </button>
+                  {/* Botones de acción: Lectura y Examen (Requerimiento 10) */}
+                  <div className="flex flex-col sm:flex-row gap-2">
+                    <button
+                      onClick={() => handleStartCourse(course)}
+                      className={`flex-1 py-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+                        isCompleted
+                          ? 'bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-[#273449] dark:hover:bg-[#2f3e58] dark:text-[#cbd5e1]'
+                          : 'bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-[#273449] dark:text-[#cbd5e1]'
+                      }`}
+                    >
+                      <BookOpen className="w-3.5 h-3.5" />
+                      <span>{isCompleted ? 'Repasar Diapositivas' : (prog.progress || 0) > 0 ? 'Continuar Diapositivas' : 'Ver Diapositivas'}</span>
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        window.location.href = getAssetPath(`/exam-player?courseId=${course.id}`);
+                      }}
+                      className={`flex-1 py-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-sm ${
+                        isCompleted
+                          ? 'bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30'
+                          : isFailed
+                            ? 'bg-red-600 hover:bg-red-700 text-white'
+                            : prog.contentViewed
+                              ? 'bg-emerald-600 hover:bg-emerald-700 text-white animate-pulse'
+                              : 'bg-[#0082c8] hover:bg-[#0070ad] text-white'
+                      }`}
+                    >
+                      <BookOpenCheck className="w-3.5 h-3.5" />
+                      <span>
+                        {isCompleted 
+                          ? 'Revisar Examen' 
+                          : isFailed 
+                            ? 'Reintentar Examen' 
+                            : 'Presentar Examen'}
+                      </span>
+                    </button>
+                  </div>
                 </div>
               </div>
             );
@@ -1348,7 +1433,7 @@ URL: ${activeUrl ? activeUrl.substring(0, 80) + '...' : 'N/A'}`);
                           className="flex items-center gap-1.5 px-5 py-2.5 rounded-xl text-xs font-bold bg-emerald-500 hover:bg-emerald-600 text-white shadow-md cursor-pointer transition-all animate-pulse"
                         >
                           <BookOpenCheck className="w-4 h-4" />
-                          <span>Comenzar Examen</span>
+                          <span>Presentar Examen</span>
                         </button>
                       ) : (
                         <button
@@ -1463,7 +1548,7 @@ URL: ${activeUrl ? activeUrl.substring(0, 80) + '...' : 'N/A'}`);
                           className="flex items-center gap-1.5 px-6 py-3 rounded-xl text-xs font-bold bg-emerald-500 hover:bg-emerald-600 text-white shadow-md cursor-pointer transition-all animate-pulse"
                         >
                           <BookOpenCheck className="w-4 h-4" />
-                          <span>Comenzar Examen</span>
+                          <span>Presentar Examen</span>
                         </button>
                       ) : (
                         <button
@@ -1826,6 +1911,303 @@ URL: ${activeUrl ? activeUrl.substring(0, 80) + '...' : 'N/A'}`);
             </div>
 
           </div>
+
+        </div>
+      )}
+
+      {/* TAB CONTENT: HISTORIAL DE EXÁMENES (Requerimiento 9) */}
+      {activeTab === 'historial' && (
+        <div className="flex flex-col gap-6 animate-fade-in">
+          
+          {/* Tarjetas Resumen del Historial */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="glass-panel rounded-2.5xl p-5 bg-white dark:bg-[#1e293b] border-slate-200 dark:border-[#334155] flex items-center justify-between">
+              <div>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Total de Evaluaciones</p>
+                <h3 className="text-xl font-black text-slate-800 dark:text-white">{examHistory.length}</h3>
+              </div>
+              <div className="bg-slate-50 dark:bg-slate-800 p-3 rounded-xl border border-slate-100 dark:border-slate-700 text-[#0082c8]">
+                <History className="w-5 h-5" />
+              </div>
+            </div>
+
+            <div className="glass-panel rounded-2.5xl p-5 bg-white dark:bg-[#1e293b] border-slate-200 dark:border-[#334155] flex items-center justify-between">
+              <div>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Exámenes Aprobados</p>
+                <h3 className="text-xl font-black text-emerald-600 dark:text-emerald-400">
+                  {examHistory.filter(a => a.passed).length}
+                </h3>
+              </div>
+              <div className="bg-emerald-50 dark:bg-emerald-950/30 p-3 rounded-xl border border-emerald-100 dark:border-emerald-800/40 text-emerald-600">
+                <CheckCircle2 className="w-5 h-5" />
+              </div>
+            </div>
+
+            <div className="glass-panel rounded-2.5xl p-5 bg-white dark:bg-[#1e293b] border-slate-200 dark:border-[#334155] flex items-center justify-between">
+              <div>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Exámenes Reprobados</p>
+                <h3 className="text-xl font-black text-red-600 dark:text-red-400">
+                  {examHistory.filter(a => !a.passed).length}
+                </h3>
+              </div>
+              <div className="bg-red-50 dark:bg-red-950/30 p-3 rounded-xl border border-red-100 dark:border-red-800/40 text-red-600">
+                <XCircle className="w-5 h-5" />
+              </div>
+            </div>
+
+            <div className="glass-panel rounded-2.5xl p-5 bg-white dark:bg-[#1e293b] border-slate-200 dark:border-[#334155] flex items-center justify-between">
+              <div>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Promedio General</p>
+                <h3 className="text-xl font-black text-[#0082c8]">
+                  {examHistory.length > 0 
+                    ? Math.round(examHistory.reduce((acc, a) => acc + (a.score || 0), 0) / examHistory.length)
+                    : 0}%
+                </h3>
+              </div>
+              <div className="bg-blue-50 dark:bg-blue-950/30 p-3 rounded-xl border border-blue-100 dark:border-blue-800/40 text-[#0082c8]">
+                <TrendingUp className="w-5 h-5" />
+              </div>
+            </div>
+          </div>
+
+          {/* Filtros de Historial */}
+          <div className="glass-panel rounded-2.5xl p-4 bg-white dark:bg-[#1e293b] border-slate-200 dark:border-[#334155] flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-bold text-slate-500">Filtrar por curso:</span>
+              <select
+                value={historyCourseFilter}
+                onChange={(e) => setHistoryCourseFilter(e.target.value)}
+                className="text-xs font-bold bg-slate-100 dark:bg-[#273449] border border-slate-200 dark:border-[#334155] rounded-xl px-3 py-1.5 text-slate-700 dark:text-[#cbd5e1] outline-none cursor-pointer"
+              >
+                <option value="all">Todos los cursos</option>
+                {courses.map(c => (
+                  <option key={c.id} value={c.id}>{c.name}</option>
+                ))}
+              </select>
+            </div>
+
+            <div className="flex items-center bg-slate-100 dark:bg-[#273449] p-1 rounded-xl border border-slate-200 dark:border-[#334155] text-xs font-bold">
+              <button
+                onClick={() => setHistoryStatusFilter('all')}
+                className={`px-3 py-1 rounded-lg transition-all cursor-pointer ${
+                  historyStatusFilter === 'all' 
+                    ? 'bg-white dark:bg-[#1e293b] text-slate-800 dark:text-white shadow-sm font-extrabold' 
+                    : 'text-slate-500 hover:text-slate-800 dark:hover:text-white'
+                }`}
+              >
+                Todos ({examHistory.length})
+              </button>
+              <button
+                onClick={() => setHistoryStatusFilter('passed')}
+                className={`px-3 py-1 rounded-lg transition-all cursor-pointer ${
+                  historyStatusFilter === 'passed' 
+                    ? 'bg-emerald-500 text-white shadow-sm font-extrabold' 
+                    : 'text-slate-500 hover:text-emerald-600'
+                }`}
+              >
+                Aprobados ({examHistory.filter(a => a.passed).length})
+              </button>
+              <button
+                onClick={() => setHistoryStatusFilter('failed')}
+                className={`px-3 py-1 rounded-lg transition-all cursor-pointer ${
+                  historyStatusFilter === 'failed' 
+                    ? 'bg-red-500 text-white shadow-sm font-extrabold' 
+                    : 'text-slate-500 hover:text-red-600'
+                }`}
+              >
+                Reprobados ({examHistory.filter(a => !a.passed).length})
+              </button>
+            </div>
+          </div>
+
+          {/* Listado de Intentos de Exámenes */}
+          {examHistory
+            .filter(a => historyCourseFilter === 'all' || a.courseId === historyCourseFilter)
+            .filter(a => historyStatusFilter === 'all' || (historyStatusFilter === 'passed' ? a.passed : !a.passed))
+            .length > 0 ? (
+            <div className="space-y-4">
+              {examHistory
+                .filter(a => historyCourseFilter === 'all' || a.courseId === historyCourseFilter)
+                .filter(a => historyStatusFilter === 'all' || (historyStatusFilter === 'passed' ? a.passed : !a.passed))
+                .map((attempt) => {
+                  const isExpanded = expandedAttemptId === attempt.id;
+                  const examForAttempt = (exams && exams.find(e => e.courseId === attempt.courseId)) ||
+                    (officialExams as unknown as Exam[]).find(e => e.courseId === attempt.courseId);
+                  
+                  return (
+                    <div 
+                      key={attempt.id}
+                      className="glass-panel rounded-2.5xl p-6 bg-white dark:bg-[#1e293b] border-slate-200 dark:border-[#334155] shadow-sm transition-all"
+                    >
+                      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                        <div>
+                          <div className="flex items-center gap-2 mb-1.5">
+                            <span className={`text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full border ${
+                              attempt.passed 
+                                ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20' 
+                                : 'bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20'
+                            }`}>
+                              {attempt.passed ? 'Aprobado ✅' : 'Reprobado ❌'}
+                            </span>
+                            <span className="text-[10px] font-mono font-bold text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-md">
+                              Intento #{attempt.attemptNumber}
+                            </span>
+                            <span className="text-[10px] text-slate-400 flex items-center gap-1 font-medium">
+                              <Calendar className="w-3 h-3" />
+                              {attempt.date}
+                            </span>
+                          </div>
+
+                          <h3 className="text-base font-extrabold text-slate-900 dark:text-white">
+                            {attempt.courseName}
+                          </h3>
+                        </div>
+
+                        <div className="flex items-center gap-4 self-end sm:self-center">
+                          <div className="text-right">
+                            <span className="text-[10px] font-bold text-slate-400 uppercase block">Calificación</span>
+                            <span className={`text-2xl font-black ${attempt.passed ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}>
+                              {attempt.score}%
+                            </span>
+                          </div>
+
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={() => setExpandedAttemptId(isExpanded ? null : attempt.id)}
+                              className="px-3 py-2 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 dark:bg-[#273449] dark:hover:bg-[#2f3e58] text-slate-700 dark:text-[#cbd5e1] border border-slate-200 dark:border-[#334155] flex items-center gap-1.5 transition-all cursor-pointer"
+                            >
+                              <span>{isExpanded ? 'Ocultar Detalle' : 'Ver Preguntas'}</span>
+                              {isExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+                            </button>
+
+                            <button
+                              onClick={() => {
+                                window.location.href = getAssetPath(`/exam-player?courseId=${attempt.courseId}`);
+                              }}
+                              className="px-3 py-2 rounded-xl text-xs font-bold bg-[#0082c8] hover:bg-[#0070ad] text-white shadow-sm flex items-center gap-1.5 transition-all cursor-pointer"
+                              title="Presentar este examen de nuevo"
+                            >
+                              <RotateCcw className="w-3.5 h-3.5" />
+                              <span className="hidden sm:inline">Presentar de Nuevo</span>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Desglose de preguntas del intento */}
+                      {isExpanded && (
+                        <div className="mt-6 pt-6 border-t border-slate-100 dark:border-[#2d3a4f] space-y-4 animate-fade-in">
+                          <div className="flex justify-between items-center text-xs font-bold text-slate-500 mb-2">
+                            <span className="flex items-center gap-1.5">
+                              <HelpCircle className="w-4 h-4 text-[#0082c8]" />
+                              Revisión de Preguntas y Explicaciones Oficiales
+                            </span>
+                            <span className="font-mono">
+                              Correctas: {attempt.correctCount} / {attempt.totalQuestions || 10}
+                            </span>
+                          </div>
+
+                          {examForAttempt?.questions && examForAttempt.questions.length > 0 ? (
+                            <div className="space-y-3">
+                              {examForAttempt.questions.map((q, qIdx) => {
+                                const userAnsIdx = attempt.answers ? attempt.answers[q.id] : undefined;
+                                const isCorrect = userAnsIdx === q.correctOptionIndex;
+                                const correctLetter = String.fromCharCode(65 + q.correctOptionIndex);
+                                const userLetter = userAnsIdx !== undefined ? String.fromCharCode(65 + userAnsIdx) : 'No respondida';
+                                
+                                return (
+                                  <div 
+                                    key={q.id}
+                                    className={`p-4 rounded-2xl border text-xs transition-all ${
+                                      isCorrect 
+                                        ? 'bg-emerald-50/20 border-emerald-200 dark:border-emerald-800/30' 
+                                        : 'bg-red-50/20 border-red-200 dark:border-red-800/30'
+                                    }`}
+                                  >
+                                    <div className="flex justify-between items-start gap-2 mb-1.5">
+                                      <span className="font-mono font-bold text-slate-400 text-[10px]">
+                                        Pregunta {q.questionNumber || qIdx + 1}
+                                      </span>
+                                      <span className={`text-[10px] font-black px-2 py-0.5 rounded-md ${
+                                        isCorrect 
+                                          ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300' 
+                                          : 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300'
+                                      }`}>
+                                        {isCorrect ? 'Correcta (+10 pts)' : 'Incorrecta (0 pts)'}
+                                      </span>
+                                    </div>
+
+                                    <p className="font-bold text-slate-800 dark:text-white mb-2.5 text-xs leading-relaxed">
+                                      {q.text}
+                                    </p>
+
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-2 font-semibold">
+                                      <div className={`p-2.5 rounded-xl border text-[11px] ${
+                                        isCorrect 
+                                          ? 'bg-emerald-100/30 border-emerald-300 text-emerald-800 dark:text-emerald-300' 
+                                          : 'bg-red-100/30 border-red-300 text-red-800 dark:text-red-300'
+                                      }`}>
+                                        <span className="font-black text-[9px] uppercase block">Tu selección:</span>
+                                        <span>{userAnsIdx !== undefined ? `${userLetter}) ${q.options[userAnsIdx]}` : 'Sin responder'}</span>
+                                      </div>
+
+                                      {!isCorrect && (
+                                        <div className="p-2.5 rounded-xl border bg-emerald-100/30 border-emerald-300 text-emerald-800 dark:text-emerald-300 text-[11px]">
+                                          <span className="font-black text-[9px] uppercase block">Respuesta correcta:</span>
+                                          <span>{correctLetter}) {q.options[q.correctOptionIndex]}</span>
+                                        </div>
+                                      )}
+                                    </div>
+
+                                    {q.explanation && (
+                                      <div className="bg-white dark:bg-[#1e293b] border border-slate-200 dark:border-[#334155] rounded-xl p-3 text-[11px] text-slate-600 dark:text-slate-300">
+                                        <span className="font-black text-[9px] text-[#0082c8] uppercase tracking-wider block mb-0.5">
+                                          💡 Explicación Oficial (Clave Lean):
+                                        </span>
+                                        <p className="leading-relaxed">
+                                          {q.explanation}
+                                        </p>
+                                      </div>
+                                    )}
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          ) : (
+                            <p className="text-xs text-slate-400">Detalle de preguntas no disponible para este examen.</p>
+                          )}
+                        </div>
+                      )}
+
+                    </div>
+                  );
+                })}
+            </div>
+          ) : (
+            <div className="glass-panel rounded-3xl p-12 bg-white dark:bg-[#1e293b] border-slate-200 dark:border-[#334155] text-center flex flex-col items-center justify-center">
+              <div className="w-16 h-16 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-400 flex items-center justify-center mb-4">
+                <History className="w-8 h-8" />
+              </div>
+              <h3 className="text-base font-extrabold text-slate-800 dark:text-white mb-1">
+                {examHistory.length === 0 ? 'Sin evaluaciones registradas' : 'No hay resultados con los filtros actuales'}
+              </h3>
+              <p className="text-xs text-slate-500 max-w-md mx-auto mb-6">
+                {examHistory.length === 0 
+                  ? 'Aún no has presentado ningún examen. Ingresa a la sección "Mis Cursos" y selecciona "Presentar Examen" en cualquiera de los módulos para registrar tus calificaciones.'
+                  : 'Prueba cambiando el filtro de curso o el estatus de aprobación para ver otros intentos.'
+                }
+              </p>
+              {examHistory.length === 0 && (
+                <button
+                  onClick={() => setActiveTab('cursos')}
+                  className="px-6 py-2.5 rounded-xl text-xs font-bold bg-[#0082c8] hover:bg-[#0070ad] text-white shadow-md cursor-pointer transition-all flex items-center gap-2"
+                >
+                  <BookOpen className="w-4 h-4" />
+                  <span>Ir a Mis Cursos</span>
+                </button>
+              )}
+            </div>
+          )}
 
         </div>
       )}

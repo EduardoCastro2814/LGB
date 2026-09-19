@@ -25,6 +25,7 @@ export default function ConfigExams({ courses, exams, onSaveExams }: ConfigExams
   const [optionD, setOptionD] = useState('');
   const [correctIndex, setCorrectIndex] = useState(0);
   const [points, setPoints] = useState(10);
+  const [explanation, setExplanation] = useState('');
 
   // Buscar examen activo para el curso seleccionado
   const activeExam = useMemo(() => {
@@ -70,6 +71,7 @@ export default function ConfigExams({ courses, exams, onSaveExams }: ConfigExams
     setOptionD('');
     setCorrectIndex(0);
     setPoints(10);
+    setExplanation('');
   };
 
   // Iniciar edición de pregunta
@@ -83,6 +85,7 @@ export default function ConfigExams({ courses, exams, onSaveExams }: ConfigExams
     setOptionD(q.options[3] || '');
     setCorrectIndex(q.correctOptionIndex);
     setPoints(q.points || 10);
+    setExplanation(q.explanation || '');
   };
 
   // Guardar pregunta en el examen
@@ -113,6 +116,8 @@ export default function ConfigExams({ courses, exams, onSaveExams }: ConfigExams
         options: optionsList,
         correctOptionIndex: correctIndex,
         points: points,
+        explanation: explanation.trim() || undefined,
+        questionNumber: updatedQuestions.length + 1,
       };
       updatedQuestions.push(newQuestion);
       setIsAddingQuestion(false);
@@ -125,6 +130,7 @@ export default function ConfigExams({ courses, exams, onSaveExams }: ConfigExams
             options: optionsList,
             correctOptionIndex: correctIndex,
             points: points,
+            explanation: explanation.trim() || undefined,
           };
         }
         return q;
@@ -287,8 +293,15 @@ export default function ConfigExams({ courses, exams, onSaveExams }: ConfigExams
                                 );
                               })}
                             </ul>
+                            {q.explanation && (
+                              <p className="text-[11px] text-slate-500 dark:text-slate-400 bg-slate-100/70 dark:bg-slate-900/60 p-2 rounded-lg border border-slate-200 dark:border-[#334155] italic">
+                                <span className="font-bold text-slate-700 dark:text-slate-300 not-italic">Justificación: </span>
+                                {q.explanation}
+                              </p>
+                            )}
                             <div className="pt-2 border-t border-slate-100/50 dark:border-[#2d3a4f]/50 text-[10px] text-slate-400 font-bold flex gap-3">
                               <span>Puntaje: <span className="text-emerald-500">{q.points || 10} pts</span></span>
+                              {q.questionNumber && <span>Reactivo #{q.questionNumber}</span>}
                             </div>
                           </div>
 
@@ -391,6 +404,19 @@ export default function ConfigExams({ courses, exams, onSaveExams }: ConfigExams
                       <div className="flex flex-col justify-end">
                         <span className="text-[10px] text-slate-450 italic pb-2 font-medium">Seleccione la opción correcta con el botón circular.</span>
                       </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">
+                        Explicación / Justificación de la Respuesta (Feedback)
+                      </label>
+                      <textarea
+                        rows={3}
+                        className="block w-full px-3 py-2 bg-white dark:bg-[#1e293b] border border-slate-200 dark:border-[#334155] rounded-xl text-xs"
+                        placeholder="Explicación pedagógica de por qué esta opción es la correcta según la metodología Lean..."
+                        value={explanation}
+                        onChange={(e) => setExplanation(e.target.value)}
+                      />
                     </div>
 
                     {/* Controles Formulario */}
