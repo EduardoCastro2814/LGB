@@ -1,0 +1,732 @@
+[
+  {
+    "courseId": "lean-basics-1",
+    "minScore": 80,
+    "questions": [
+      {
+        "id": "lean-basics-1-q21",
+        "questionNumber": 21,
+        "text": "¿Cómo se define el concepto general de **Lean** en el material de capacitación?",
+        "options": [
+          "Un programa temporal para reducir la plantilla de empleados.",
+          "Un enfoque sistemático para identificar y eliminar actividades que no agregan valor, maximizando el valor para el cliente.",
+          "Una técnica exclusiva para el mantenimiento de maquinaria pesada.",
+          "Un conjunto de normas contables internacionales."
+        ],
+        "correctOptionIndex": 1,
+        "points": 10,
+        "explanation": "Lean busca lograr más con menos recursos, tiempo y esfuerzo, enfocando todo el flujo en el valor percibido por el cliente."
+      },
+      {
+        "id": "lean-basics-1-q22",
+        "questionNumber": 22,
+        "text": "¿Cuál es la diferencia entre **Valor Agregado** y **Desperdicio (Muda)**?",
+        "options": [
+          "Valor es lo que cuesta producir y Desperdicio es la ganancia.",
+          "Valor es cualquier acción por la que el cliente estaría dispuesto a pagar; Desperdicio es toda actividad que no agrega valor.",
+          "Valor es la velocidad de la máquina y Desperdicio es la energía eléctrica.",
+          "No hay diferencia; ambos términos son equivalentes en Lean."
+        ],
+        "correctOptionIndex": 1,
+        "points": 10,
+        "explanation": "El cliente solo paga por transformaciones directas en el producto que cumplen sus requerimientos; todo lo demás es Muda."
+      },
+      {
+        "id": "lean-basics-1-q23",
+        "questionNumber": 23,
+        "text": "En la evolución histórica de Lean, ¿qué concepto introdujo **Sakichi Toyoda** en 1896?",
+        "options": [
+          "Just-In-Time (JIT) con transportadores de cadena.",
+          "Jidoka (autonomatización) con un dispositivo de detención automática en el telar.",
+          "SMED y cambio de herramientas en un solo dígito de minuto.",
+          "El sistema de supermercados de inventario."
+        ],
+        "correctOptionIndex": 1,
+        "points": 10,
+        "explanation": "Sakichi Toyoda inventó un mecanismo que detenía el telar si el hilo se rompía, evitando producir material defectuoso."
+      },
+      {
+        "id": "lean-basics-1-q24",
+        "questionNumber": 24,
+        "text": "¿A quién se le reconoce como el \"Arquitecto del TPS\" y creador del sistema de control de inventario por Supermercado?",
+        "options": [
+          "Kiichiro Toyoda.",
+          "Dr. Shigeo Shingo.",
+          "Taiichi Ohno.",
+          "Edward Hodnett."
+        ],
+        "correctOptionIndex": 2,
+        "points": 10,
+        "explanation": "Taiichi Ohno estructuró el Sistema de Producción Toyota (TPS) inspirado en los supermercados estadounidenses para regular el flujo Pull."
+      },
+      {
+        "id": "lean-basics-1-q25",
+        "questionNumber": 25,
+        "text": "¿Qué significan las siglas del acrónimo **TIM WOODS** utilizado para recordar los 7+1 desperdicios?",
+        "options": [
+          "Time, Information, Material, Waste, Organization, Operation, Design, Safety.",
+          "Transport, Inventory, Motion, Waiting, Overproduction, Overprocessing, Defects, Skills (Talento no utilizado).",
+          "Tools, Inspection, Management, Work, Order, Output, Data, System.",
+          "Technology, Innovation, Manufacturing, Warehousing, Order, Delivery, Service, Sustainability."
+        ],
+        "correctOptionIndex": 1,
+        "points": 10,
+        "explanation": "TIM WOODS es la nemotecnia internacional estandarizada en Flex para identificar todos los desperdicios operativos."
+      },
+      {
+        "id": "lean-basics-1-q26",
+        "questionNumber": 26,
+        "text": "¿Cuál es la diferencia entre el desperdicio de **Transporte** y el desperdicio de **Movimiento**?",
+        "options": [
+          "Transporte se refiere a personas y Movimiento a información.",
+          "Transporte es mover materiales o insumos innecesariamente; Movimiento es el desplazamiento humano innecesario.",
+          "Transporte es digital y Movimiento es físico.",
+          "Son el mismo desperdicio con diferente nombre."
+        ],
+        "correctOptionIndex": 1,
+        "points": 10,
+        "explanation": "Transportar piezas de una bodega a otra es Muda de Transporte; caminar o agacharse en exceso por mala ergonomía es Muda de Movimiento."
+      },
+      {
+        "id": "lean-basics-1-q27",
+        "questionNumber": 27,
+        "text": "¿Qué es un **Value Stream Mapping (VSM)** o Mapeo del Flujo de Valor?",
+        "options": [
+          "Un plano arquitectónico de las instalaciones de la planta.",
+          "Una radiografía visual de los flujos de materiales e información para diagnosticar el estado actual y diseñar el estado futuro.",
+          "Un organigrama de puestos directivos.",
+          "Un gráfico de barras con las ventas mensuales."
+        ],
+        "correctOptionIndex": 1,
+        "points": 10,
+        "explanation": "El VSM permite visualizar desperdicios, tiempos de espera y cuellos de botella a lo largo de toda la cadena de valor."
+      },
+      {
+        "id": "lean-basics-1-q28",
+        "questionNumber": 28,
+        "text": "¿Cuáles son los componentes de las **Las 3 GEN** en el diagnóstico Kaizen?",
+        "options": [
+          "Genchi (ir al piso), Genbutsu (ver el objeto real) y Genjitsu (obtener hechos y datos en tiempo real).",
+          "Génesis, Generación y Genética.",
+          "Ganar, Gastar y Gerenciar.",
+          "General, Global y Grupal."
+        ],
+        "correctOptionIndex": 0,
+        "points": 10,
+        "explanation": "Las 3 GEN establecen que los problemas solo se entienden observando directamente la realidad donde ocurren los hechos."
+      },
+      {
+        "id": "lean-basics-1-q29",
+        "questionNumber": 29,
+        "text": "¿Qué caracteriza a la práctica de **Try-storming** frente a las lluvias de ideas tradicionales?",
+        "options": [
+          "Discutir ideas teóricas en una sala durante varios días sin salir.",
+          "La experimentación física rápida y simulación en el piso (usando cartón, cinta, maquetas) para aprender iterando.",
+          "Aprobar proyectos únicamente por votación del comité gerencial.",
+          "Redactar informes en software de simulación complejo."
+        ],
+        "correctOptionIndex": 1,
+        "points": 10,
+        "explanation": "El Try-storming sustituye la \"parálisis por análisis\" por pruebas físicas inmediatas y de bajo costo."
+      },
+      {
+        "id": "lean-basics-1-q30",
+        "questionNumber": 30,
+        "text": "¿Cuáles son los 3 pasos de **El Plano a la Acción** en la cultura Lean?",
+        "options": [
+          "Planear, Contratar y Vender.",
+          "Identificar (ver los 8 desperdicios), Eliminar (aplicar 5S+1, flujo, Pull) y Construir (cultura Kaizen diaria).",
+          "Inspeccionar, Sancionar y Reportar.",
+          "Comprar, Instalar y Producir."
+        ],
+        "correctOptionIndex": 1,
+        "points": 10,
+        "explanation": "Es la ruta sistemática para transformar la concientización del desperdicio en hábitos colectivos de alto desempeño."
+      }
+    ]
+  },
+  {
+    "courseId": "5s-1",
+    "minScore": 80,
+    "questions": [
+      {
+        "id": "5s-1-q11",
+        "questionNumber": 11,
+        "text": "Dentro del marco del **Templo Flex Lean Enterprise (FLE)**, ¿dónde se ubica la metodología 5S+1?",
+        "options": [
+          "En el techo como la meta final del cliente.",
+          "En las columnas principales junto con Jidoka.",
+          "En la base del templo, junto con VSM y Supermercados.",
+          "Es un elemento externo que no pertenece al templo."
+        ],
+        "correctOptionIndex": 2,
+        "points": 10,
+        "explanation": "5S+1 es el pilar de estabilidad y cimiento sobre el cual se construyen Heijunka, JIT y Jidoka."
+      },
+      {
+        "id": "5s-1-q12",
+        "questionNumber": 12,
+        "text": "¿Qué significa la primera 'S', **Seiri**, y cuál es su acción clave?",
+        "options": [
+          "Ordenar: Un lugar para cada cosa.",
+          "Clasificar: Separar lo necesario de lo innecesario.",
+          "Limpiar: Eliminar la suciedad de las máquinas.",
+          "Estandarizar: Hacer reglas visuales."
+        ],
+        "correctOptionIndex": 1,
+        "points": 10,
+        "explanation": "Seiri consiste en retirar del área de trabajo todo elemento que no se requiera para la operación actual."
+      },
+      {
+        "id": "5s-1-q13",
+        "questionNumber": 13,
+        "text": "¿Cuál es el principio operativo fundamental de la segunda 'S', **Seiton (Ordenar)**?",
+        "options": [
+          "Limpiar el piso dos veces por turno.",
+          "Un lugar para cada cosa y cada cosa en su lugar.",
+          "Recompensar a los empleados del mes.",
+          "Usar equipo de protección personal obligatoriamente."
+        ],
+        "correctOptionIndex": 1,
+        "points": 10,
+        "explanation": "Seiton busca organizar las herramientas e información para una recuperación rápida, cómoda y ergonómica."
+      },
+      {
+        "id": "5s-1-q14",
+        "questionNumber": 14,
+        "text": "En la tercera 'S', **Seiso (Limpiar)**, ¿cuál es la máxima fundamental expresada en la metodología?",
+        "options": [
+          "\"Limpiar es solo para dar buena impresión.\"",
+          "\"Limpiar es inspeccionar.\"",
+          "\"La limpieza debe contratarse con proveedores externos.\"",
+          "\"Solo se limpia al final de la semana.\""
+        ],
+        "correctOptionIndex": 1,
+        "points": 10,
+        "explanation": "Al limpiar se detectan anomalias, fugas, grietas o desgastes antes de que se conviertan en fallas graves."
+      },
+      {
+        "id": "5s-1-q15",
+        "questionNumber": 15,
+        "text": "¿Cuál es el objetivo principal de la cuarta 'S', **Seiketsu (Estandarizar)**?",
+        "options": [
+          "Comprar herramientas del mismo color.",
+          "Hacer obvios los estándares para que las anomalías destaquen inmediatamente sin investigación.",
+          "Elaborar manuales impresos de más de 100 páginas.",
+          "Eliminar todas las reuniones operativas."
+        ],
+        "correctOptionIndex": 1,
+        "points": 10,
+        "explanation": "Mediante controles visuales, marcas de piso y procedimientos uniformes, cualquiera puede notar si algo está fuera de lugar."
+      },
+      {
+        "id": "5s-1-q16",
+        "questionNumber": 16,
+        "text": "¿Cómo se define la quinta 'S', **Shitsuke (Mantener/Disciplina)**?",
+        "options": [
+          "Aplicar sanciones disciplinarias a quien no limpie.",
+          "Convertir la disciplina en un hábito diario inquebrantable y asumir la propiedad (ownership) del espacio.",
+          "Repetir auditorías semanales sin capacitar al personal.",
+          "Mantener el inventario al máximo nivel posible."
+        ],
+        "correctOptionIndex": 1,
+        "points": 10,
+        "explanation": "Shitsuke asegura que los estándares logrados se sostengan en el tiempo a través de la cultura y responsabilidad compartida."
+      },
+      {
+        "id": "5s-1-q17",
+        "questionNumber": 17,
+        "text": "En el pilar **\"+1\" (Seguridad / Safety)**, ¿cuáles son los 4 aspectos abarcados?",
+        "options": [
+          "Cascos, Guantes, Botas y Lentes.",
+          "Protección Personal (EPP), Maquinaria Segura, Tránsito Seguro y Seguridad Digital (TI).",
+          "Luces, Alarmas, Salidas y Extintores.",
+          "Auditorías, Inspecciones, Reportes y Multas."
+        ],
+        "correctOptionIndex": 1,
+        "points": 10,
+        "explanation": "El +1 integra la seguridad física, operativa y de la información como parte inherente del puesto de trabajo."
+      },
+      {
+        "id": "5s-1-q18",
+        "questionNumber": 18,
+        "text": "En la Matriz de Evaluación de 5S+1 (Niveles 0 al 5), ¿qué caracteriza al **Nivel 3**?",
+        "options": [
+          "Áreas descuidadas con información oculta.",
+          "Inspección de limpieza diaria documentada.",
+          "Estándar mundial sostenido y auditado.",
+          "Ausencia total de sistema."
+        ],
+        "correctOptionIndex": 1,
+        "points": 10,
+        "explanation": "El Nivel 3 representa el paso donde las rutinas de verificación diaria están formalizadas y registradas."
+      },
+      {
+        "id": "5s-1-q19",
+        "questionNumber": 19,
+        "text": "¿Qué es un **Gemba Walk** en el contexto de la sostenibilidad de 5S+1?",
+        "options": [
+          "Una reunión ejecutiva en una sala de conferencias.",
+          "Caminatas regulares de liderazgo por la fábrica, almacenes y oficinas para verificar estándares en el terreno real.",
+          "Un examen teórico escrito para operadores.",
+          "Una inspección realizada únicamente por auditores externos."
+        ],
+        "correctOptionIndex": 1,
+        "points": 10,
+        "explanation": "Gemba significa \"el lugar real\"; los líderes caminan el piso para apoyar, verificar y fomentar la participación."
+      },
+      {
+        "id": "5s-1-q20",
+        "questionNumber": 20,
+        "text": "¿En qué áreas de la empresa es aplicable la metodología 5S+1?",
+        "options": [
+          "Únicamente en las líneas de ensamble de manufactura.",
+          "Exclusivamente en los almacenes de materia prima.",
+          "Universalmente en manufactura, almacenes y oficinas (entornos físicos y digitales).",
+          "Solo en las áreas de mantenimiento."
+        ],
+        "correctOptionIndex": 2,
+        "points": 10,
+        "explanation": "Los principios de 5S+1 aplican tanto a espacios físicos de planta como a archivos y carpetas digitales en oficinas."
+      }
+    ]
+  },
+  {
+    "courseId": "5-whys",
+    "minScore": 80,
+    "questions": [
+      {
+        "id": "5-whys-q1",
+        "questionNumber": 1,
+        "text": "¿Quién desarrolló originalmente la técnica de los **5 Why** y como parte de qué sistema?",
+        "options": [
+          "Taiichi Ohno como parte del sistema SMED.",
+          "Sakichi Toyoda como parte del Sistema de Producción Toyota (TPS).",
+          "Shigeo Shingo en el desarrollo de Poka-Yoke.",
+          "Kiichiro Toyoda en el diseño de transportadores de cadena."
+        ],
+        "correctOptionIndex": 1,
+        "points": 10,
+        "explanation": "El método fue desarrollado por Sakichi Toyoda dentro de la filosofía de mejora continua del TPS, basando las decisiones en lo que ocurre en el piso de trabajo (Gemba)."
+      },
+      {
+        "id": "5-whys-q2",
+        "questionNumber": 2,
+        "text": "¿Cuál es la función principal del análisis de **5 Why**?",
+        "options": [
+          "Evaluar 7 alternativas diferentes antes de tomar una decisión.",
+          "Clasificar los residuos peligrosos del área de producción.",
+          "Explorar el \"Por qué\" cinco veces para revelar la causa raíz real eliminando capas superficiales.",
+          "Mapear horizontalmente todas las causas posibles en un diagrama de pescado."
+        ],
+        "correctOptionIndex": 2,
+        "points": 10,
+        "explanation": "La técnica busca penetrar verticalmente en el problema hasta encontrar la falla sistémica u origen primario."
+      },
+      {
+        "id": "5-whys-q3",
+        "questionNumber": 3,
+        "text": "Según la representación concéntrica del análisis 5 Why, ¿cuál es el orden correcto de las capas desde el exterior hasta la causa raíz?",
+        "options": [
+          "1º Síntoma → 2º Excusa → 3º Culpa → 4º Causa → 5º Causa Raíz.",
+          "1º Culpa → 2º Causa → 3º Síntoma → 4º Excusa → 5º Causa Raíz.",
+          "1º Excusa → 2º Síntoma → 3º Causa → 4º Culpa → 5º Causa Raíz.",
+          "1º Causa → 2º Causa Raíz → 3º Síntoma → 4º Excusa → 5º Culpa."
+        ],
+        "correctOptionIndex": 0,
+        "points": 10,
+        "explanation": "El proceso va pelando capas desde los síntomas externos, excusas y culpas hasta llegar a la causa accionable y sistémica."
+      },
+      {
+        "id": "5-whys-q4",
+        "questionNumber": 4,
+        "text": "¿Cuáles son los tres beneficios fundamentales de llegar a la raíz con los 5 Why?",
+        "options": [
+          "Clasificar, Ordenar y Limpiar el área.",
+          "Revelar la verdadera naturaleza del problema, Profundizar eliminando excusas/culpas y Erradicar el problema permanentemente.",
+          "Reducir costos, contratar más personal y aumentar el inventario.",
+          "Diseñar maquetas, calcular ponderaciones y seleccionar el Top 3."
+        ],
+        "correctOptionIndex": 1,
+        "points": 10,
+        "explanation": "La metodología busca evitar soluciones superficiales o temporales y erradicar la causa mediante contramedidas a largo plazo."
+      },
+      {
+        "id": "5-whys-q5",
+        "questionNumber": 5,
+        "text": "En la fase de \"Entender la Situación (Grasp the Situation)\", ¿cuáles son los 3 pasos obligatorios antes de lanzar el primer \"Por qué\"?",
+        "options": [
+          "Medir, Calcular, Evaluar.",
+          "Identificar (definir visualmente), Clarificar (acotar) y Localizar / POC (encontrar el Punto de Origen).",
+          "Seiri, Seiton y Seiso.",
+          "Probar, Fallar, Corregir."
+        ],
+        "correctOptionIndex": 1,
+        "points": 10,
+        "explanation": "Antes de preguntar por qué, es necesario delimitar con claridad el contexto real y el punto exacto del proceso donde ocurrió la falla."
+      },
+      {
+        "id": "5-whys-q6",
+        "questionNumber": 6,
+        "text": "¿Cuál es la diferencia de enfoque entre el Diagrama de Ishikawa y la metodología 5 Why?",
+        "options": [
+          "Ishikawa busca la causa raíz vertical y 5 Why busca la causa horizontal.",
+          "Ishikawa da amplitud horizontal (\"La Red\" mapeando todas las variables), mientras que 5 Why da profundidad vertical (\"El Taladro\").",
+          "Ishikawa es solo para seguridad y 5 Why es para mantenimiento.",
+          "No existe diferencia; ambas herramientas hacen exactamente lo mismo."
+        ],
+        "correctOptionIndex": 1,
+        "points": 10,
+        "explanation": "Ishikawa ayuda a visibilizar todas las posibles causas (6M), mientras que 5 Why permite profundizar en la causa más probable hasta su núcleo sistémico."
+      },
+      {
+        "id": "5-whys-q7",
+        "questionNumber": 7,
+        "text": "En la Documentación Visual de los **Cuatro Cuadrantes** recomendada por Flex, ¿qué se registra en el cuadrante de **Yokoten**?",
+        "options": [
+          "La ilustración clara del modo de falla.",
+          "Las acciones inmediatas y Pokayoke aplicados.",
+          "La localización exacta de la máquina o estación.",
+          "La réplica global de la mejor práctica en familias de productos similares."
+        ],
+        "correctOptionIndex": 3,
+        "points": 10,
+        "explanation": "Yokoten significa compartir y estandarizar horizontalmente el aprendizaje en otras líneas o plantas."
+      },
+      {
+        "id": "5-whys-q8",
+        "questionNumber": 8,
+        "text": "¿Cuál es el cuarto paso del flujo de investigación de los 5 Why?",
+        "options": [
+          "Asignar culpas individuales al operador.",
+          "Alcanzar un acuerdo y descubrir la causa accionable para definir la contramedida.",
+          "Rediseñar todo el edificio de la planta.",
+          "Comprar máquinas nuevas sin investigar más."
+        ],
+        "correctOptionIndex": 1,
+        "points": 10,
+        "explanation": "La investigación concluye cuando el equipo acuerda cuál es la causa raíz sobre la cual se puede tomar una acción efectiva."
+      },
+      {
+        "id": "5-whys-q9",
+        "questionNumber": 9,
+        "text": "En el ejemplo práctico del \"Charco de Aceite\", ¿cuál resultó ser la **causa raíz real** detrás de la fuga recurrente de aceite?",
+        "options": [
+          "La máquina estaba vieja y rota.",
+          "El operador no limpió el piso a tiempo.",
+          "El indicador de desempeño (KPI) del agente de compras premiaba únicamente la reducción de costos de las juntas.",
+          "La junta era de buena calidad pero se instaló al revés."
+        ],
+        "correctOptionIndex": 2,
+        "points": 10,
+        "explanation": "La falla no era técnica ni humana en el piso, sino un incentivo sistémico en el departamento de compras que promovía la adquisición de insumos de baja calidad."
+      },
+      {
+        "id": "5-whys-q10",
+        "questionNumber": 10,
+        "text": "¿Cuál es el enfoque cultural básico de la técnica de 5 Why según la filosofía Lean?",
+        "options": [
+          "Identificar al empleado responsable del error para sancionarlo.",
+          "Comprender el fracaso de los sistemas y no la falla de las personas, erradicando la cultura de \"buscar culpables\".",
+          "Automatizar el proceso sin importar los costos.",
+          "Generar reportes largos para la alta dirección."
+        ],
+        "correctOptionIndex": 1,
+        "points": 10,
+        "explanation": "Los 5 Porqués asumen que los errores humanos son síntomas de un sistema que no brindó el soporte o estándar adecuado."
+      }
+    ]
+  },
+  {
+    "courseId": "7-ways",
+    "minScore": 80,
+    "questions": [
+      {
+        "id": "7-ways-q41",
+        "questionNumber": 41,
+        "text": "¿Cuál es la definición y objetivo fundamental de la herramienta **Seven Ways**?",
+        "options": [
+          "Un método para limpiar máquinas en 7 minutos.",
+          "Una metodología para evaluar múltiples opciones objetivamente, exigiendo creatividad forzada de 7 alternativas para pasar de la suposición a la ingeniería objetiva.",
+          "Una lista de 7 reglas de seguridad industrial.",
+          "Un sistema para categorizar 7 tipos de clientes."
+        ],
+        "correctOptionIndex": 1,
+        "points": 10,
+        "explanation": "Obliga al equipo a romper prejuicios generando 7 conceptos completamente distintos antes de elegir uno."
+      },
+      {
+        "id": "7-ways-q42",
+        "questionNumber": 42,
+        "text": "¿La metodología Seven Ways es dependiente de los 7 desperdicios (TIM WOODS) de Lean?",
+        "options": [
+          "Sí, es obligatorio usar un desperdicio por cada solución.",
+          "No, es una metodología independiente orientada a la ingeniería objetiva e ideación de soluciones.",
+          "Sí, fue creada por Taiichi Ohno específicamente para inventarios.",
+          "Solo aplica cuando existen defectos de calidad."
+        ],
+        "correctOptionIndex": 1,
+        "points": 10,
+        "explanation": "El material aclara explícitamente que es un proceso de toma de decisiones independiente del catálogo de residuos."
+      },
+      {
+        "id": "7-ways-q43",
+        "questionNumber": 43,
+        "text": "¿Qué es la **Matriz de Pugh** dentro de la metodología Seven Ways?",
+        "options": [
+          "Un gráfico de pastel para repartir presupuestos.",
+          "El \"Calculation Engine\" o motor del sistema que cruza criterios de evaluación contra alternativas ponderadas.",
+          "Una lista de verificación de mantenimiento preventivo.",
+          "Un formato de encuesta de satisfacción laboral."
+        ],
+        "correctOptionIndex": 1,
+        "points": 10,
+        "explanation": "Asigna calificaciones y pesos matemáticos a cada criterio para evaluar lógicamente las 7 opciones."
+      },
+      {
+        "id": "7-ways-q44",
+        "questionNumber": 44,
+        "text": "¿Cómo se calcula la **Puntuación Ponderada** en la Matriz de Pugh para cada criterio?",
+        "options": [
+          "Puntuación de la Idea + Peso del Criterio.",
+          "(Puntuación de la Idea) x (Peso del Criterio).",
+          "Puntuación de la Idea / Peso del Criterio.",
+          "Peso del Criterio elevado al cuadrado."
+        ],
+        "correctOptionIndex": 1,
+        "points": 10,
+        "explanation": "La multiplicación del desempeño relativo por la importancia relativa del criterio determina los puntos asignados."
+      },
+      {
+        "id": "7-ways-q45",
+        "questionNumber": 45,
+        "text": "¿Cuál es la regla principal del **Embudo de Decisión (6 Pasos)** al pasar de la Fase 3 a la Fase 4?",
+        "options": [
+          "Seleccionar la alternativa más barata sin importar el puntaje.",
+          "Filtrar las 7 alternativas mediante la Matriz de Pugh y seleccionar únicamente las Top 3 con mayor puntuación.",
+          "Implementar las 7 alternativas al mismo tiempo en la planta.",
+          "Descartar todas las ideas y pedir nuevas propuestas a la gerencia."
+        ],
+        "correctOptionIndex": 1,
+        "points": 10,
+        "explanation": "Las 3 ideas con la calificación objetiva más alta avanzan a la etapa de prototipado y validación física."
+      },
+      {
+        "id": "7-ways-q46",
+        "questionNumber": 46,
+        "text": "¿Qué se realiza en la **Fase 4: Try-storming y Prototipado** dentro de Seven Ways?",
+        "options": [
+          "Simulación numérica teórica en computadora únicamente.",
+          "Construcción de maquetas sencillas o pruebas piloto físicas en el piso de trabajo de las Top 3 ideas para descubrir fallos ocultos.",
+          "Firma de contratos de compra con proveedores finales.",
+          "Redacción de los manuales de usuario finales."
+        ],
+        "correctOptionIndex": 1,
+        "points": 10,
+        "explanation": "Permite comprobar operativamente qué funciona en la práctica real antes de realizar inversiones mayores."
+      },
+      {
+        "id": "7-ways-q47",
+        "questionNumber": 47,
+        "text": "¿Cómo se obtiene el **Estándar Final (Paso 6)** tras la experimentación física?",
+        "options": [
+          "Descartando las 3 maquetas y eligiendo la opción original.",
+          "Combinando los mejores aprendizajes y características de las 3 pruebas físicas en una única \"Súper Solución\" mejorada.",
+          "Dejando que cada turno de trabajo elija su método preferido.",
+          "Seleccionando la maqueta que se construyó más rápido."
+        ],
+        "correctOptionIndex": 1,
+        "points": 10,
+        "explanation": "La solución definitiva no es necesariamente una sola maqueta aislada, sino la integración híbrida de los mejores aspectos probados."
+      },
+      {
+        "id": "7-ways-q48",
+        "questionNumber": 48,
+        "text": "En el ejemplo matemático de la Matriz de Pugh presentado en el manual, si una idea obtiene calificación 4 en Espacio (Peso 3), 4 en Headcount (Peso 2), 4 en WIP (Peso 2) y 4 en Productividad (Peso 2), ¿cuál es su **Puntuación Total**?",
+        "options": [
+          "16 Puntos.",
+          "36 Puntos.",
+          "24 Puntos.",
+          "48 Puntos."
+        ],
+        "correctOptionIndex": 1,
+        "points": 10,
+        "explanation": "(4x3) + (4x2) + (4x2) + (4x2) = 12 + 8 + 8 + 8 = 36 Puntos."
+      },
+      {
+        "id": "7-ways-q49",
+        "questionNumber": 49,
+        "text": "¿Qué beneficio aporta la Matriz de Pugh al proceso de toma de decisiones en equipo?",
+        "options": [
+          "Garantiza que el jefe siempre tenga la razón.",
+          "Transforma el \"yo creo\" en \"los datos demuestran\", eliminando emociones y sesgos personales.",
+          "Aumenta el tiempo de debate en un 50%.",
+          "Evita tener que realizar pruebas físicas."
+        ],
+        "correctOptionIndex": 1,
+        "points": 10,
+        "explanation": "Al estructurar criterios y pesos matemáticos, la decisión se vuelve objetiva y transparente para todos los involucrados."
+      },
+      {
+        "id": "7-ways-q50",
+        "questionNumber": 50,
+        "text": "¿Cuáles son los tres pilares del **Éxito en Kaizen** mediante la estructura de Seven Ways?",
+        "options": [
+          "Rapidez, Bajo Costo y Automatización.",
+          "Colaboración Estructurada, Objetividad Basada en Datos y Evolución Continua.",
+          "Inspección, Control y Sanción.",
+          "Teoría, Documentación y Archivo."
+        ],
+        "correctOptionIndex": 1,
+        "points": 10,
+        "explanation": "Seven Ways rompe silos interfuncionales, basa decisiones en datos y fuerza la búsqueda constante de mejores alternativas."
+      }
+    ]
+  },
+  {
+    "courseId": "sga-guide",
+    "minScore": 80,
+    "questions": [
+      {
+        "id": "sga-guide-q31",
+        "questionNumber": 31,
+        "text": "¿Qué es el **SGA** según la guía oficial de Flex?",
+        "options": [
+          "Un sistema de gestión ambiental para control de residuos tóxicos.",
+          "Un método sistemático basado en equipos para identificar causas raíz y eliminar problemas cotidianos usando herramientas Lean básicas.",
+          "Un software informático de administración de nóminas.",
+          "Un departamento de auditoría financiera interna."
+        ],
+        "correctOptionIndex": 1,
+        "points": 10,
+        "explanation": "SGA (Small Group Activities) impulsa la solución de problemas desde la base operativa fomentando el trabajo en equipo."
+      },
+      {
+        "id": "sga-guide-q32",
+        "questionNumber": 32,
+        "text": "¿Qué entrenamiento previo se requiere como requisito obligatorio para participar en un equipo SGA?",
+        "options": [
+          "Certificación Six Sigma Black Belt.",
+          "Entrenamiento Lean Basics 1 y Lean Tools.",
+          "Maestría en Administración de Empresas.",
+          "Licencia de conducir montacargas."
+        ],
+        "correctOptionIndex": 1,
+        "points": 10,
+        "explanation": "Todos los miembros deben conocer los conceptos básicos de eliminación de desperdicio e instrumentos de calidad antes de formar el grupo."
+      },
+      {
+        "id": "sga-guide-q33",
+        "questionNumber": 33,
+        "text": "¿Cuáles son los cuatro componentes del objetivo principal **PQCD** en SGA?",
+        "options": [
+          "Plan, Quality, Cost, Design.",
+          "Productividad, Calidad, Costos y Entrega (Delivery).",
+          "Process, Quantity, Control, Development.",
+          "People, Quality, Culture, Discipline."
+        ],
+        "correctOptionIndex": 1,
+        "points": 10,
+        "explanation": "El indicador PQCD abarca los frentes clave donde las fricciones operativas deben convertirse en flujos eficientes."
+      },
+      {
+        "id": "sga-guide-q34",
+        "questionNumber": 34,
+        "text": "En la arquitectura jerárquica del equipo SGA, ¿quiénes actúan como **Coordinadores / Facilitadores**?",
+        "options": [
+          "Los operadores de recién ingreso.",
+          "La Alta Dirección únicamente.",
+          "Personal de Ingeniería de Negocios (BE) o supervisores.",
+          "Proveedores externos de materiales."
+        ],
+        "correctOptionIndex": 2,
+        "points": 10,
+        "explanation": "BE y supervisores facilitan el programa, dirigen las actividades y aseguran el entrenamiento metodológico del grupo."
+      },
+      {
+        "id": "sga-guide-q35",
+        "questionNumber": 35,
+        "text": "¿Cuál es la diferencia de roles entre el **Facilitador** y el **Líder** del grupo SGA?",
+        "options": [
+          "El Facilitador toma las fotos y el Líder redacta el contrato.",
+          "El Facilitador guía/dirige actividades generales, entrena y apoya; el Líder conduce las reuniones, lidera sesiones de try-storming y define áreas de mejora.",
+          "El Facilitador es externo a Flex y el Líder es el gerente general.",
+          "No hay diferencia; es la misma persona con dos cargos."
+        ],
+        "correctOptionIndex": 1,
+        "points": 10,
+        "explanation": "El facilitador aporta el soporte metodológico mientras el líder conduce la operativa diaria del proyecto."
+      },
+      {
+        "id": "sga-guide-q36",
+        "questionNumber": 36,
+        "text": "¿Cuáles son los parámetros clave recomendados para un equipo SGA en cuanto a **tamaño, frecuencia de reunión y tiempo de cierre**?",
+        "options": [
+          "15 a 20 miembros, reuniones mensuales, cierre en 1 año.",
+          "5 a 8 miembros, mínimo 1 reunión por semana, cierre meta dentro de los 3 meses.",
+          "2 a 3 miembros, reuniones diarias de 4 horas, cierre en 1 semana.",
+          "Sin límite de miembros, reuniones cuando se requiera, sin fecha de cierre."
+        ],
+        "correctOptionIndex": 1,
+        "points": 10,
+        "explanation": "Estos parámetros garantizan agilidad, compromiso activo y obtención de resultados a corto plazo sin desgastar al equipo."
+      },
+      {
+        "id": "sga-guide-q37",
+        "questionNumber": 37,
+        "text": "¿Qué busca el método **\"Round Robin\"** durante las lluvias de ideas en las reuniones del SGA?",
+        "options": [
+          "Decidir las ideas únicamente por la antigüedad del empleado.",
+          "Recopilar ideas de todos los miembros por turnos para garantizar equidad y participación total.",
+          "Eliminar las primeras 5 ideas presentadas.",
+          "Permitir que solo hable el líder del equipo."
+        ],
+        "correctOptionIndex": 1,
+        "points": 10,
+        "explanation": "El sistema evita que los perfiles dominantes acaparen la conversación y da voz igualitaria a todos los integrantes."
+      },
+      {
+        "id": "sga-guide-q38",
+        "questionNumber": 38,
+        "text": "¿Cuántos pasos componen el **Ciclo Estructurado de Solución de Problemas** en SGA?",
+        "options": [
+          "4 Pasos.",
+          "8 Pasos (Comprender, Objetivos, Estructura, Análisis, Planificación, Configuración, Evaluación, Sostenibilidad).",
+          "12 Pasos.",
+          "5 Pasos."
+        ],
+        "correctOptionIndex": 1,
+        "points": 10,
+        "explanation": "El ciclo estándar guía ordenadamente al equipo desde la definición del tema hasta la consolidación de la mejora."
+      },
+      {
+        "id": "sga-guide-q39",
+        "questionNumber": 39,
+        "text": "¿Cuál de las siguientes **7 QC Tools** se utiliza para identificar el 20% de las causas que generan el 80% de los problemas?",
+        "options": [
+          "Histograma.",
+          "Diagrama de Dispersión.",
+          "Diagrama de Pareto.",
+          "Hoja de Verificación."
+        ],
+        "correctOptionIndex": 2,
+        "points": 10,
+        "explanation": "El Principio de Pareto (80/20) ayuda a priorizar los pocos defectos vitales sobre los muchos triviales."
+      },
+      {
+        "id": "sga-guide-q40",
+        "questionNumber": 40,
+        "text": "¿Qué hito demuestra realmente el cierre exitoso de un proyecto SGA según la metodología?",
+        "options": [
+          "Entregar un reporte escrito de más de 50 páginas.",
+          "La verificación física de la mejora en el piso de trabajo (Gemba Walk) y el ahorro validado.",
+          "Realizar un festejo fuera de la planta.",
+          "Enviar un correo masivo a toda la empresa."
+        ],
+        "correctOptionIndex": 1,
+        "points": 10,
+        "explanation": "Como afirma el principio Lean: \"El hito final no es un reporte, es la demostración física de la mejora\"."
+      }
+    ]
+  }
+]
