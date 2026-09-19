@@ -27,13 +27,56 @@ import {
 import { MergedEmployee, Course, Exam, Question, UserCourseProgress, ExamAttempt } from '../types';
 import officialExams from '@/data/exams.json';
 
+const DEFAULT_COURSES: Course[] = [
+  {
+    id: 'lean-basics-1',
+    name: 'Lean Basics 1',
+    description: 'Conceptos básicos de manufactura esbelta, desperdicios y valor agregado en líneas de producción.',
+    duration: '2 horas',
+    order: 1,
+    materials: []
+  },
+  {
+    id: '5s-1',
+    name: '5S + 1',
+    description: 'Metodología clásica de las 5S con enfoque transversal en la Seguridad (+1).',
+    duration: '1.5 horas',
+    order: 2,
+    materials: []
+  },
+  {
+    id: '5-whys',
+    name: '5 Whys',
+    description: 'Herramienta de análisis de causa raíz que indaga de manera iterativa el origen físico y de gestión de una falla.',
+    duration: '1 hora',
+    order: 3,
+    materials: []
+  },
+  {
+    id: '7-ways',
+    name: '7 Ways',
+    description: 'Resolución analítica de problemas orientada a proponer y seleccionar de entre 7 opciones distintas de solución.',
+    duration: '2 horas',
+    order: 4,
+    materials: []
+  },
+  {
+    id: 'sga-guide',
+    name: 'Small Group Activities (SGA) Guide',
+    description: 'Guía de trabajo para la ejecución de proyectos de mejora en equipos pequeños y círculos de calidad.',
+    duration: '3 horas',
+    order: 5,
+    materials: []
+  }
+];
+
 function ExamPlayerContent() {
   const searchParams = useSearchParams();
   const courseId = searchParams.get('courseId');
 
   const [currentUser, setCurrentUser] = useState<MergedEmployee | null>(null);
-  const [courses, setCourses] = useState<Course[]>([]);
-  const [exams, setExams] = useState<Exam[]>([]);
+  const [courses, setCourses] = useState<Course[]>(DEFAULT_COURSES);
+  const [exams, setExams] = useState<Exam[]>(officialExams as unknown as Exam[]);
   const [loading, setLoading] = useState(true);
   const [attemptsCount, setAttemptsCount] = useState(0);
 
@@ -61,20 +104,49 @@ function ExamPlayerContent() {
     const savedExams = localStorage.getItem('lgb_exams_list');
 
     if (savedUser) {
-      setCurrentUser(JSON.parse(savedUser));
+      try {
+        setCurrentUser(JSON.parse(savedUser));
+      } catch (e) {
+        console.error('Error al parsear usuario:', e);
+      }
+    } else {
+      // Perfil de respaldo para permitir acceso y pruebas directas por URL
+      setCurrentUser({
+        ID: 'COLLAB-DIRECT',
+        Nombre: 'Colaborador LGB',
+        Departamento: 'Operaciones',
+        Puesto: 'Operador / Técnico',
+        Manager: 'Supervisor LGB',
+        Action: 'Create Form',
+        Estatus: 'Por Certificar',
+        TipoPersonal: 'IDL',
+        role: 'User'
+      });
     }
+
     if (savedCourses) {
-      setCourses(JSON.parse(savedCourses));
+      try {
+        const parsed = JSON.parse(savedCourses);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setCourses(parsed);
+        }
+      } catch (e) {
+        console.error('Error al parsear cursos:', e);
+      }
     }
     
     // Validar si los exámenes en localStorage tienen la versión oficial completa
     if (savedExams) {
-      const parsed = JSON.parse(savedExams) as Exam[];
-      const isValid = parsed.length >= (officialExams as any).length &&
-        parsed.every(e => e.questions && e.questions.length >= 10 && e.questions.some(q => !!q.explanation));
-      if (isValid) {
-        setExams(parsed);
-      } else {
+      try {
+        const parsed = JSON.parse(savedExams) as Exam[];
+        const isValid = parsed.length >= (officialExams as any).length &&
+          parsed.every(e => e.questions && e.questions.length >= 10 && e.questions.some(q => !!q.explanation));
+        if (isValid) {
+          setExams(parsed);
+        } else {
+          setExams(officialExams as unknown as Exam[]);
+        }
+      } catch (e) {
         setExams(officialExams as unknown as Exam[]);
       }
     } else {
@@ -84,34 +156,86 @@ function ExamPlayerContent() {
     setLoading(false);
   }, []);
 
-  // Redirigir si no está logueado o falta courseId
+  // Redirigir si falta courseId tras terminar de cargar
   useEffect(() => {
-    if (!loading && (!currentUser || !courseId)) {
+    if (!loading && !courseId) {
       window.location.href = getAssetPath('/');
     }
-  }, [currentUser, courseId, loading]);
+  }, [courseId, loading]);
 
   // Obtener curso y examen correspondientes
+  const normalizedCourseId = courseId?.trim() || '';
+
   const currentCourse = useMemo(() => {
-    return courses.find(c => c.id === courseId) || null;
-  }, [courses, courseId]);
+    if (!normalizedCourseId) return null;
+    const found = courses.find(c => c.id.toLowerCase() === normalizedCourseId.toLowerCase());
+    if (found) return found;
+    return DEFAULT_COURSES.find(c => c.id.toLowerCase() === normalizedCourseId.toLowerCase()) || null;
+  }, [courses, normalizedCourseId]);
 
   const activeExam = useMemo(() => {
-    const fromList = exams.find(e => e.courseId === courseId);
+    if (!normalizedCourseId) return null;
+    const fromList = exams.find(e => e.courseId.toLowerCase() === normalizedCourseId.toLowerCase());
     if (fromList) return fromList;
-    return (officialExams as unknown as Exam[]).find(e => e.courseId === courseId) || null;
-  }, [exams, courseId]);
+    return (officialExams as unknown as Exam[]).find(e => e.courseId.toLowerCase() === normalizedCourseId.toLowerCase()) || null;
+  }, [exams, normalizedCourseId]);
 
   const questions = useMemo(() => {
     return activeExam?.questions || [];
   }, [activeExam]);
 
-  if (loading || !currentUser || !currentCourse || !activeExam) {
+  // Filtrar preguntas para revisión final (useMemo SIEMPRE en nivel superior antes de cualquier return)
+  const filteredReviewQuestions = useMemo(() => {
+    if (!examResult) return [];
+    return questions.filter(q => {
+      const isCorrect = selectedAnswers[q.id] === q.correctOptionIndex;
+      if (reviewFilter === 'incorrect') return !isCorrect;
+      if (reviewFilter === 'correct') return isCorrect;
+      return true;
+    });
+  }, [questions, selectedAnswers, reviewFilter, examResult]);
+
+  // Variable de examen para validación
+  const exam = activeExam;
+
+  // Logs temporales solicitados para diagnóstico
+  console.log('courseId:', courseId);
+  console.log('exam:', exam);
+
+  // 1. Estado de carga inicial
+  if (loading) {
     return (
       <div className="min-h-screen bg-slate-900 text-white flex items-center justify-center font-sans">
         <div className="flex flex-col items-center gap-3">
           <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#0082c8]" />
           <p className="text-sm font-semibold tracking-wider text-slate-400">Cargando Evaluación...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // 2. Validación de existencia del examen antes de acceder a propiedades
+  if (!exam || questions.length === 0) {
+    return (
+      <div className="min-h-screen bg-slate-900 text-white flex items-center justify-center font-sans p-6">
+        <div className="bg-[#1e293b] border border-slate-700 rounded-3xl p-8 max-w-md w-full text-center shadow-2xl animate-fade-in">
+          <div className="w-16 h-16 rounded-2xl bg-amber-500/10 text-amber-400 flex items-center justify-center mx-auto mb-4 border border-amber-500/20">
+            <AlertTriangle className="w-8 h-8" />
+          </div>
+          <h2 className="text-xl font-bold text-white mb-2">Examen no encontrado</h2>
+          <p className="text-xs text-slate-400 mb-6 leading-relaxed">
+            No se encontró ninguna evaluación disponible para el identificador de curso:
+            <br />
+            <span className="font-mono text-amber-300 font-bold bg-slate-800/90 px-3 py-1 rounded-lg mt-2 inline-block border border-slate-700">
+              {courseId || '(parámetro vacío)'}
+            </span>
+          </p>
+          <button
+            onClick={() => window.location.href = getAssetPath('/')}
+            className="w-full py-3 bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold rounded-xl transition-all shadow-md cursor-pointer"
+          >
+            Volver a Academia Lean
+          </button>
         </div>
       </div>
     );
@@ -213,7 +337,7 @@ function ExamPlayerContent() {
       id: `att-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
       employeeId: currentUser.ID,
       courseId: courseId,
-      courseName: currentCourse.name,
+      courseName: currentCourse?.name || 'Curso Lean',
       score,
       passed,
       correctCount,
@@ -260,7 +384,7 @@ function ExamPlayerContent() {
           certId,
           currentUser.ID,
           courseId,
-          currentCourse.name,
+          currentCourse?.name || 'Curso Lean',
           now,
           score,
           folio
@@ -317,18 +441,7 @@ function ExamPlayerContent() {
   };
 
   const currentQuestion = questions[currentQuestionIndex];
-  const isCurrentAnswered = selectedAnswers[currentQuestion?.id] !== undefined;
-
-  // Filtrar preguntas para revisión final
-  const filteredReviewQuestions = useMemo(() => {
-    if (!examResult) return [];
-    return questions.filter(q => {
-      const isCorrect = selectedAnswers[q.id] === q.correctOptionIndex;
-      if (reviewFilter === 'incorrect') return !isCorrect;
-      if (reviewFilter === 'correct') return isCorrect;
-      return true;
-    });
-  }, [questions, selectedAnswers, reviewFilter, examResult]);
+  const isCurrentAnswered = currentQuestion ? selectedAnswers[currentQuestion.id] !== undefined : false;
 
   return (
     <div className="w-screen h-screen bg-[#f3f4f6] flex flex-col font-sans text-slate-800 select-none overflow-hidden m-0 p-0">
@@ -348,7 +461,7 @@ function ExamPlayerContent() {
 
         <div className="text-center">
           <span className="text-[9px] font-black text-[#0082c8] uppercase tracking-wider block">Evaluación Oficial</span>
-          <h1 className="text-sm font-extrabold text-slate-800">Examen de {currentCourse.name}</h1>
+          <h1 className="text-sm font-extrabold text-slate-800">Examen de {currentCourse?.name || 'Curso Lean'}</h1>
         </div>
 
         <div className="flex items-center gap-2">
@@ -653,7 +766,7 @@ function ExamPlayerContent() {
                   </h2>
                   <p className="text-xs text-slate-500 font-semibold mt-1">
                     {examResult.passed 
-                      ? `Has superado exitosamente la evaluación oficial de ${currentCourse.name}.`
+                      ? `Has superado exitosamente la evaluación oficial de ${currentCourse?.name || 'este curso'}.`
                       : `Obtuviste una calificación menor al 80% mínimo requerido. Repasa el material y las explicaciones antes de reintentar.`
                     }
                   </p>
